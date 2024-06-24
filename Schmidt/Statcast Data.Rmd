@@ -67,9 +67,5 @@ statcast_2023_09_10 <- download_savant_data("2023-09-02", "2023-10-01")
 
 statcast_2023 <- rbind(statcast_2023_03_04, statcast_2023_05_06, statcast_2023_07_08, statcast_2023_09_10)
 
-statcast_2023
-
-statcast_2023 |> 
-  group_by(pitch_type)
 ```
 
