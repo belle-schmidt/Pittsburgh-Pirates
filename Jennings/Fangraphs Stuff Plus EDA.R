@@ -45,6 +45,7 @@ fg_stuff_plus_21 <- fg_stuff_plus_21 |>
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
          stuff_plus_SI = sp_s_SI, stuff_plus_FS = sp_s_FS,
          stuff_plus = sp_stuff,
+         # stuff plus location variables
          stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
          stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
@@ -70,6 +71,7 @@ fg_stuff_plus_22 <- fg_stuff_plus_22 |>
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
          stuff_plus_SI = sp_s_SI, stuff_plus_FS = sp_s_FS,
          stuff_plus = sp_stuff,
+         # stuff plus location variables
          stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
          stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
@@ -95,6 +97,7 @@ fg_stuff_plus_23 <- fg_stuff_plus_23 |>
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
          stuff_plus_SI = sp_s_SI, stuff_plus_FS = sp_s_FS,
          stuff_plus = sp_stuff,
+         # stuff plus location variables
          stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
          stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
@@ -121,6 +124,7 @@ fg_stuff_plus_24 <- fg_stuff_plus_24 |>
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
          stuff_plus_SI = sp_s_SI, stuff_plus_FS = sp_s_FS,
          stuff_plus = sp_stuff,
+         # stuff plus location variables
          stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
          stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
@@ -263,6 +267,9 @@ fg_stuff_plus |>
 
 
 ###### INTERESTING THOUGHT ######
+##### PAUL SKENES SLIDER STUFF IS WELL ABOVE AVERAGE FOR BOTH MODELS
+##### HIS SPLITTER IS ONLY SLIGHTLY ABOVE AVERAGE
+##### SLIDERS HAVE THE HIGHEST AVERAGE STUFF+ STUFF OF THE PITCH TYPES
 #### LOOK AT PAUL SKENES RUN VALUE FOR SPLITTER AND SLIDER 
 ##### RUN VALUE SLIDER: -2
 ##### RUN VALUE SPLITTER: 10
