@@ -208,6 +208,49 @@ fg_stuff_plus |>
 ##### RUN VALUE SLIDER: -2
 ##### RUN VALUE SPLITTER: 10
 
+##### NEXT: USE STATCAST TO CALCULATE RUN VALUE AND COMPARE TO STUFF+
+##### ALSO, COMPARE STUFF+ TO PITCH+, LOCATION+, AND PITCHINGBOT
+##### LOOK INTO DIFFERENCES BETWEEN ROLES
+
+fg_stuff_plus |> 
+  mutate(Season_fct = factor(Season)) |> 
+  ggplot(aes(x = stuff_plus_SL, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Stuff+",
+    y = "Season",
+    title = "Stuff+ Slider from 2020-24"
+  ) +
+  geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_SL, na.rm = TRUE),
+             color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
+  scale_fill_colorblind() +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  ) +
+  facet_wrap(~ Role, ncol = 1)
+
+fg_stuff_plus |> 
+  filter(stuff_plus_FF <= 200) |> 
+  mutate(Season_fct = factor(Season)) |> 
+  ggplot(aes(x = stuff_plus_FF, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Stuff+",
+    y = "Season",
+    title = "Stuff+ Fastballs from 2020-24"
+  ) +
+  geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_FF, na.rm = TRUE),
+             color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
+  scale_fill_colorblind() +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  ) +
+  facet_wrap(~ Role, ncol = 1)
+
 
 ### glimpse
 glimpse(fg_stuff_plus_22)
