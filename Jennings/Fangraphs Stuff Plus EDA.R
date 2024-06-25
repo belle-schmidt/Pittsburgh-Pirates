@@ -196,6 +196,7 @@ fg_stuff_plus |>
     plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
   )
 
+## mean Stuff+ for each pitch
 fg_stuff_plus |> 
   select(stuff_plus_CH:stuff_plus) |> 
   map(mean, na.rm = TRUE) |> 
