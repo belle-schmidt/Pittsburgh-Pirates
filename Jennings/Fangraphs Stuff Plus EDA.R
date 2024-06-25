@@ -24,12 +24,30 @@ fg_stuff_plus_20 <- fg_stuff_plus_20 |>
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
          stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
          stuff_plus_loc = sp_location,
+         # stuff plus pitch variables
+         stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
+         stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
+         stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
+         stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
+         stuff_plus_loc = sp_location,
          # PitchingBot stuff
          pb_s_CH, pb_s_FF, 
          pb_s_SL, pb_s_KC,
          pb_s_FC, pb_s_CU, 
          pb_s_SI, pb_s_FS,
-         pb_stuff
+         pb_stuff,
+         # PitchingBot command
+         pb_c_CH, pb_c_FF, 
+         pb_c_SL, pb_c_KC,
+         pb_c_FC, pb_c_CU, 
+         pb_c_SI, pb_c_FS,
+         pb_command,
+         # PitchingBot overall
+         pb_o_CH, pb_o_FF, 
+         pb_o_SL, pb_o_KC,
+         pb_o_FC, pb_o_CU, 
+         pb_o_SI, pb_o_FS,
+         pb_overall
          ) |> 
   filter(IP >= 6) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
@@ -40,6 +58,7 @@ fg_stuff_plus_21 <- baseballr::fg_pitcher_leaders(startseason = "2021", endseaso
 ##### select columns
 fg_stuff_plus_21 <- fg_stuff_plus_21 |> 
   select(Season, Throws, PlayerName, IP, Relief_IP,
+         # stuff plus stuff variables
          stuff_plus_CH = sp_s_CH, stuff_plus_FF = sp_s_FF, 
          stuff_plus_SL = sp_s_SL, stuff_plus_KC = sp_s_KC,
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
@@ -51,12 +70,30 @@ fg_stuff_plus_21 <- fg_stuff_plus_21 |>
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
          stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
          stuff_plus_loc = sp_location,
+         # stuff plus pitch variables
+         stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
+         stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
+         stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
+         stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
+         stuff_plus_loc = sp_location,
          # PitchingBot stuff
          pb_s_CH, pb_s_FF, 
          pb_s_SL, pb_s_KC,
          pb_s_FC, pb_s_CU, 
          pb_s_SI, pb_s_FS,
-         pb_stuff) |> 
+         pb_stuff,
+         # PitchingBot command
+         pb_c_CH, pb_c_FF, 
+         pb_c_SL, pb_c_KC,
+         pb_c_FC, pb_c_CU, 
+         pb_c_SI, pb_c_FS,
+         pb_command,
+         # PitchingBot overall
+         pb_o_CH, pb_o_FF, 
+         pb_o_SL, pb_o_KC,
+         pb_o_FC, pb_o_CU, 
+         pb_o_SI, pb_o_FS,
+         pb_overall) |> 
   filter(IP >= 9) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
@@ -66,6 +103,7 @@ fg_stuff_plus_22 <- baseballr::fg_pitcher_leaders(startseason = "2022", endseaso
 ##### select columns
 fg_stuff_plus_22 <- fg_stuff_plus_22 |> 
   select(Season, Throws, PlayerName, IP, Relief_IP,
+         # stuff plus stuff variables
          stuff_plus_CH = sp_s_CH, stuff_plus_FF = sp_s_FF, 
          stuff_plus_SL = sp_s_SL, stuff_plus_KC = sp_s_KC,
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
@@ -77,12 +115,30 @@ fg_stuff_plus_22 <- fg_stuff_plus_22 |>
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
          stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
          stuff_plus_loc = sp_location,
+         # stuff plus pitch variables
+         stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
+         stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
+         stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
+         stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
+         stuff_plus_loc = sp_location,
          # PitchingBot stuff
          pb_s_CH, pb_s_FF, 
          pb_s_SL, pb_s_KC,
          pb_s_FC, pb_s_CU, 
          pb_s_SI, pb_s_FS,
-         pb_stuff) |> 
+         pb_stuff,
+         # PitchingBot command
+         pb_c_CH, pb_c_FF, 
+         pb_c_SL, pb_c_KC,
+         pb_c_FC, pb_c_CU, 
+         pb_c_SI, pb_c_FS,
+         pb_command,
+         # PitchingBot overall
+         pb_o_CH, pb_o_FF, 
+         pb_o_SL, pb_o_KC,
+         pb_o_FC, pb_o_CU, 
+         pb_o_SI, pb_o_FS,
+         pb_overall) |> 
   filter(IP >= 9) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
@@ -92,6 +148,7 @@ fg_stuff_plus_23 <- baseballr::fg_pitcher_leaders(startseason = "2023", endseaso
 ##### select columns
 fg_stuff_plus_23 <- fg_stuff_plus_23 |> 
   select(Season, Throws, PlayerName, IP, Relief_IP,
+         # stuff plus stuff variables
          stuff_plus_CH = sp_s_CH, stuff_plus_FF = sp_s_FF, 
          stuff_plus_SL = sp_s_SL, stuff_plus_KC = sp_s_KC,
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
@@ -103,12 +160,30 @@ fg_stuff_plus_23 <- fg_stuff_plus_23 |>
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
          stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
          stuff_plus_loc = sp_location,
+         # stuff plus pitch variables
+         stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
+         stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
+         stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
+         stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
+         stuff_plus_loc = sp_location,
          # PitchingBot stuff
          pb_s_CH, pb_s_FF, 
          pb_s_SL, pb_s_KC,
          pb_s_FC, pb_s_CU, 
          pb_s_SI, pb_s_FS,
-         pb_stuff) |> 
+         pb_stuff,
+         # PitchingBot command
+         pb_c_CH, pb_c_FF, 
+         pb_c_SL, pb_c_KC,
+         pb_c_FC, pb_c_CU, 
+         pb_c_SI, pb_c_FS,
+         pb_command,
+         # PitchingBot overall
+         pb_o_CH, pb_o_FF, 
+         pb_o_SL, pb_o_KC,
+         pb_o_FC, pb_o_CU, 
+         pb_o_SI, pb_o_FS,
+         pb_overall) |> 
   filter(IP >= 10.5) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP")) 
 
@@ -119,6 +194,7 @@ fg_stuff_plus_24 <- baseballr::fg_pitcher_leaders(startseason = "2024", endseaso
 ##### select columns
 fg_stuff_plus_24 <- fg_stuff_plus_24 |> 
   select(Season, Throws, PlayerName, IP, Relief_IP,
+         # stuff plus stuff variables
          stuff_plus_CH = sp_s_CH, stuff_plus_FF = sp_s_FF, 
          stuff_plus_SL = sp_s_SL, stuff_plus_KC = sp_s_KC,
          stuff_plus_FC = sp_s_FC, stuff_plus_CU = sp_s_CU, 
@@ -130,12 +206,30 @@ fg_stuff_plus_24 <- fg_stuff_plus_24 |>
          stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
          stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
          stuff_plus_loc = sp_location,
+         # stuff plus pitch variables
+         stuff_plus_loc_CH = sp_l_CH, stuff_plus_loc_FF = sp_l_FF, 
+         stuff_plus_loc_SL = sp_l_SL, stuff_plus_loc_KC = sp_l_KC,
+         stuff_plus_loc_FC = sp_l_FC, stuff_plus_loc_CU = sp_l_CU, 
+         stuff_plus_loc_SI = sp_l_SI, stuff_plus_loc_FS = sp_l_FS,
+         stuff_plus_loc = sp_location,
          # PitchingBot stuff
          pb_s_CH, pb_s_FF, 
          pb_s_SL, pb_s_KC,
          pb_s_FC, pb_s_CU, 
          pb_s_SI, pb_s_FS,
-         pb_stuff) |> 
+         pb_stuff,
+         # PitchingBot command
+         pb_c_CH, pb_c_FF, 
+         pb_c_SL, pb_c_KC,
+         pb_c_FC, pb_c_CU, 
+         pb_c_SI, pb_c_FS,
+         pb_command,
+         # PitchingBot overall
+         pb_o_CH, pb_o_FF, 
+         pb_o_SL, pb_o_KC,
+         pb_o_FC, pb_o_CU, 
+         pb_o_SI, pb_o_FS,
+         pb_overall) |> 
   filter(IP >= 9) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
