@@ -1,0 +1,234 @@
+---
+title: "Statcast Run Value"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(baseballr)
+```
+
+
+```{r}
+#Statcast <- read.csv("D:/R files/CMU/Pirates/Statcast.csv")
+run_value_data <- read.csv("D:/R files/CMU/Pirates/run_value_data.csv")
+#download run_value_data from google drive and change the path for read csv
+
+```
+
+
+CH。
+FF。FA
+SL。ST
+KC。
+FC。
+CU。SV CS
+SI。
+FS。
+
+
+EP take out
+FO keep
+KN keep
+
+PO take out
+SC take out
+take out
+
+
+cleaned_statcast <- Statcast %>%
+    filter(!is.na(pitch_type) & pitch_type != "")%>%
+  # Filter out specific unwanted pitch types
+  filter(!pitch_type %in% c("EP", "PO", "SC")) %>%
+  # Replace and consolidate pitch types
+  mutate(pitch_type = case_when(
+    pitch_type %in% c("FA") ~ "FF",  # Add FA to FF
+    pitch_type %in% c("ST") ~ "SL",  # Add ST to SL
+    pitch_type %in% c("SV", "CS") ~ "CU",  # Add SV and CS to CU
+    TRUE ~ pitch_type  # Keep all other pitch types unchanged
+  ))
+
+ cleaned_statcast%>%
+  count(pitch_type) %>%
+  arrange(desc(n))
+
+
+
+run_value_data <- cleaned_statcast %>%
+  select(pitch_type, game_date, player_name, pitcher, game_year, delta_run_exp)
+
+
+```{r}
+library(ggridges)
+library(viridis)
+library(ggthemes)
+```
+
+
+```{r}
+CH_RV <- run_value_data %>%
+  filter(pitch_type == "CH") %>%
+  mutate(Season_fct = factor(game_year))%>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for CH by Season"
+  ) +
+  scale_fill_colorblind() +  # Ensuring colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+CH_RV
+```
+
+```{r}
+FF_RV <- run_value_data %>%
+  filter(pitch_type == "FF") %>%
+  mutate(Season_fct = factor(game_year))%>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for FF by Season"
+  ) +
+  scale_fill_colorblind() +  # Ensuring colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+FF_RV
+```
+```{r}
+SL_RV <- run_value_data %>%
+  filter(pitch_type == "SL") %>%
+  mutate(Season_fct = factor(game_year))%>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for SL by Season"
+  ) +
+  scale_fill_colorblind() +  # Ensuring colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+SL_RV
+```
+```{r}
+KC_RV <- run_value_data %>%
+  filter(pitch_type == "KC") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for KC by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+KC_RV
+```
+
+```{r}
+FC_RV <- run_value_data %>%
+  filter(pitch_type == "FC") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for FC by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+FC_RV
+```
+
+```{r}
+CU_RV <- run_value_data %>%
+  filter(pitch_type == "CU") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for CU by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+CU_RV
+```
+
+```{r}
+SI_RV <- run_value_data %>%
+  filter(pitch_type == "SI") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for SI by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+SI_RV
+```
+
+```{r}
+FS_RV <- run_value_data %>%
+  filter(pitch_type == "FS") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for FS by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+FS_RV
+```
+
