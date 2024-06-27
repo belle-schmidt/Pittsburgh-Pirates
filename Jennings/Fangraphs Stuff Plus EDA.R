@@ -188,8 +188,17 @@ fg_stuff_plus_22 <- fg_stuff_plus_22 |>
 fg_stuff_plus_23 <- baseballr::fg_pitcher_leaders(startseason = "2023", endseason = "2023")
 
 ##### take out forkball values for later
-fg_stuff_plus_23 |> 
-  pull(sp_s_FO, sp_l_FO, sp_p_FO)
+sp_s_FO_23 <- fg_stuff_plus_23 |> 
+  filter(IP >= 10.5) |> 
+  pull(sp_s_FO)
+
+sp_l_FO_23 <- fg_stuff_plus_23 |> 
+  filter(IP >= 10.5) |> 
+  pull(sp_l_FO)
+
+sp_p_FO_23 <- fg_stuff_plus_23 |> 
+  filter(IP >= 10.5) |> 
+  pull(sp_p_FO)
 
 ##### select columns
 fg_stuff_plus_23 <- fg_stuff_plus_23 |> 
@@ -242,6 +251,19 @@ fg_stuff_plus_23 <- fg_stuff_plus_23 |>
 #### 2024
 fg_stuff_plus_24 <- baseballr::fg_pitcher_leaders(startseason = "2024", endseason = "2024")
 
+##### take out forkball values for later
+sp_s_FO_24 <- fg_stuff_plus_24 |> 
+  filter(IP >= 9) |> 
+  pull(sp_s_FO)
+
+sp_l_FO_24 <- fg_stuff_plus_24 |> 
+  filter(IP >= 9) |> 
+  pull(sp_l_FO)
+
+sp_p_FO_24 <- fg_stuff_plus_24 |> 
+  filter(IP >= 9) |> 
+  pull(sp_p_FO)
+
 ##### select columns
 fg_stuff_plus_24 <- fg_stuff_plus_24 |> 
    select(Season, Throws, PlayerName, IP, Relief_IP,
@@ -289,6 +311,18 @@ fg_stuff_plus_24 <- fg_stuff_plus_24 |>
   filter(IP >= 9) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
+##### add NA's in forkball vectors because forkballs were not thrown until 2023
+sp_s_FO <- c(rep(NA, 
+      sum(nrow(fg_stuff_plus_20), nrow(fg_stuff_plus_21), nrow(fg_stuff_plus_22))), 
+  sp_s_FO_23, sp_s_FO_24)
+
+sp_l_FO <- c(rep(NA, 
+                 sum(nrow(fg_stuff_plus_20), nrow(fg_stuff_plus_21), nrow(fg_stuff_plus_22))), 
+             sp_l_FO_23, sp_l_FO_24)
+
+sp_p_FO <- c(rep(NA, 
+                 sum(nrow(fg_stuff_plus_20), nrow(fg_stuff_plus_21), nrow(fg_stuff_plus_22))), 
+             sp_p_FO_23, sp_p_FO_24)
 
 #### row bind
 fg_stuff_plus <- rbind(
@@ -299,6 +333,15 @@ fg_stuff_plus <- rbind(
   fg_stuff_plus_24
   )
 
+#### add forkball variables
+fg_stuff_plus$stuff_plus_stuff_FO <- sp_s_FO
+
+fg_stuff_plus$stuff_plus_loc_FO <- sp_l_FO
+
+fg_stuff_plus$stuff_plus_pit_FO <- sp_p_FO
+
+#### write to dataset
+write.csv(fg_stuff_plus, "Fangraphs_Pitching_Models_2020-24.csv")
 
 ### plots
 #### Stuff+ Changeup over years
