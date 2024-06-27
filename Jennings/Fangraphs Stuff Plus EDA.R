@@ -333,7 +333,7 @@ fg_stuff_plus <- rbind(
   fg_stuff_plus_24
   )
 
-#### add forkball variables
+#### add forkball variables to dataset
 fg_stuff_plus$stuff_plus_stuff_FO <- sp_s_FO
 
 fg_stuff_plus$stuff_plus_loc_FO <- sp_l_FO
