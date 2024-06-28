@@ -38,7 +38,7 @@ fg_stuff_plus_20 <- baseballr::fg_pitcher_leaders(startseason = "2020", endseaso
 
 ##### select columns
 fg_stuff_plus_20 <- fg_stuff_plus_20 |> 
-  select(Season, Throws, PlayerName, IP, Relief_IP,
+  select(Season, Throws, PlayerName, xMLBAMID, IP, Relief_IP,
          # stuff plus stuff variables
          stuff_plus_stuff_CH = sp_s_CH, stuff_plus_stuff_FF = sp_s_FF, 
          stuff_plus_stuff_SL = sp_s_SL, stuff_plus_stuff_KC = sp_s_KC,
@@ -89,7 +89,7 @@ fg_stuff_plus_21 <- baseballr::fg_pitcher_leaders(startseason = "2021", endseaso
 
 ##### select columns
 fg_stuff_plus_21 <- fg_stuff_plus_21 |> 
-  select(Season, Throws, PlayerName, IP, Relief_IP,
+  select(Season, Throws, PlayerName, xMLBAMID, IP, Relief_IP,
          # stuff plus stuff variables
          stuff_plus_stuff_CH = sp_s_CH, stuff_plus_stuff_FF = sp_s_FF, 
          stuff_plus_stuff_SL = sp_s_SL, stuff_plus_stuff_KC = sp_s_KC,
@@ -139,7 +139,7 @@ fg_stuff_plus_22 <- baseballr::fg_pitcher_leaders(startseason = "2022", endseaso
 
 ##### select columns
 fg_stuff_plus_22 <- fg_stuff_plus_22 |> 
-  select(Season, Throws, PlayerName, IP, Relief_IP,
+  select(Season, Throws, PlayerName, xMLBAMID, IP, Relief_IP,
          # stuff plus stuff variables
          stuff_plus_stuff_CH = sp_s_CH, stuff_plus_stuff_FF = sp_s_FF, 
          stuff_plus_stuff_SL = sp_s_SL, stuff_plus_stuff_KC = sp_s_KC,
@@ -202,7 +202,7 @@ sp_p_FO_23 <- fg_stuff_plus_23 |>
 
 ##### select columns
 fg_stuff_plus_23 <- fg_stuff_plus_23 |> 
-  select(Season, Throws, PlayerName, IP, Relief_IP,
+  select(Season, Throws, PlayerName, xMLBAMID, IP, Relief_IP,
          # stuff plus stuff variables
          stuff_plus_stuff_CH = sp_s_CH, stuff_plus_stuff_FF = sp_s_FF, 
          stuff_plus_stuff_SL = sp_s_SL, stuff_plus_stuff_KC = sp_s_KC,
@@ -266,7 +266,7 @@ sp_p_FO_24 <- fg_stuff_plus_24 |>
 
 ##### select columns
 fg_stuff_plus_24 <- fg_stuff_plus_24 |> 
-   select(Season, Throws, PlayerName, IP, Relief_IP,
+   select(Season, Throws, PlayerName, xMLBAMID, IP, Relief_IP,
          # stuff plus stuff variables
          stuff_plus_stuff_CH = sp_s_CH, stuff_plus_stuff_FF = sp_s_FF, 
          stuff_plus_stuff_SL = sp_s_SL, stuff_plus_stuff_KC = sp_s_KC,
@@ -341,7 +341,7 @@ fg_stuff_plus$stuff_plus_loc_FO <- sp_l_FO
 fg_stuff_plus$stuff_plus_pit_FO <- sp_p_FO
 
 #### write to dataset
-write.csv(fg_stuff_plus, "Fangraphs_Pitching_Models_2020-24.csv")
+#write.csv(fg_stuff_plus, "Fangraphs_Pitching_Models_2020-24.csv")
 
 ### plots
 #### Stuff+ Changeup over years
