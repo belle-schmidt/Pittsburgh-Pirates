@@ -351,3 +351,26 @@ ggplot(ff_data_joined, aes(x = sp_s_FF, y = normalized_delta_run_exp)) +
 
 ```
 
+```{r}
+library(ggplot2)
+
+# Filter the data for the year 2023
+ff_data_2023 <- ff_data_joined %>%
+  filter(game_year == 2021)
+
+# Plotting only the data for the year 2023
+ggplot(ff_data_2023, aes(x = sp_s_FF, y = normalized_delta_run_exp)) +
+  geom_point(alpha = 0.6, color = "blue") +  # Color specified directly as it's a single year
+  labs(
+    x = "Stuff Plus for FF",
+    y = "Normalized Delta Run Exp per 100 Pitches",
+    title = "Relationship between Stuff Plus and Normalized Delta Run Exp for 2023"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.title = element_text(size = 12)
+  )
+
+```
+
