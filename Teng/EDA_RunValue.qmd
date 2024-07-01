@@ -409,15 +409,32 @@ Joined_FanGraphs_Statcast %>%
   coord_cartesian(ylim = c(-10, 10)) +  # Sets the y-axis limits
   facet_wrap(~Season) +  # Creates separate plots for each Season
   labs(
-    x = "Average Velocity (SL)", 
-    y = "Run Value per 100 Pitches (SL)",
-    title = "Relationship between Average Velocity and Run Value"
+    x = "Velocity (SL)", 
+    y = "RV/100 Pitches (SL)",
+    title = "Relationship between Velocity and RV/100 Pitches"
   ) +
   theme_minimal()  # Applies a minimalistic theme
 
 ```
+```{r}
+Joined_FanGraphs_Statcast %>%
+  ggplot(aes(x = avg_velocity_SL, y = stuff_plus_stuff_SL)) +
+  geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
+  coord_cartesian(ylim = c(-0, 200)) +  # Sets the y-axis limits
+  facet_wrap(~Season) +  # Creates separate plots for each Season
+  labs(
+    x = "Velocity (SL)", 
+    y = "Stuff Plus (SL)",
+    title = "Relationship between Stuff Plus and RV/100 Pitches"
+  ) +
+  theme_minimal()  # Applies a minimalistic theme
+```
+
+
 
 ```{r}
+Joined_FanGraphs_Statcast <- Joined_FanGraphs_Statcast %>% mutate(Season = factor(Season))
 Joined_FanGraphs_Statcast %>%
   ggplot(aes(x = avg_velocity_SL, y = stuff_plus_stuff_SL)) +
   geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
@@ -434,14 +451,14 @@ Joined_FanGraphs_Statcast %>%
 
 ```{r}
 Joined_FanGraphs_Statcast %>%
-  ggplot(aes(x = avg_velocity_FS, y = run_value_per100_FS)) +
+  ggplot(aes(x = avg_velocity_SI, y = run_value_per100_SI)) +
   geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
   geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
   coord_cartesian(ylim = c(-10, 10)) +  # Sets the y-axis limits
   facet_wrap(~Season) +  # Creates separate plots for each Season
   labs(
-    x = "Average Velocity (FS)", 
-    y = "Run Value per 100 Pitches (FS)",
+    x = "Average Velocity (SI)", 
+    y = "Run Value per 100 Pitches (SI)",
     title = "Relationship between Average Velocity and Run Value"
   ) +
   theme_minimal()  # Applies a minimalistic theme
@@ -449,14 +466,14 @@ Joined_FanGraphs_Statcast %>%
 
 ```{r}
 Joined_FanGraphs_Statcast %>%
-  ggplot(aes(x = avg_velocity_FS, y = stuff_plus_stuff_FS)) +
+  ggplot(aes(x = avg_velocity_SI, y = stuff_plus_stuff_SI)) +
   geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
   geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
   coord_cartesian(ylim = c(0, 200)) +  # Sets the y-axis limits
   facet_wrap(~Season) +  # Creates separate plots for each Season
   labs(
-    x = "Average Velocity (FS)", 
-    y = "Stuff Plus per 100 Pitches (FS)",
+    x = "Average Velocity (SI)", 
+    y = "Stuff Plus per 100 Pitches (SI)",
     title = "Relationship between Average Velocity and Stuff Plus"
   ) +
   theme_minimal()
