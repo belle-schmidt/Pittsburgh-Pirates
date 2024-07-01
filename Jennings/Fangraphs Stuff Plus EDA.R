@@ -441,6 +441,7 @@ fg_stuff_plus |>
 
 #### Stuff+ Slider with avg. Stuff+ over years
 fg_stuff_plus |> 
+  filter(stuff_plus_stuff_SL >= 0 & stuff_plus_stuff_SL <= 200) |> 
   mutate(Season_fct = factor(Season)) |> 
   ggplot(aes(x = stuff_plus_stuff_SL, y = Season_fct, fill = Season_fct)) +
   geom_density_ridges() +
@@ -450,6 +451,87 @@ fg_stuff_plus |>
     title = "Stuff+ Slider from 2020-24"
   ) +
   geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_stuff_SL, na.rm = TRUE),
+             color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
+  scale_fill_colorblind() +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+#### Stuff+ Four-seam Fastball with avg. Stuff+ over years
+fg_stuff_plus |> 
+  filter(stuff_plus_stuff_FF >= 0 & stuff_plus_stuff_FF <= 200) |> 
+  mutate(Season_fct = factor(Season)) |> 
+  ggplot(aes(x = stuff_plus_stuff_FF, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Stuff+",
+    y = "Season",
+    title = "Stuff+ Four-Seam Fastball from 2020-24"
+  ) +
+  geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_stuff_FF, na.rm = TRUE),
+             color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
+  scale_fill_colorblind() +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+#### Stuff+ Curveball with avg. Stuff+ over years
+fg_stuff_plus |> 
+  filter(stuff_plus_stuff_CU >= 0 & stuff_plus_stuff_CU <= 200) |> 
+  mutate(Season_fct = factor(Season)) |> 
+  ggplot(aes(x = stuff_plus_stuff_CU, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Stuff+",
+    y = "Season",
+    title = "Stuff+ Curveball from 2020-24"
+  ) +
+  geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_stuff_CU, na.rm = TRUE),
+             color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
+  scale_fill_colorblind() +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+#### Stuff+ Changeup with avg. Stuff+ over years
+fg_stuff_plus |> 
+  filter(stuff_plus_stuff_CH >= 0 & stuff_plus_stuff_CH <= 200) |> 
+  mutate(Season_fct = factor(Season)) |> 
+  ggplot(aes(x = stuff_plus_stuff_CH, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Stuff+",
+    y = "Season",
+    title = "Stuff+ Changeup from 2020-24"
+  ) +
+  geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_stuff_CH, na.rm = TRUE),
+             color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
+  scale_fill_colorblind() +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+
+#### Stuff+ Sinker with avg. Stuff+ over years
+fg_stuff_plus |> 
+  filter(stuff_plus_stuff_SI >= 0 & stuff_plus_stuff_SI <= 200) |> 
+  mutate(Season_fct = factor(Season)) |> 
+  ggplot(aes(x = stuff_plus_stuff_SI, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Stuff+",
+    y = "Season",
+    title = "Stuff+ Sinker from 2020-24"
+  ) +
+  geom_vline(xintercept = mean(fg_stuff_plus$stuff_plus_stuff_SI, na.rm = TRUE),
              color = "firebrick1", linetype = "dashed", linewidth = 1.5) +
   scale_fill_colorblind() +
   theme_bw() +
