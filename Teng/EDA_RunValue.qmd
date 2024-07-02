@@ -426,7 +426,7 @@ Joined_FanGraphs_Statcast %>%
   labs(
     x = "Velocity (SL)", 
     y = "Stuff Plus (SL)",
-    title = "Relationship between Stuff Plus and RV/100 Pitches"
+    title = "Relationship between Velocity and Stuff Plus"
   ) +
   theme_minimal()  # Applies a minimalistic theme
 ```
