@@ -1,0 +1,348 @@
+---
+title: "Joining FanGraph and Statcast"
+author: "Belle Schmidt"
+date: "2024-06-27"
+output: html_document
+---
+
+### Libraries
+
+```{r}
+library(tidyverse)
+```
+
+### Read in Original Dataset From Statcast
+
+```{r}
+Statcast <- read.csv("Statcast.csv")
+```
+
+### Combine the Pitches From Statcast to match the pitches included in FanGraphs
+
+```{r}
+
+Statcast_Combined_Pitches <- Statcast |> 
+  mutate(pitch_type = ifelse(pitch_type == "FA", "FF",
+                             ifelse(pitch_type == "ST", "SL",
+                                    ifelse(pitch_type == "SV", "CU",
+                                    ifelse(pitch_type == "CS", "KC", pitch_type)))),
+         pitch_name = ifelse(pitch_name == "Sweeper", "Slider",
+                             ifelse(pitch_name == "Slow Curve" | pitch_name == "Slurve", "Knuckle Curve", pitch_name)),
+         pfx_x = pfx_x * 12,
+         pfx_x = ifelse(pitch_type == "FF" & p_throws == "R", pfx_x * -1, pfx_x)) |> 
+  filter(pitch_type != "SC") 
+
+```
+
+### Turn the new dataset into a CSV
+
+```{r}
+
+#write.csv(Statcast_Combined_Pitches, "StatcastCombinedPitches.csv")
+
+```
+
+### Read in both the New Statcast and FanGraphs Dataset
+
+```{r}
+Statcast_Combined_Pitches <- read.csv("StatcastCombinedPitches.csv")
+
+FanGraphs <- read.csv("C:/Users/isabe/OneDrive/Carnegie Mellon Sports Analytics/Capstone Project/Fangraphs_Pitching_Models_2020-24.csv")
+```
+
+### PitchUse Dataset
+
+```{r}
+PitchUse_Year <- Statcast_Combined_Pitches |> 
+  group_by(pitch_name, year) |> 
+  summarise(times_thrown_in_year = n()) 
+
+
+
+TotalPitches_Year <- Statcast_Combined_Pitches |> 
+  group_by(year) |> 
+  summarise(pitches_thrown_in_year = n()) 
+
+
+PitchUse <- left_join(TotalPitches_Year, PitchUse_Year) |> 
+  mutate(prop = times_thrown_in_year / pitches_thrown_in_year) |> 
+  select(-times_thrown_in_year, -pitches_thrown_in_year)
+
+```
+
+### Turn the dataset into a CSV
+```{r}
+
+# write.csv(PitchUse, "PitchUse.csv")
+
+```
+
+### Aggregated Run Value of Each Pitcher For Each Pitch Type Each Year Between 2020-2024
+
+```{r}
+Aggregated_RV <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |> 
+  summarize(
+    total_delta_run_exp = sum(delta_run_exp, na.rm = TRUE),  # Sum of delta_run_exp for each pitch type
+    count = n(),  # Count of pitches for each pitch type
+   run_value_per100 = -(total_delta_run_exp / count) * 100  # Normalized and scaled by 100 
+                          ) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, run_value_per100) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "run_value_per100_{pitch_type}", values_from = run_value_per100)
+
+```
+
+```{r}
+# Adding Aggregated Runvalue to FanGraphs Dataset
+Joined_FanGraphs_Statcast <- left_join(FanGraphs, Aggregated_RV, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average Velocity of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Avg_Velocity <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_velocity = mean(release_speed, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_velocity) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_velocity_{pitch_type}", values_from = avg_velocity)
+
+```
+
+```{r}
+# Adding Average Velocity to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_Velocity, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average Extension of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Avg_Extension <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_release_extension = mean(release_extension, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_release_extension) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_release_extension_{pitch_type}", values_from = avg_release_extension)
+
+```
+
+```{r}
+# Adding Average Extension to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_Extension, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average WOBA of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Avg_WOBA <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_WOBA = mean(woba_value, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_WOBA) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_WOBA_{pitch_type}", values_from = avg_WOBA) |> 
+  mutate_all(~ifelse(is.nan(.), NA, .))
+  
+```
+
+```{r}
+# Adding Average WOBA to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_WOBA, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average Exit Velocity of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Avg_Exit_Velocity <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_launch_speed = mean(launch_speed, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_launch_speed) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_launch_speed_{pitch_type}", values_from = avg_launch_speed) |> 
+  mutate_all(~ifelse(is.nan(.), NA, .))
+
+```
+
+```{r}
+# Adding Average Exit Velocity to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_Exit_Velocity, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average Spin Rate of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Avg_SpinRate <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_spin_rate = mean(release_spin_rate, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_spin_rate) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_spin_rate_{pitch_type}", values_from = avg_spin_rate)
+
+```
+
+```{r}
+# Adding Average Spin Rate to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_SpinRate, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average Horizontal Break (without gravity) of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Statcast_Combined_Pitches
+
+Avg_Horizontal_Break <- Statcast_Combined_Pitches |>   
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_h_break = mean(pfx_x, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_h_break) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_h_break_{pitch_type}", values_from = avg_h_break)
+
+```
+
+```{r}
+# Adding Average Horizontal Break to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_Horizontal_Break, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Average Vertical Break (without gravity) of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+Avg_Vertical_Break <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(avg_v_break = mean(pfx_z, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(pitcher, year, pitch_type, avg_v_break) |> 
+  pivot_wider(names_from = pitch_type, names_glue = "avg_v_break_{pitch_type}", values_from = avg_v_break)
+
+```
+
+```{r}
+# Adding Average Vertical Break to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_Vertical_Break, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Swinging Strike Percentage of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Times_Thrown <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(num_times_thrown = n()) 
+
+
+Times_Missed <- Statcast_Combined_Pitches |> 
+  filter(description %in% c("swinging_strike", "swinging_strike_blocked", "missed_bunt", "bunt_foul_tip", "foul_tip")) |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(num_missed = n()) 
+
+
+Swing_and_Miss_Pct <- left_join(Times_Thrown, Times_Missed, by = c("pitcher" = "pitcher", "pitch_type" = "pitch_type", "year" = "year")) |> 
+  mutate(num_missed = ifelse(is.na(num_missed), 0, num_missed),
+         swing_and_miss_pct = (num_missed / num_times_thrown) * 100) |> 
+  select(-num_missed, -num_times_thrown)|> 
+  ungroup() |> 
+  pivot_wider(names_from = pitch_type, names_glue = "swing_and_miss_pct_{pitch_type}", values_from = swing_and_miss_pct)
+
+Swing_and_Miss_Pct
+
+
+```
+
+```{r}
+# Adding Swing Rate to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Swing_and_Miss_Pct, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Wiff Rate of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Times_Swung <- Statcast_Combined_Pitches |> 
+  filter(description %in% c("foul_bunt", "bunt_foul_tip", "missed_bunt", "hit_into_play", "foul", "swinging_strike", "swinging_strike_blocked", "foul_tip")) |> 
+  group_by(pitcher, year, pitch_type) |>
+  summarise(num_times_swung = n()) 
+
+
+Wiff_Rate <- left_join(Times_Swung, Times_Missed, by = c("pitcher" = "pitcher", "pitch_type" = "pitch_type", "year" = "year")) |> 
+  mutate(num_missed = ifelse(is.na(num_missed), 0, num_missed),
+         wiff_rate = num_missed / num_times_swung) |> 
+  select(-num_missed, -num_times_swung)|> 
+  ungroup() |> 
+  pivot_wider(names_from = pitch_type, names_glue = "wiff_rate_{pitch_type}", values_from = wiff_rate)
+
+```
+
+```{r}
+# Adding Misses Per Swing to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Wiff_Rate, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Swing Rate of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+
+```{r}
+
+Swing_Rate <- left_join(Times_Thrown, Times_Swung, by = c("pitcher" = "pitcher", "pitch_type" = "pitch_type", "year" = "year")) |> 
+  mutate(num_times_swung = ifelse(is.na(num_times_swung), 0, num_times_swung),
+         swing_rate = num_times_swung / num_times_thrown) |> 
+  select(-num_times_thrown, -num_times_swung)|> 
+  ungroup() |> 
+  pivot_wider(names_from = pitch_type, names_glue = "swing_rate_{pitch_type}", values_from = swing_rate)
+
+```
+
+```{r}
+# Adding Misses Per Swing to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Swing_Rate, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+
+### Times Each Pitch Type Was Thrown By Each Pitcher Each Year
+
+```{r}
+
+Times_Thrown2 <- Times_Thrown |> 
+  ungroup() |> 
+  pivot_wider(names_from = pitch_type, names_glue = "times_thrown_{pitch_type}", values_from = num_times_thrown)
+
+```
+
+```{r}
+# Adding Times Thrown to FanGraphs Dataset
+
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+
+```
+### Turn the dataset into a CSV
+
+```{r}
+
+# write.csv(Joined_FanGraphs_Statcast, "Joined_FanGraphs_Statcast.csv")
+
+Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
+```

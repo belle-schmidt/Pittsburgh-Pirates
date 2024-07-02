@@ -1,0 +1,899 @@
+---
+title: "Main doc"
+author: "Belle Schmidt"
+date: "2024-06-24"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+### Libraries
+
+```{r}
+library(tidyverse)
+library(ggridges)
+library(ggthemes)
+library(pillar)
+library(baseballr)
+library(readr)
+library(viridis)
+```
+
+### Read Statcast Dataset
+
+```{r}
+
+Statcast_Combined_Pitches <- read.csv("StatcastCombinedPitches.csv")
+
+Joined_FanGraphs_Statcast <- read.csv("Joined_FanGraphs_Statcast.csv")
+
+PitchUse <- read.csv("PitchUse.csv")
+
+```
+
+
+
+
+### The Proportion Each Pitch Type Was Thrown Each Year
+
+```{r}
+# Use of Each Fastpitch Per Year
+fastball_frequency_graph <- PitchUse |> 
+  filter(pitch_name %in% c("4-Seam Fastball", "Cutter", "Sinker")) |> 
+ggplot(aes(x = year, y = prop, fill = year)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~pitch_name) +
+  labs(title = "Use of Each Fastball Type Per Year",
+       x = "Year",
+       y = "Proportion") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 11),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white"))
+
+fastball_frequency_graph
+
+# Use of Each Offspeed Per Year
+offspeed_frequency_graph <- PitchUse |> 
+  filter(pitch_name %in% c("Changeup", "Forkball", "Knuckle Curve", "Split-Finger")) |> 
+ggplot(aes(x = year, y = prop, fill = year)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~pitch_name) +
+   labs(title = "Use of Each Offspeed Type Per Year",
+       x = "Year",
+       y = "Proportion") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour= "black"),
+strip.text.x = element_text(color = "white"))
+
+offspeed_frequency_graph
+
+# Use of Each Breaking Ball Per Year
+BreakingBall_frequency_graph <- PitchUse |> 
+  filter(pitch_name %in% c("Curveball", "Knuckleball", "Slider")) |> 
+ggplot(aes(x = year, y = prop, fill = year)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~pitch_name) +
+   labs(title = "Use of Each Breaking Ball Type Per Year",
+       x = "Year",
+       y = "Proportion") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+         axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white"))
+
+BreakingBall_frequency_graph
+```
+
+
+# WOBA Distribution For Each Pitch Type (Without Combining Pitches)
+
+```{r}
+
+
+fastball_WOBA <- WOBA |> 
+  filter(pitch_name %in% c("4-Seam Fastball", "Cutter", "Sinker")) |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  facet_wrap(~pitch_name) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For All Types of Fastballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) +
+  scale_fill_colorblind()
+
+fastball_WOBA
+
+offspeed_WOBA <- WOBA |> 
+  filter(pitch_name %in% c("Changeup", "Forkball", "Knuckle Curve", "Screwball", "Split-Finger")) |>
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  facet_wrap(~pitch_name) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For All Types of Offspeed Pitches Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) +
+  scale_fill_colorblind()
+
+offspeed_WOBA 
+
+BreakingBall_WOBA <- WOBA |> 
+  filter(pitch_name %in% c("Curveball", "Knuckleball", "Slider", "Slurve", "Sweeper", "Slow Curve")) |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.7) +
+  facet_wrap(~pitch_name) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For All Types of Breaking Balls Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 1.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) +
+  scale_fill_colorblind()
+
+BreakingBall_WOBA  
+```
+
+
+### WOBA By Individual Pitch Type (Not Combined)
+
+```{r}
+# WOBA Distribution of 4-Seam Fastball
+FourSeamFastball_WOBA <- WOBA |> 
+  filter(pitch_name == "4-Seam Fastball") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For 4-Seam Fastballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+FourSeamFastball_WOBA
+
+# WOBA Distribution of Cutter
+Cutter_WOBA <- WOBA |> 
+  filter(pitch_name == "Cutter") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Cutters Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Cutter_WOBA
+
+# WOBA Distribution of Sinker
+Sinker_WOBA <- WOBA |> 
+  filter(pitch_name == "Sinker") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Sinkers Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Sinker_WOBA
+
+# WOBA Distribution of Change Up
+ChangeUp_WOBA <- WOBA |> 
+  filter(pitch_name == "Changeup") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Changeups Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+ChangeUp_WOBA
+
+# WOBA Distribution of Forkball
+Forkball_WOBA <- WOBA |> 
+  filter(pitch_name == "Forkball") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Forkballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Forkball_WOBA
+
+# WOBA Distribution of Knuckle Curve
+KnuckleCurve_WOBA <- WOBA |> 
+  filter(pitch_name == "Knuckle Curve") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Knuckle Curves Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+KnuckleCurve_WOBA
+
+# WOBA Distribution of Screwball
+Screwball_WOBA <- WOBA |> 
+  filter(pitch_name == "Screwball") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Screwballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Screwball_WOBA
+
+# WOBA Distribution of Split-Finger
+SplitFinger_WOBA <- WOBA |> 
+  filter(pitch_name == "Split-Finger") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Split-Fingers Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+SplitFinger_WOBA
+
+# WOBA Distribution of Curveball
+Curveball_WOBA <- WOBA |> 
+  filter(pitch_name == "Curveball") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Curveballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Curveball_WOBA
+
+# WOBA Distribution of Knuckle ball
+Knuckleball_WOBA <- WOBA |> 
+  filter(pitch_name == "Knuckleball") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Knuckleballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Knuckleball_WOBA
+
+# WOBA Distribution of Curveball
+Slider_WOBA <- WOBA_Combined |> 
+  filter(pitch_name == "Slider") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Sliders Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Slider_WOBA
+
+# WOBA Distribution of Slow Curves
+SlowCurve_WOBA <- WOBA |> 
+  filter(pitch_name == "Slow Curve") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Slow Curves Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+SlowCurve_WOBA
+
+# WOBA Distribution of Slurves
+Slurve_WOBA <- WOBA |> 
+  filter(pitch_name == "Slurve") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Slurves Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Slurve_WOBA
+
+# WOBA Distribution of Sweepers
+Sweeper_WOBA <- WOBA |> 
+  filter(pitch_name == "Sweeper") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Sweepers Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Sweeper_WOBA
+```
+
+### WOBA By Individual Pitch Type (Combined)
+
+```{r}
+
+# WOBA Distribution of Curveball
+Curveball_WOBA <- WOBA_Combined |> 
+  filter(pitch_name == "Curveball") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Curveballs Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Curveball_WOBA
+
+# WOBA Distribution of Curveball
+Slider_WOBA <- WOBA_Combined |> 
+  filter(pitch_name == "Slider") |> 
+  ggplot(aes(x = woba_value, y = year, fill = year)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(0, 2)) +
+  labs(title = "WOBA Distribution For Sliders Per Year",
+       x = "WOBA Value",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Slider_WOBA
+```
+
+
+### Relationship Between Change in Run Expectancy and Velocity (Pitch-By-Pitch)
+
+```{r}
+# Run Value For Each Pitch Based on Velocity
+Statcast_Combined_Pitches |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name, alpha = .2)) +
+  geom_point() +
+  facet_wrap(~pitch_name)
+```
+
+```{r}
+# Run Value For Each Pitch Based on Velocity For Each Year - Scatter Plot
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = run_value_per100_FF, color = Season)) +
+  geom_point(alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Pitcher's Average Fastball Velocity Corresponding to Run Value Per 100 Pitches",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Run Value Per 100 Pitches") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Run Value For Each Pitch Based on Velocity For Each Year - Scatter Plot
+Statcast |> 
+  filter(pitch_name == "4-Seam Fastball") |> 
+  mutate(year = as.character(year)) |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = year)) +
+  geom_point(alpha = .2)
+```
+
+```{r}
+# Change in Run Value Based on Velocity - Bins
+
+Statcast |> 
+  filter(pitch_name != "", pitch_name != "Eephus", pitch_name != "Other", pitch_name != "Pitch Out") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 60, colour = "white")
+```
+
+
+```{r}
+# Change in Run Value For Fastballs Of Various Velocities in 2020
+Statcast |> 
+  filter(pitch_name == "4-Seam Fastball", year == "2020") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 45, colour = "white") +
+   scale_x_continuous(limits = c(70, 105))
+
+# Change in Run Value For Fastballs Of Various Velocities in 2021
+Statcast |> 
+  filter(pitch_name == "4-Seam Fastball", year == "2021") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 45, colour = "white") +
+  scale_x_continuous(limits = c(70, 105))
+
+# Change in Run Value For Fastballs Of Various Velocities in 2022
+Statcast |> 
+  filter(pitch_name == "4-Seam Fastball", year == "2022") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 45, colour = "white") +
+  scale_x_continuous(limits = c(70, 105))
+
+# Change in Run Value For Fastballs Of Various Velocities in 2023
+Statcast |> 
+  filter(pitch_name == "4-Seam Fastball", year == "2023") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 45, colour = "white") +
+  scale_x_continuous(limits = c(70, 105))
+
+# Change in Run Value For Fastballs Of Various Velocities in 2023
+Statcast |> 
+  filter(pitch_name == "4-Seam Fastball", year == 2024) |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 45, colour = "white") +
+  scale_x_continuous(limits = c(70, 105))
+```
+
+
+```{r}
+# Change in Run Value For Cutters Of Various Velocities
+Statcast |> 
+  filter(pitch_name == "Cutter") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 35, colour = "white")
+```
+
+```{r}
+# Change in Run Value For Sinkers Of Various Velocities
+Statcast |> 
+  filter(pitch_name == "Sinker") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 35, colour = "white")
+```
+
+```{r}
+# Change in Run Value For Change-Ups Of Various Velocities
+Statcast |> 
+  filter(pitch_name == "Changeup") |> 
+  ggplot(aes(x = release_speed, y = delta_run_exp,
+             color = pitch_name)) +
+  stat_bin_2d(bins = 50, colour = "white")
+```
+
+```{r}
+# Random Plot To Determine Quantity of times something occurred 
+ggplot(Statcast, aes(x = release_speed, delta_run_exp)) +
+  geom_raster() +
+  scale_fill_viridis() 
+```
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For 4-Seam Fastballs
+
+FourSeamFastball <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_FF, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For 4-Seam Fastballs",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+FourSeamFastball
+```
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Change Ups
+
+Change_Up <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_CH, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Change Ups",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+Change_Up
+```
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Cutters
+
+Cutters <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_FC, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Cutters",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+Cutters
+```
+
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Sliders
+
+Slider <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_SL, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Sliders",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+Slider
+```
+
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Knuckle Curves
+
+Knuckle_Curve <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_KC, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Knuckle Curves",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+Knuckle_Curve
+```
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Curves
+
+Curve <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_CU, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Curves",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+Curve
+```
+
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Sinkers
+
+Sinkers <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_SI, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Sinkers",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind() +
+  coord_cartesian(xlim = c(-25, 25)) 
+
+Sinkers
+```
+
+```{r}
+# Density Plot of Run Value Per 100 Pitches Per Season For Splitters
+Splitter <- Joined_FanGraphs_Statcast |> 
+  mutate(Season = as.character(Season)) |> 
+  ggplot(aes(x = run_value_per100_FS, y = Season, fill = Season)) +
+  geom_density_ridges(scale = 0.9) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  labs(title = "Run Value Per 100 Pitches Distribution For Splitters",
+       x = "Run Value Per 100 Pitches",
+       y = "Year") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold")) +
+  scale_fill_colorblind()
+
+Splitter
+```
+
+
+### Relationship Between Average Velocity And Run Value Per 100 Pitches
+
+```{r}
+# Change in Run Value For Fastballs Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = run_value_per100_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season)
+```
+
+
+```{r}
+# Change in Run Value For Change Ups Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_CH, y = run_value_per100_CH)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(ylim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+
+```{r}
+# Change in Run Value For Slider Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = run_value_per100_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(ylim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+```{r}
+# Change in Run Value For Knuckle Curves Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_KC, y = run_value_per100_KC)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(ylim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+```{r}
+# Change in Run Value For Cutters Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FC, y = run_value_per100_FC)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(ylim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+```{r}
+# Change in Run Value For Curves Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_CU, y = run_value_per100_CU)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(ylim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+
+### Relationship between run Value Per 100 and Stuff+
+
+
+```{r}
+# Run Values Impact on Stuff+ 
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_FF, y = stuff_plus_stuff_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+
+```{r}
+# Run Values Impact on Stuff+ 
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_FF, y = stuff_plus_stuff_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+
+```{r}
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_CH, y = stuff_plus_stuff_CH)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+
+```{r}
+# Change in Run Value For Slider Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_SL, y = stuff_plus_stuff_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+```{r}
+# Change in Run Value For Knuckle Curves Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_KC, y = stuff_plus_stuff_KC)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+```{r}
+# Change in Run Value For Cutters Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_FC, y = stuff_plus_stuff_FC)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+```{r}
+# Change in Run Value For Curves Of Various Velocities in 2020
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = run_value_per100_CU, y = stuff_plus_stuff_CU)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(xlim = c(-25, 25)) +
+  facet_wrap(~Season)
+```
+
+

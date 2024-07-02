@@ -1,0 +1,362 @@
+---
+title: "Useful EDA"
+author: "Belle Schmidt"
+date: "2024-07-02"
+output: html_document
+---
+
+
+### Libraries
+
+```{r}
+library(tidyverse)
+library(ggridges)
+library(ggthemes)
+library(pillar)
+library(baseballr)
+library(readr)
+library(viridis)
+```
+
+### Read Statcast Dataset
+
+```{r}
+
+Statcast_Combined_Pitches <- read.csv("StatcastCombinedPitches.csv")
+
+Joined_FanGraphs_Statcast <- read.csv("Joined_FanGraphs_Statcast.csv")
+
+PitchUse <- read.csv("PitchUse.csv")
+
+```
+
+### The Proportion Each Pitch Type Was Thrown Each Year
+
+```{r}
+# Use of Each Fastpitch Per Year
+fastball_frequency_graph <- PitchUse |> 
+  filter(pitch_name %in% c("4-Seam Fastball", "Cutter", "Sinker")) |> 
+ggplot(aes(x = year, y = prop, fill = year)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~pitch_name) +
+  labs(title = "Use of Each Fastball Type Per Year",
+       x = "Year",
+       y = "Proportion") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 11),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white"))
+
+fastball_frequency_graph
+
+# Use of Each Offspeed Per Year
+offspeed_frequency_graph <- PitchUse |> 
+  filter(pitch_name %in% c("Changeup", "Forkball", "Knuckle Curve", "Split-Finger")) |> 
+ggplot(aes(x = year, y = prop, fill = year)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~pitch_name) +
+   labs(title = "Use of Each Offspeed Type Per Year",
+       x = "Year",
+       y = "Proportion") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour= "black"),
+strip.text.x = element_text(color = "white"))
+
+offspeed_frequency_graph
+
+# Use of Each Breaking Ball Per Year
+BreakingBall_frequency_graph <- PitchUse |> 
+  filter(pitch_name %in% c("Curveball", "Knuckleball", "Slider")) |> 
+ggplot(aes(x = year, y = prop, fill = year)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~pitch_name) +
+   labs(title = "Use of Each Breaking Ball Type Per Year",
+       x = "Year",
+       y = "Proportion") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+         axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white"))
+
+BreakingBall_frequency_graph
+```
+
+
+### Relationship Between A Pitcher's Average Velocity and Outcome Variables For A Fastball
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Average Stuff+
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = stuff_plus_stuff_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Average Stuff+",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average Stuff+") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  coord_cartesian(ylim = c(0, 200)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 10),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Run Value Per 100 Pitches
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = run_value_per100_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Run Value Per 100 Pitches",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Run Value Per 100 Pitches") +
+  coord_cartesian(ylim = c(-20, 20)) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 10),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing Rate
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = swing_rate_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing Rate",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Swing Rate") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing And Miss Percentage
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = swing_and_miss_pct_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing And Miss Percentage",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Swing And Miss Percentage") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  coord_cartesian(ylim = c(0, 35)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 10),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And WIFF Rate
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = wiff_rate_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Wiff Rate",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Wiff Rate") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+    coord_cartesian(ylim = c(0, .55)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Average WOBA Value
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = avg_WOBA_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Average WOBA Value",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average WOBA Value") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  coord_cartesian(ylim = c(0, .85)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+### Relationship Between A Pitcher's Average Velocity and Outcome Variables For A Slider
+
+```{r}
+# Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Average Stuff+
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = stuff_plus_stuff_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average Slider Velocity And Its Average Stuff+",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average Stuff+") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  coord_cartesian(ylim = c(50, 175)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average Slider Velocity And Its Run Value Per 100 Pitches
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = run_value_per100_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average Slider Velocity And Its Run Value Per 100 Pitches",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Run Value Per 100 Pitches") +
+  coord_cartesian(ylim = c(-20, 20)) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11.2),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average Slider Velocity And Its Swing Rate
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = swing_rate_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average Slider Velocity And Its Swing Rate",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Swing Rate") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average Slider Velocity And Its Swing And Miss Percentage
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = swing_and_miss_pct_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average Slider Velocity And Its Swing & Miss Percentage",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Swing And Miss Percentage") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  coord_cartesian(ylim = c(0, 35)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11.2),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average Slider Velocity And WIFF Rate
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = wiff_rate_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average Slider Velocity And Its Wiff Rate",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Wiff Rate") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+    coord_cartesian(ylim = c(0, .55)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 13.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
+
+```{r}
+# Relationship Between A Pitcher's Average Slider Velocity And Average WOBA Value
+
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_SL, y = avg_WOBA_SL)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  facet_wrap(~Season) +
+  labs(title = "Relationship Between A Pitcher's Average Slider Velocity And Its Average WOBA Value",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average WOBA Value") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  coord_cartesian(ylim = c(0, .85)) +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.text = element_text(face = "bold"),
+        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
+strip.background = element_rect(fill = "steelblue4", colour = "black"),
+strip.text.x = element_text(color = "white")) 
+```
