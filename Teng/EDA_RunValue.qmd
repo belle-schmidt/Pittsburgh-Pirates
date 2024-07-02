@@ -1,0 +1,487 @@
+---
+title: "Statcast Run Value"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(baseballr)
+```
+
+
+```{r}
+#Statcast <- read.csv("D:/R files/CMU/Pirates/Statcast.csv")
+run_value_data <- read.csv("D:/R files/CMU/Pirates/run_value_data.csv")
+#download run_value_data from google drive and change the path for read csv
+
+```
+
+
+CH。
+FF。FA
+SL。ST
+KC。
+FC。
+CU。SV CS
+SI。
+FS。
+
+
+EP take out
+FO keep
+KN keep
+
+PO take out
+SC take out
+take out
+
+
+cleaned_statcast <- Statcast %>%
+    filter(!is.na(pitch_type) & pitch_type != "")%>%
+  # Filter out specific unwanted pitch types
+  filter(!pitch_type %in% c("EP", "PO", "SC")) %>%
+  # Replace and consolidate pitch types
+  mutate(pitch_type = case_when(
+    pitch_type %in% c("FA") ~ "FF",  # Add FA to FF
+    pitch_type %in% c("ST") ~ "SL",  # Add ST to SL
+    pitch_type %in% c("SV", "CS") ~ "CU",  # Add SV and CS to CU
+    TRUE ~ pitch_type  # Keep all other pitch types unchanged
+  ))
+
+```{r}
+ cleaned_statcast%>%
+  count(pitch_type) %>%
+  arrange(desc(n))
+```
+
+
+run_value_data <- cleaned_statcast %>%
+  select(pitch_type, game_date, player_name, pitcher, game_year, delta_run_exp)
+
+
+```{r}
+library(ggridges)
+library(viridis)
+library(ggthemes)
+```
+
+
+```{r}
+CH_RV <- run_value_data %>%
+  filter(pitch_type == "CH") %>%
+  mutate(Season_fct = factor(game_year))%>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for CH by Season"
+  ) +
+  scale_fill_colorblind() +  # Ensuring colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+CH_RV
+```
+
+```{r}
+FF_RV <- run_value_data %>%
+  filter(pitch_type == "FF") %>%
+  mutate(Season_fct = factor(game_year))%>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for FF by Season"
+  ) +
+  scale_fill_colorblind() +  # Ensuring colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+FF_RV
+```
+```{r}
+SL_RV <- run_value_data %>%
+  filter(pitch_type == "SL") %>%
+  mutate(Season_fct = factor(game_year))%>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for SL by Season"
+  ) +
+  scale_fill_colorblind() +  # Ensuring colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+SL_RV
+```
+```{r}
+KC_RV <- run_value_data %>%
+  filter(pitch_type == "KC") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for KC by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+KC_RV
+```
+
+```{r}
+FC_RV <- run_value_data %>%
+  filter(pitch_type == "FC") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for FC by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+FC_RV
+```
+
+```{r}
+CU_RV <- run_value_data %>%
+  filter(pitch_type == "CU") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for CU by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+CU_RV
+```
+
+```{r}
+SI_RV <- run_value_data %>%
+  filter(pitch_type == "SI") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for SI by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+SI_RV
+```
+
+```{r}
+FS_RV <- run_value_data %>%
+  filter(pitch_type == "FS") %>%
+  mutate(Season_fct = factor(game_year)) %>%
+  ggplot(aes(x = delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Delta Run Value",
+    y = "Season",
+    title = "Delta Run Value for FS by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+FS_RV
+```
+
+```{r}
+gerrit <- run_value_data %>% filter(pitcher == "543037") %>%
+  filter(game_year == "2023" ) %>%
+   group_by(pitch_type) %>%
+  summarize(
+    total_delta_run_exp = sum(delta_run_exp, na.rm = TRUE),  # Sum of delta_run_exp for each pitch type
+    count = n(),  # Count of pitches for each pitch type
+    normalized_delta_run_exp = (total_delta_run_exp / count) * 100  # Normalized and scaled by 100
+  ) %>%
+  ungroup()  # Optionally remove grouping structure from the data frame
+
+# Display the results
+print(gerrit)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggridges)  # ensure this package is installed
+
+CH_RV_per100 <- run_value_data %>%
+  filter(pitch_type == "CH") %>%
+  group_by(game_year, pitcher) %>%
+  summarize(
+    total_delta_run_exp = sum(delta_run_exp, na.rm = TRUE),  # Sum of delta_run_exp for each pitch type, ignoring NAs
+    count = n(),  # Count of pitches for each pitch type
+    normalized_delta_run_exp = (total_delta_run_exp / count) * 100  # Normalized and scaled by 100
+  ) %>%
+  ungroup() %>%
+  mutate(Season_fct = factor(game_year))  # Convert game_year to a factor for plotting
+
+
+library(viridis)
+
+# Plot using normalized delta run value
+CH_RV_plot <- ggplot(CH_RV_per100, aes(x = normalized_delta_run_exp, y = Season_fct, fill = Season_fct)) +
+  geom_density_ridges() +
+  labs(
+    x = "Normalized Delta Run Value per 100 Pitches",
+    y = "Season",
+    title = "Normalized Delta Run Value for CH by Season"
+  ) +
+  scale_fill_viridis(discrete = TRUE) +  # Using viridis for colorblind-friendly palette
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 20)
+  )
+
+# Display the plot
+print(CH_RV_plot)
+
+```
+
+
+```{r}
+fg_stuff_plus_20 <- baseballr::fg_pitcher_leaders(startseason = "2020", endseason = "2020")
+fg_stuff_plus_21 <- baseballr::fg_pitcher_leaders(startseason = "2021", endseason = "2021")
+fg_stuff_plus_22 <- baseballr::fg_pitcher_leaders(startseason = "2022", endseason = "2022")
+fg_stuff_plus_23 <- baseballr::fg_pitcher_leaders(startseason = "2023", endseason = "2023")
+fg_stuff_plus_24 <- baseballr::fg_pitcher_leaders(startseason = "2024", endseason = "2024")
+```
+
+
+```{r}
+FF_RV_per100 <- run_value_data %>%
+  filter(pitch_type == "FF") %>%
+  group_by(game_year, pitcher) %>%
+  summarize(
+    total_delta_run_exp = sum(delta_run_exp, na.rm = TRUE),  # Sum of delta_run_exp for each pitch type, ignoring NAs
+    count = n(),  # Count of pitches for each pitch type
+    normalized_delta_run_exp = -(total_delta_run_exp / count) * 100  # Normalized and scaled by 100
+  ) 
+```
+
+```{r}
+library(dplyr)
+library(baseballr)
+
+# Combine fg_stuff_plus data from different years
+fg_stuff_plus_combined <- bind_rows(
+  fg_stuff_plus_20 %>% mutate(game_year = 2020),
+  fg_stuff_plus_21 %>% mutate(game_year = 2021),
+  fg_stuff_plus_22 %>% mutate(game_year = 2022),
+  fg_stuff_plus_23 %>% mutate(game_year = 2023),
+  fg_stuff_plus_24 %>% mutate(game_year = 2024)
+)
+# Join the data
+ff_data_joined <- FF_RV_per100 %>%
+  left_join(fg_stuff_plus_combined, by = c("pitcher" = "xMLBAMID", "game_year")) %>%
+  select(pitcher, game_year, normalized_delta_run_exp, sp_s_FF)  # Select relevant columns
+
+```
+
+```{r}
+library(ggplot2)
+
+# Create a scatter plot
+library(ggplot2)
+
+# Assuming ff_data_joined is your dataset
+ggplot(ff_data_joined, aes(x = sp_s_FF, y = normalized_delta_run_exp)) +
+  geom_point(aes(color = as.factor(game_year)), alpha = 0.6) +  # Color not necessary with facets by year
+  labs(x = "Stuff Plus for FF", y = "Normalized Delta Run Exp per 100 Pitches", 
+       title = "Relationship between Stuff Plus and Normalized Delta Run Exp by Year") +
+  facet_wrap(~ game_year) +  # Creates a separate plot for each year
+  theme_minimal() +
+  scale_color_brewer(palette = "Set2") +  # Color still defined, might be redundant
+  theme(
+    strip.background = element_blank(),  # Optional: style the facet labels
+    strip.text.x = element_text(face = "bold", size = 12, color = "black"),
+    legend.position = "none"  # Hide the legend if redundant
+  )
+
+
+```
+
+```{r}
+library(ggplot2)
+
+# Filter the data for the year 2023
+ff_data_2023 <- ff_data_joined %>%
+  filter(game_year == 2021)
+
+# Plotting only the data for the year 2023
+ggplot(ff_data_2023, aes(x = sp_s_FF, y = normalized_delta_run_exp)) +
+  geom_point(alpha = 0.6, color = "blue") +  # Color specified directly as it's a single year
+  labs(
+    x = "Stuff Plus for FF",
+    y = "Normalized Delta Run Exp per 100 Pitches",
+    title = "Relationship between Stuff Plus and Normalized Delta Run Exp for 2023"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.title = element_text(size = 12)
+  )
+
+```
+
+
+```{r}
+Joined_FanGraphs_Statcast <- read.csv("D:/R files/CMU/Pirates/Joined_FanGraphs_Statcast.csv")
+```
+
+CH
+FF: add FA to FF
+SL: add ST to SL
+KC
+FC
+CU: add SV and CS to CU
+SI
+FS
+
+
+CH
+```{r}
+Joined_FanGraphs_Statcast |> 
+  ggplot(aes(x = avg_velocity_FF, y = run_value_per100_FF)) +
+  geom_point(aes(color = Season), alpha = .3) +
+  coord_cartesian(ylim = c(-25, 25)) +
+  facet_wrap(~Season)
+
+```
+
+```{r}
+library(ggplot2)
+
+Joined_FanGraphs_Statcast %>%
+  ggplot(aes(x = avg_velocity_SL, y = run_value_per100_SL)) +
+  geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
+  coord_cartesian(ylim = c(-10, 10)) +  # Sets the y-axis limits
+  facet_wrap(~Season) +  # Creates separate plots for each Season
+  labs(
+    x = "Velocity (SL)", 
+    y = "RV/100 Pitches (SL)",
+    title = "Relationship between Velocity and RV/100 Pitches"
+  ) +
+  theme_minimal()  # Applies a minimalistic theme
+
+```
+```{r}
+Joined_FanGraphs_Statcast %>%
+  ggplot(aes(x = avg_velocity_SL, y = stuff_plus_stuff_SL)) +
+  geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
+  coord_cartesian(ylim = c(-0, 200)) +  # Sets the y-axis limits
+  facet_wrap(~Season) +  # Creates separate plots for each Season
+  labs(
+    x = "Velocity (SL)", 
+    y = "Stuff Plus (SL)",
+    title = "Relationship between Velocity and Stuff Plus"
+  ) +
+  theme_minimal()  # Applies a minimalistic theme
+```
+
+
+
+```{r}
+Joined_FanGraphs_Statcast <- Joined_FanGraphs_Statcast %>% mutate(Season = factor(Season))
+Joined_FanGraphs_Statcast %>%
+  ggplot(aes(x = avg_velocity_SL, y = stuff_plus_stuff_SL)) +
+  geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
+  coord_cartesian(ylim = c(0, 200)) +  # Sets the y-axis limits
+  facet_wrap(~Season) +  # Creates separate plots for each Season
+  labs(
+    x = "Average Velocity (SL)", 
+    y = "Stuff Plus per 100 Pitches (SL)",
+    title = "Relationship between Average Velocity and Stuff Plus"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+Joined_FanGraphs_Statcast %>%
+  ggplot(aes(x = avg_velocity_SI, y = run_value_per100_SI)) +
+  geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
+  coord_cartesian(ylim = c(-10, 10)) +  # Sets the y-axis limits
+  facet_wrap(~Season) +  # Creates separate plots for each Season
+  labs(
+    x = "Average Velocity (SI)", 
+    y = "Run Value per 100 Pitches (SI)",
+    title = "Relationship between Average Velocity and Run Value"
+  ) +
+  theme_minimal()  # Applies a minimalistic theme
+```
+
+```{r}
+Joined_FanGraphs_Statcast %>%
+  ggplot(aes(x = avg_velocity_SI, y = stuff_plus_stuff_SI)) +
+  geom_point(aes(color = Season), alpha = 0.3) +  # Points with transparency
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  # Adds a linear model fit line, without confidence interval
+  coord_cartesian(ylim = c(0, 200)) +  # Sets the y-axis limits
+  facet_wrap(~Season) +  # Creates separate plots for each Season
+  labs(
+    x = "Average Velocity (SI)", 
+    y = "Stuff Plus per 100 Pitches (SI)",
+    title = "Relationship between Average Velocity and Stuff Plus"
+  ) +
+  theme_minimal()
+
+```
+
+sec.axis
+geom.segment
+
+
+Jinghao
