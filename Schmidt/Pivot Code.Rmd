@@ -47,7 +47,7 @@ Statcast_Combined_Pitches <- Statcast |>
 ```{r}
 Statcast_Combined_Pitches <- read.csv("StatcastCombinedPitches.csv")
 
-FanGraphs <- read.csv("C:/Users/isabe/OneDrive/Carnegie Mellon Sports Analytics/Capstone Project/Fangraphs_Pitching_Models_2020-24.csv")
+FanGraphs <- read.csv("C:/Users/isabe/OneDrive/Carnegie Mellon Sports Analytics/Capstone Project/Pittsburgh-Pirates/Schmidt/Fangraphs_Pitching_Models_2020-24.csv")
 ```
 
 ### PitchUse Dataset
@@ -205,8 +205,6 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Avg_SpinRate, 
 
 ```{r}
 
-Statcast_Combined_Pitches
-
 Avg_Horizontal_Break <- Statcast_Combined_Pitches |>   
   group_by(pitcher, year, pitch_type) |>
   summarise(avg_h_break = mean(pfx_x, na.rm = TRUE)) |> 
@@ -264,7 +262,6 @@ Swing_and_Miss_Pct <- left_join(Times_Thrown, Times_Missed, by = c("pitcher" = "
   ungroup() |> 
   pivot_wider(names_from = pitch_type, names_glue = "swing_and_miss_pct_{pitch_type}", values_from = swing_and_miss_pct)
 
-Swing_and_Miss_Pct
 
 
 ```
