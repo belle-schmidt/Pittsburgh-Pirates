@@ -29,7 +29,8 @@ Statcast_Combined_Pitches <- Statcast |>
          pitch_name = ifelse(pitch_name == "Sweeper", "Slider",
                              ifelse(pitch_name == "Slow Curve" | pitch_name == "Slurve", "Knuckle Curve", pitch_name)),
          pfx_x = pfx_x * 12,
-         pfx_x = ifelse(pitch_type == "FF" & p_throws == "R", pfx_x * -1, pfx_x)) |> 
+         pfx_x = ifelse(p_throws == "L", pfx_x * -1, pfx_x),
+         pfx_z = pfx_z * 12) |> 
   filter(pitch_type != "SC") 
 
 ```

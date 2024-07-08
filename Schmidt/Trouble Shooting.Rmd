@@ -10,22 +10,25 @@ output: html_document
 ```{r}
 Times_Missed <- Statcast_Combined_Pitches |> 
   filter(description %in% c("swinging_strike", "swinging_strike_blocked", "missed_bunt", "bunt_foul_tip", "foul_tip")) |> 
-  group_by(pitcher, year, pitch_type) |>
+  group_by(pitch_type) |>
   summarise(num_missed = n()) 
+
 
 
 Times_Swung <- Statcast_Combined_Pitches |> 
   filter(description %in% c("foul_bunt", "bunt_foul_tip", "missed_bunt", "hit_into_play", "foul", "swinging_strike", "swinging_strike_blocked", "foul_tip")) |> 
-  group_by(pitcher, year, pitch_type) |>
+  group_by(pitch_type) |>
   summarise(num_times_swung = n()) 
 
 
-Wiff_Rate <- left_join(Times_Swung, Times_Missed, by = c("pitcher" = "pitcher", "pitch_type" = "pitch_type", "year" = "year")) |> 
+Wiff_Rate <- left_join(Times_Swung, Times_Missed) |> 
   mutate(num_missed = ifelse(is.na(num_missed), 0, num_missed),
          wiff_rate = num_missed / num_times_swung) |> 
   select(-num_missed, -num_times_swung)|> 
   ungroup() |> 
   pivot_wider(names_from = pitch_type, names_glue = "wiff_rate_{pitch_type}", values_from = wiff_rate)
+
+Wiff_Rate
 
 Wiff_Rate2 |> 
   mutate(ave_wiff_rate_CU = mean(wiff_rate_CU, na.rm = TRUE),
