@@ -131,7 +131,7 @@ fg_stuff_plus_21 <- fg_stuff_plus_21 |>
          pfx_SL_pct, pfx_KC_pct,
          pfx_FC_pct, pfx_CU_pct,
          pfx_SI_pct, pfx_FS_pct) |> 
-  filter(IP >= 9) |> 
+  filter(IP >= 6) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
 #### 2022
@@ -181,7 +181,7 @@ fg_stuff_plus_22 <- fg_stuff_plus_22 |>
          pfx_SL_pct, pfx_KC_pct,
          pfx_FC_pct, pfx_CU_pct,
          pfx_SI_pct, pfx_FS_pct) |> 
-  filter(IP >= 9) |> 
+  filter(IP >= 6) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
 #### 2023
@@ -189,15 +189,15 @@ fg_stuff_plus_23 <- baseballr::fg_pitcher_leaders(startseason = "2023", endseaso
 
 ##### take out forkball values for later
 sp_s_FO_23 <- fg_stuff_plus_23 |> 
-  filter(IP >= 10.5) |> 
+  filter(IP >= 6) |> 
   pull(sp_s_FO)
 
 sp_l_FO_23 <- fg_stuff_plus_23 |> 
-  filter(IP >= 10.5) |> 
+  filter(IP >= 6) |> 
   pull(sp_l_FO)
 
 sp_p_FO_23 <- fg_stuff_plus_23 |> 
-  filter(IP >= 10.5) |> 
+  filter(IP >= 6) |> 
   pull(sp_p_FO)
 
 ##### select columns
@@ -244,7 +244,7 @@ fg_stuff_plus_23 <- fg_stuff_plus_23 |>
          pfx_SL_pct, pfx_KC_pct,
          pfx_FC_pct, pfx_CU_pct,
          pfx_SI_pct, pfx_FS_pct) |> 
-  filter(IP >= 10.5) |> 
+  filter(IP >= 6) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP")) 
 
 
@@ -253,15 +253,15 @@ fg_stuff_plus_24 <- baseballr::fg_pitcher_leaders(startseason = "2024", endseaso
 
 ##### take out forkball values for later
 sp_s_FO_24 <- fg_stuff_plus_24 |> 
-  filter(IP >= 9) |> 
+  filter(IP >= 6) |> 
   pull(sp_s_FO)
 
 sp_l_FO_24 <- fg_stuff_plus_24 |> 
-  filter(IP >= 9) |> 
+  filter(IP >= 6) |> 
   pull(sp_l_FO)
 
 sp_p_FO_24 <- fg_stuff_plus_24 |> 
-  filter(IP >= 9) |> 
+  filter(IP >= 6) |> 
   pull(sp_p_FO)
 
 ##### select columns
@@ -308,7 +308,7 @@ fg_stuff_plus_24 <- fg_stuff_plus_24 |>
          pfx_SL_pct, pfx_KC_pct,
          pfx_FC_pct, pfx_CU_pct,
          pfx_SI_pct, pfx_FS_pct) |> 
-  filter(IP >= 9) |> 
+  filter(IP >= 6) |> 
   mutate(Role = ifelse(Relief_IP <= IP * 0.25 | is.na(Relief_IP) == TRUE, "SP", "RP"))
 
 ##### add NA's in forkball vectors because forkballs were not thrown until 2023
@@ -341,7 +341,7 @@ fg_stuff_plus$stuff_plus_loc_FO <- sp_l_FO
 fg_stuff_plus$stuff_plus_pit_FO <- sp_p_FO
 
 #### write to dataset
-#write.csv(fg_stuff_plus, "Fangraphs_Pitching_Models_2020-24.csv")
+write.csv(fg_stuff_plus, "Fangraphs_Pitching_Models_2020-24.csv")
 
 ### plots
 #### Stuff+ Changeup over years
