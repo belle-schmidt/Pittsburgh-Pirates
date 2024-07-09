@@ -110,29 +110,6 @@ ggplot(tidy_Stuff_Plus_Extension, aes(x = term, y = estimate)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-```{r}
-# Load necessary libraries
-library(tidyverse)
-library(broom)
-
-# Fit the linear model without intercept
-Stuff_Plus_Extension <- lm(scale(stuff_plus_stuff_FF) ~ factor(Season) : avg_release_extension_FF - 1, data = FF_Over_100)
-
-# Summarize the model and extract tidy results
-tidy_Stuff_Plus_Extension <- tidy(Stuff_Plus_Extension)
-
-# Plotting the scatter plot for each year with fitted lines
-ggplot(FF_Over_100, aes(x = avg_release_extension_FF, y = scale(stuff_plus_stuff_FF), color = factor(Season))) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(group = factor(Season))) +
-  labs(title = "Stuff Plus Extension Linear Model",
-       x = "Average Release Extension (FF)",
-       y = "Scaled Stuff Plus (FF)",
-       color = "Season") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
 
 
 ##Load Data
