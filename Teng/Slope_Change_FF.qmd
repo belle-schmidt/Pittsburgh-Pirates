@@ -13,6 +13,7 @@ FF_Over_100 <- Joined_FanGraphs_Statcast |>
   filter(times_thrown_FF >99)
 ```
 
+
 ## Velocity
 ```{r}
 # RV with Year and Velocity
