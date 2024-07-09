@@ -1,0 +1,53 @@
+---
+title: "Slope_change - FF"
+format: html
+editor: visual
+---
+
+## Slope_Change_FF
+
+## Load Data
+```{r}
+Joined_FanGraphs_Statcast <- read.csv("D:/R files/CMU/Pirates/Joined_FanGraphs_Statcast.csv")
+FF_Over_100 <- Joined_FanGraphs_Statcast |>
+  filter(times_thrown_FF >99)
+```
+
+## Velocity
+```{r}
+# RV with Year and Velocity
+RV_Velocity <- lm(run_value_per100_FF ~ factor(Season) + avg_velocity_FF, data = FF_Over_100)
+RV_Velocity <- lm(run_value_per100_FF ~ factor(Season) * avg_velocity_FF, data = FF_Over_100)
+RV_Velocity <- lm(run_value_per100_FF*100 ~ factor(Season) : avg_velocity_FF-1, data = FF_Over_100)
+summary(RV_Velocity)
+tidy(RV_Velocity)
+```
+
+```{r}
+#Stuff+ with Year and Velocity
+Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season) + avg_velocity_FF, data = FF_Over_100)
+Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season)*avg_velocity_FF, data = FF_Over_100)
+Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season):avg_velocity_FF -1, data = FF_Over_100)
+summary(Stuff_Plus_Velocity)
+tidy(Stuff_Plus_Velocity)
+```
+## Extension
+```{r}
+# RV with year and Extension
+RV_Extension <- lm(scale(run_value_per100_FF) ~ factor(Season) + avg_release_extension_FF, data = FF_Over_100)
+summary(RV_Extension)
+tidy(RV_Extension)
+```
+
+```{r}
+# Stuff+ with year and Extension
+Stuff_Plus_Extension <- lm(scale(stuff_plus_stuff_FF) ~ factor(Season) + avg_release_extension_FF, data = FF_Over_100)
+summary(Stuff_Plus_Extension)
+tidy(Stuff_Plus_Extension)
+```
+
+##Load Data
+```{r}
+mlb_pitching_stats <- read.csv("D:/R files/CMU/Pirates/mlb_pitching_stats_2020-24.csv")
+```
+

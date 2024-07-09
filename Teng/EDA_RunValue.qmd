@@ -11,7 +11,6 @@ library(ggplot2)
 library(baseballr)
 ```
 
-
 ```{r}
 #Statcast <- read.csv("D:/R files/CMU/Pirates/Statcast.csv")
 run_value_data <- read.csv("D:/R files/CMU/Pirates/run_value_data.csv")
@@ -19,37 +18,13 @@ run_value_data <- read.csv("D:/R files/CMU/Pirates/run_value_data.csv")
 
 ```
 
+CH。 FF。FA SL。ST KC。 FC。 CU。SV CS SI。 FS。
 
-CH。
-FF。FA
-SL。ST
-KC。
-FC。
-CU。SV CS
-SI。
-FS。
+EP take out FO keep KN keep
 
+PO take out SC take out take out
 
-EP take out
-FO keep
-KN keep
-
-PO take out
-SC take out
-take out
-
-
-cleaned_statcast <- Statcast %>%
-    filter(!is.na(pitch_type) & pitch_type != "")%>%
-  # Filter out specific unwanted pitch types
-  filter(!pitch_type %in% c("EP", "PO", "SC")) %>%
-  # Replace and consolidate pitch types
-  mutate(pitch_type = case_when(
-    pitch_type %in% c("FA") ~ "FF",  # Add FA to FF
-    pitch_type %in% c("ST") ~ "SL",  # Add ST to SL
-    pitch_type %in% c("SV", "CS") ~ "CU",  # Add SV and CS to CU
-    TRUE ~ pitch_type  # Keep all other pitch types unchanged
-  ))
+cleaned_statcast \<- Statcast %\>% filter(!is.na(pitch_type) & pitch_type != "")%\>% \# Filter out specific unwanted pitch types filter(!pitch_type %in% c("EP", "PO", "SC")) %\>% \# Replace and consolidate pitch types mutate(pitch_type = case_when( pitch_type %in% c("FA") \~ "FF", \# Add FA to FF pitch_type %in% c("ST") \~ "SL", \# Add ST to SL pitch_type %in% c("SV", "CS") \~ "CU", \# Add SV and CS to CU TRUE \~ pitch_type \# Keep all other pitch types unchanged ))
 
 ```{r}
  cleaned_statcast%>%
@@ -57,17 +32,13 @@ cleaned_statcast <- Statcast %>%
   arrange(desc(n))
 ```
 
-
-run_value_data <- cleaned_statcast %>%
-  select(pitch_type, game_date, player_name, pitcher, game_year, delta_run_exp)
-
+run_value_data \<- cleaned_statcast %\>% select(pitch_type, game_date, player_name, pitcher, game_year, delta_run_exp)
 
 ```{r}
 library(ggridges)
 library(viridis)
 library(ggthemes)
 ```
-
 
 ```{r}
 CH_RV <- run_value_data %>%
@@ -110,6 +81,7 @@ FF_RV <- run_value_data %>%
 
 FF_RV
 ```
+
 ```{r}
 SL_RV <- run_value_data %>%
   filter(pitch_type == "SL") %>%
@@ -130,6 +102,7 @@ SL_RV <- run_value_data %>%
 
 SL_RV
 ```
+
 ```{r}
 KC_RV <- run_value_data %>%
   filter(pitch_type == "KC") %>%
@@ -288,7 +261,6 @@ print(CH_RV_plot)
 
 ```
 
-
 ```{r}
 fg_stuff_plus_20 <- baseballr::fg_pitcher_leaders(startseason = "2020", endseason = "2020")
 fg_stuff_plus_21 <- baseballr::fg_pitcher_leaders(startseason = "2021", endseason = "2021")
@@ -296,7 +268,6 @@ fg_stuff_plus_22 <- baseballr::fg_pitcher_leaders(startseason = "2022", endseaso
 fg_stuff_plus_23 <- baseballr::fg_pitcher_leaders(startseason = "2023", endseason = "2023")
 fg_stuff_plus_24 <- baseballr::fg_pitcher_leaders(startseason = "2024", endseason = "2024")
 ```
-
 
 ```{r}
 FF_RV_per100 <- run_value_data %>%
@@ -374,22 +345,14 @@ ggplot(ff_data_2023, aes(x = sp_s_FF, y = normalized_delta_run_exp)) +
 
 ```
 
-
 ```{r}
 Joined_FanGraphs_Statcast <- read.csv("D:/R files/CMU/Pirates/Joined_FanGraphs_Statcast.csv")
 ```
 
-CH
-FF: add FA to FF
-SL: add ST to SL
-KC
-FC
-CU: add SV and CS to CU
-SI
-FS
-
+CH FF: add FA to FF SL: add ST to SL KC FC CU: add SV and CS to CU SI FS
 
 CH
+
 ```{r}
 Joined_FanGraphs_Statcast |> 
   ggplot(aes(x = avg_velocity_FF, y = run_value_per100_FF)) +
@@ -416,6 +379,7 @@ Joined_FanGraphs_Statcast %>%
   theme_minimal()  # Applies a minimalistic theme
 
 ```
+
 ```{r}
 Joined_FanGraphs_Statcast %>%
   ggplot(aes(x = avg_velocity_SL, y = stuff_plus_stuff_SL)) +
@@ -430,8 +394,6 @@ Joined_FanGraphs_Statcast %>%
   ) +
   theme_minimal()  # Applies a minimalistic theme
 ```
-
-
 
 ```{r}
 Joined_FanGraphs_Statcast <- Joined_FanGraphs_Statcast %>% mutate(Season = factor(Season))
@@ -480,8 +442,6 @@ Joined_FanGraphs_Statcast %>%
 
 ```
 
-sec.axis
-geom.segment
-
+sec.axis geom.segment
 
 Jinghao
