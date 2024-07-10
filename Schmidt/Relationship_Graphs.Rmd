@@ -169,14 +169,13 @@ Joined_FanGraphs_Statcast_FF |>
   ggplot(aes(x = avg_velocity_FF, y = swing_and_miss_pct_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
-  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing & Miss Percentage",
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing & Miss Rate",
        x = "Pitcher's Average Velocity",
-       y = "Pitcher's Swing And Miss Percentage") +
+       y = "Pitcher's Swing And Miss Rate") +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   theme_bw() +
   theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5, size = 10),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
         axis.title = element_text(face = "bold", size = 12),
         axis.text = element_text(face = "bold"),
         strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
@@ -300,11 +299,10 @@ Joined_FanGraphs_Statcast_FF |>
   ggplot(aes(x = avg_v_break_FF, y = swing_and_miss_pct_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
-  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Vertical Break And Its Swing & Miss Percentage",
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Vertical Break And Its Swing & Miss Rate",
        x = "Pitcher's Average Vertical Break",
-       y = "Pitcher's Swing And Miss Percentage") +
+       y = "Pitcher's Swing And Miss Rate") +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   theme_bw() +
   theme(legend.position = "none",
         plot.title = element_text(face = "bold", hjust = 0.5, size = 9),
@@ -431,14 +429,13 @@ Joined_FanGraphs_Statcast_FF |>
   ggplot(aes(x = avg_h_break_FF, y = swing_and_miss_pct_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
-  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Horizontal Break And Its Swing & Miss Percentage",
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Horizontal Break And Its Swing & Miss Rate",
        x = "Pitcher's Average Horizontal Break",
-       y = "Pitcher's Swing And Miss Percentage") +
+       y = "Pitcher's Swing And Miss Rate") +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   theme_bw() +
   theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5, size = 9.2),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 10),
         axis.title = element_text(face = "bold", size = 12),
         axis.text = element_text(face = "bold"),
         strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
@@ -562,14 +559,13 @@ Joined_FanGraphs_Statcast_FF |>
   ggplot(aes(x = avg_spin_rate_FF, y = swing_and_miss_pct_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
-  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Spin Rate And Its Swing & Miss Percentage",
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Spin Rate And Its Swing & Miss Rate",
        x = "Pitcher's Average Spin Rate",
-       y = "Pitcher's Swing And Miss Percentage") +
+       y = "Pitcher's Swing And Miss Rate") +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   theme_bw() +
   theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5, size = 9.2),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
         axis.title = element_text(face = "bold", size = 12),
         axis.text = element_text(face = "bold"),
         strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
@@ -677,7 +673,7 @@ Joined_FanGraphs_Statcast_FF |>
   geom_smooth(method = "lm", se = FALSE, color = "red") +
   theme_bw() +
   theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 10.6),
         axis.title = element_text(face = "bold", size = 12),
         axis.text = element_text(face = "bold"),
         strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
@@ -686,18 +682,17 @@ strip.text.x = element_text(color = "white"))
 ```
 
 ```{r}
-# Relationship Between A Pitcher's Average 4-Seam Fastball Release Extension And Its Swing And Miss Percentage
+# Relationship Between A Pitcher's Average 4-Seam Fastball Release Extension And Its Swing And Miss Rate
 
 Joined_FanGraphs_Statcast_FF |> 
   mutate(swing_and_miss_pct_FF = (swing_and_miss_pct_FF / 100)) |>
   ggplot(aes(x = avg_release_extension_FF, y = swing_and_miss_pct_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
-  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Release Extension And Its Swing & Miss Percentage",
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Release Extension And Its Swing & Miss Rate",
        x = "Pitcher's Average Release Extension",
-       y = "Pitcher's Swing And Miss Percentage") +
+       y = "Pitcher's Swing And Miss Rate") +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   theme_bw() +
   theme(legend.position = "none",
         plot.title = element_text(face = "bold", hjust = 0.5, size = 9.2),

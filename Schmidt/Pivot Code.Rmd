@@ -84,12 +84,17 @@ PitchUse <- left_join(TotalPitches_Year, PitchUse_Year) |>
 
 ```{r}
 Joined_FanGraphs_Statcast_FF <- Joined_FanGraphs_Statcast |> 
-  filter(IP >= 21.1, times_thrown_FF >= 100) |> 
-  select(Season:Relief_IP, grep("_FF", names(Joined_FanGraphs_Statcast)))
+  filter(times_thrown_FF >= 100) |> 
+  select(Season:Relief_IP, grep("_FF", names(Joined_FanGraphs_Statcast))) |> 
+  mutate(swing_and_miss_pct_FF = swing_and_miss_pct_FF / 100) |> 
+  rename(swing_and_miss_rate_FF = swing_and_miss_pct_FF)
+
+Joined_FanGraphs_Statcast_FF
+
 ```
 
 ```{r}
-# write.csv(Joined_FanGraphs_Statcast_FF, "Fastball_Data.csv")
+#write.csv(Joined_FanGraphs_Statcast_FF, "Fastball_Data.csv")
 ```
 
 

@@ -14,9 +14,7 @@ library(broom)
 
 # Read in the dataset
 ```{r}
-Fastball_Data <- read.csv("Fastball_Data.csv") |> 
-  mutate(swing_and_miss_pct_FF = swing_and_miss_pct_FF / 100) |> 
-  rename(swing_and_miss_rate_FF = swing_and_miss_pct_FF)
+Fastball_Data <- read.csv("Fastball_Data.csv")
 
 Fastball_Data
 ```
