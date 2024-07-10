@@ -33,6 +33,8 @@ Statcast_Combined_Pitches <- Statcast |>
          pfx_z = pfx_z * 12) |> 
   filter(pitch_type != "SC") 
 
+glimpse(Statcast_Combined_Pitches)
+
 ```
 
 ### Turn the new dataset into a CSV
@@ -77,6 +79,19 @@ PitchUse <- left_join(TotalPitches_Year, PitchUse_Year) |>
 # write.csv(PitchUse, "PitchUse.csv")
 
 ```
+
+### Four Seam Fastball Dataset 
+
+```{r}
+Joined_FanGraphs_Statcast_FF <- Joined_FanGraphs_Statcast |> 
+  filter(IP >= 21.1, times_thrown_FF >= 100) |> 
+  select(Season:Relief_IP, grep("_FF", names(Joined_FanGraphs_Statcast)))
+```
+
+```{r}
+# write.csv(Joined_FanGraphs_Statcast_FF, "Fastball_Data.csv")
+```
+
 
 ### Aggregated Run Value of Each Pitcher For Each Pitch Type Each Year Between 2020-2024
 
@@ -336,11 +351,13 @@ Times_Thrown2 <- Times_Thrown |>
 Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
 
 ```
+
 ### Turn the dataset into a CSV
 
 ```{r}
 
-# write.csv(Joined_FanGraphs_Statcast, "Joined_FanGraphs_Statcast.csv")
+#write.csv(Joined_FanGraphs_Statcast, "Joined_FanGraphs_Statcast.csv")
 
 Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
+
 ```

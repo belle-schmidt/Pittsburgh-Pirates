@@ -1,0 +1,48 @@
+---
+title: "Linear Models"
+author: "Belle Schmidt"
+date: "2024-07-08"
+output: html_document
+---
+
+# Libraries 
+```{r}
+library(tidyverse)
+library(dslabs)
+library(broom)
+```
+
+# Read in the dataset
+```{r}
+Overall_Stats <- read.csv("mlb_pitching_stats_2020-24.csv")
+
+
+Cleaned_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball")
+
+```
+
+### Linear Model For Stuff Plus and Horizontal Break
+```{r}
+
+horizontal_break_lm <- lm(stuff_plus ~ factor(Season) + horizontal_break, 
+                data = Cleaned_Data) 
+
+summary(horizontal_break_lm)
+tidy(horizontal_break_lm)
+
+```
+
+
+### Linear Model For Aggregated Run Value and Horizontal Break
+```{r}
+
+horizontal_break_lm <- lm(stuff_plus ~ factor(Season) + horizontal_break, 
+                data = Cleaned_Data) 
+
+summary(horizontal_break_lm)
+tidy(horizontal_break_lm)
+
+```
+
+
