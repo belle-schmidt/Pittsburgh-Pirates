@@ -14,7 +14,11 @@ library(broom)
 
 # Read in the dataset
 ```{r}
-Fastball_Data <- read.csv("Fastball_Data.csv")
+Fastball_Data <- read.csv("Fastball_Data.csv") |> 
+  mutate(swing_and_miss_pct_FF = swing_and_miss_pct_FF / 100) |> 
+  rename(swing_and_miss_rate_FF = swing_and_miss_pct_FF)
+
+Fastball_Data
 ```
 
 
@@ -101,7 +105,7 @@ tidy_horizontal_break_rv_graph
 ### Linear Model For Swing And Miss Percentage and Horizontal Break
 ```{r}
 
-horizontal_break_swing_miss <- lm(swing_and_miss_pct_FF ~ factor(Season) : avg_h_break_FF, 
+horizontal_break_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_h_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -111,7 +115,7 @@ tidy_horizontal_break_swing_miss <- tidy(horizontal_break_swing_miss)
 ```
 
 
-### Change of Impact of Horizontal Break On Swing and Miss Percentage Over Time
+### Change of Impact of Horizontal Break On Swing and Miss Rate Over Time
 ```{r}
 tidy_horizontal_break_swing_miss_graph <- tidy_horizontal_break_swing_miss |> 
   mutate(term = str_extract(term, "\\d{4}")) |> 
@@ -119,13 +123,13 @@ tidy_horizontal_break_swing_miss_graph <- tidy_horizontal_break_swing_miss |>
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
-  labs(title = "Impact Each Inch of Horizontal Break Has on Swing and Miss Pct Each Season",
+  labs(title = "Impact Each Inch of Horizontal Break Has on Swing & Miss Rate Each Season",
        x = "Year",
-       y = "Change in Swing and Miss Pct Per Inch of Horizontal Break") +
+       y = "Change in Swing & Miss Rate Per Inch of Horizontal Break") +
   theme_bw() +
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
         axis.title.x = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 9),
+        axis.title.y = element_text(face = "bold", size = 8),
         axis.text.y = element_text(face = "bold"),
         axis.text.x = element_text(face = "bold", size = 10))
 
@@ -269,7 +273,7 @@ tidy_vertical_break_rv_graph
 ### Linear Model For Swing And Miss Percentage and Vertical Break
 ```{r}
 
-vertical_break_swing_miss <- lm(swing_and_miss_pct_FF ~ factor(Season) : avg_v_break_FF, 
+vertical_break_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_v_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -279,7 +283,7 @@ tidy_vertical_break_swing_miss <- tidy(vertical_break_swing_miss)
 ```
 
 
-### Change of Impact of Vertical Break On Swing and Miss Percentage Over Time
+### Change of Impact of Vertical Break On Swing and Miss Rate Over Time
 ```{r}
 tidy_vertical_break_swing_miss_graph <- tidy_vertical_break_swing_miss |> 
   mutate(term = str_extract(term, "\\d{4}")) |> 
@@ -287,9 +291,9 @@ tidy_vertical_break_swing_miss_graph <- tidy_vertical_break_swing_miss |>
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
-  labs(title = "Impact Each Inch of Vertical Break Has on Swing & Miss Pct Each Season",
+  labs(title = "Impact Each Inch of Vertical Break Has on Swing & Miss Rate Each Season",
        x = "Year",
-       y = "Change in Swing & Miss Pct Per Inch of Vertical Break") +
+       y = "Change in Swing & Miss Rate Per Inch of Vertical Break") +
   theme_bw() +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
         axis.title.x = element_text(face = "bold", size = 12),
@@ -435,10 +439,10 @@ tidy_spin_rate_rv_graph <- tidy_spin_rate_rv |>
 tidy_spin_rate_rv_graph
 ```
 
-### Linear Model For Swing And Miss Percentage and Spin Rate
+### Linear Model For Swing And Miss Rate and Spin Rate
 ```{r}
 
-spin_rate_swing_miss <- lm(swing_and_miss_pct_FF ~ factor(Season) : avg_spin_rate_FF, 
+spin_rate_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_spin_rate_FF, 
                 data = Fastball_Data) 
 
 
@@ -448,7 +452,7 @@ tidy_spin_rate_swing_miss <- tidy(spin_rate_swing_miss)
 ```
 
 
-### Change of Impact of Spin Rate On Swing and Miss Percentage Over Time
+### Change of Impact of Spin Rate On Swing and Miss Rate Over Time
 ```{r}
 tidy_spin_rate_swing_miss_graph <- tidy_spin_rate_swing_miss |> 
   mutate(term = str_extract(term, "\\d{4}")) |> 
@@ -456,9 +460,9 @@ tidy_spin_rate_swing_miss_graph <- tidy_spin_rate_swing_miss |>
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
-  labs(title = "Impact Each Unit of Spin Rate Has on Swing & Miss Pct Each Season",
+  labs(title = "Impact Each Unit of Spin Rate Has on Swing & Miss Rate Each Season",
        x = "Year",
-       y = "Change in Swing & Miss Pct Per Unit of Spin Rate") +
+       y = "Change in Swing & Miss Rate Per Unit of Spin Rate") +
   theme_bw() +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
         axis.title.x = element_text(face = "bold", size = 12),
