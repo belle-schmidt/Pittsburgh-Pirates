@@ -10,64 +10,147 @@ editor: visual
 ```{r}
 Joined_FanGraphs_Statcast <- read.csv("D:/R files/CMU/Pirates/Joined_FanGraphs_Statcast.csv")
 FF_Over_100 <- Joined_FanGraphs_Statcast |>
-  filter(times_thrown_FF >99)
+  filter(times_thrown_FF >100)|>
+mutate(swing_and_miss_pct_FF = swing_and_miss_pct_FF / 100) |> 
+  rename(swing_and_miss_rate_FF = swing_and_miss_pct_FF)
+
 ```
 
 
 ## Velocity
 ```{r}
 # RV with Year and Velocity
-RV_Velocity <- lm(run_value_per100_FF ~ factor(Season) + avg_velocity_FF, data = FF_Over_100)
-RV_Velocity <- lm(run_value_per100_FF ~ factor(Season) * avg_velocity_FF, data = FF_Over_100)
 RV_Velocity <- lm(run_value_per100_FF ~ factor(Season) : avg_velocity_FF, data = FF_Over_100)
 summary(RV_Velocity)
 tidy_RV_Velocity <- tidy(RV_Velocity)
 ```
 ```{r}
-tidy_RV_Velocity <- tidy_RV_Velocity %>% filter(term != "(Intercept)")
-ggplot(tidy_RV_Velocity , aes(x = term, y = estimate)) +
-  geom_line(group = 1) +
-  geom_point() +
-  labs(title = "Estimates from Run Value Linear Model",
-       x = "Term",
-       y = "Estimate") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tidy_RV_Velocity %>% filter(term != "(Intercept)") |>
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for RV and Velocity",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
 ```
 
 
 ```{r}
-ggplot(FF_Over_100, aes(x = avg_velocity_FF, y = run_value_per100_FF * 100, color = factor(Season))) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(group = factor(Season))) +
-  labs(title = "Run Value vs Velocity Linear Model",
-       x = "Average Velocity (FF)",
-       y = "Run Value per 100 (FF)",
-       color = "Season") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-
-```{r}
-#Stuff+ with Year and Velocity
-Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season) + avg_velocity_FF, data = FF_Over_100)
-Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season)*avg_velocity_FF, data = FF_Over_100)
-Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season):avg_velocity_FF -1, data = FF_Over_100)
+Stuff_Plus_Velocity <- lm(stuff_plus_stuff_FF ~ factor(Season):avg_velocity_FF, data = FF_Over_100)
 summary(Stuff_Plus_Velocity)
 tidy_Stuff_Plus_Velocity <- tidy(Stuff_Plus_Velocity)
 ```
+
+
 ```{r}
-tidy_Stuff_Plus_Velocity <- tidy_Stuff_Plus_Velocity %>% filter(term != "(Intercept)")
-ggplot(tidy_Stuff_Plus_Velocity , aes(x = term, y = estimate)) +
-  geom_line(group = 1) +
-  geom_point() +
-  labs(title = "Estimates from Stuff+ Linear Model",
-       x = "Term",
-       y = "Estimate") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tidy_Stuff_Plus_Velocity %>% filter(term != "(Intercept)") |>
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for Stuff+ and Velocity",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
 ```
+## Velocity - Swing and Miss
+```{r}
+velocity_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_velocity_FF, 
+                data = FF_Over_100) 
+
+
+summary(velocity_swing_miss)
+tidy_velocity_swing_miss <- tidy(velocity_swing_miss)
+```
+
+```{r}
+tidy_velocity_swing_miss|> 
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term != "(Intercept)") |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for Swing and Miss and Velocity",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+
+```
+
+## Velocity - Swing Rate
+```{r}
+velocity_swing_rate <- lm(swing_rate_FF ~ factor(Season) : avg_velocity_FF, 
+                data = FF_Over_100) 
+
+
+summary(velocity_swing_rate)
+tidy_velocity_swing_rate <- tidy(velocity_swing_rate)
+```
+
+```{r}
+tidy_velocity_swing_rate|> 
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term != "(Intercept)") |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for Swing Rate and Velocity",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+## Velocity - Wiff Rate
+```{r}
+FF_Over_100 <- FF_Over_100 |>rename(whiff_rate_FF = wiff_rate_FF)
+velocity_whiff_rate <- lm(whiff_rate_FF ~ factor(Season) : avg_velocity_FF, 
+                data = FF_Over_100) 
+
+
+summary(velocity_whiff_rate)
+tidy_velocity_whiff_rate <- tidy(velocity_whiff_rate)
+```
+
+```{r}
+tidy_velocity_whiff_rate|> 
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term != "(Intercept)") |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for Whiff Rate and Velocity",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
 
 
 
@@ -79,15 +162,20 @@ summary(RV_Extension)
 tidy_RV_Extension <- tidy(RV_Extension)
 ```
 ```{r}
-tidy_RV_Extension <- tidy_RV_Extension %>% filter(term != "(Intercept)")
-ggplot(tidy_RV_Extension , aes(x = term, y = estimate)) +
-  geom_line(group = 1) +
-  geom_point() +
-  labs(title = "Estimates from Run Value Linear Model",
-       x = "Term",
-       y = "Estimate") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tidy_RV_Extension %>% filter(term != "(Intercept)") |>
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for RV and Extension",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
 ```
 
 
@@ -99,16 +187,20 @@ summary(Stuff_Plus_Extension)
 tidy_Stuff_Plus_Extension <- tidy(Stuff_Plus_Extension)
 ```
 ```{r}
-tidy_Stuff_Plus_Extension <- tidy_Stuff_Plus_Extension %>% filter(term != "(Intercept)")
-# Plotting the line chart using estimates
-ggplot(tidy_Stuff_Plus_Extension, aes(x = term, y = estimate)) +
-  geom_line(group = 1) +
-  geom_point() +
-  labs(title = "Estimates from Stuff Plus Extension Linear Model",
-       x = "Term",
-       y = "Estimate") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tidy_Stuff_Plus_Extension %>% filter(term != "(Intercept)") |>
+  mutate(term = str_extract(term, "\\d{4}")) |> 
+ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Slope Change over Years for Stuff+ and Extension",
+       x = "Year",
+       y = "Slope") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
 ```
 
 
