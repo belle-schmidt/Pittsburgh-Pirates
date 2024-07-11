@@ -165,8 +165,7 @@ strip.text.x = element_text(color = "white"))
 # Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing And Miss Percentage
 
 Joined_FanGraphs_Statcast_FF |> 
-  mutate(swing_and_miss_pct_FF = swing_and_miss_pct_FF / 100) |> 
-  ggplot(aes(x = avg_velocity_FF, y = swing_and_miss_pct_FF)) +
+  ggplot(aes(x = avg_velocity_FF, y = swing_and_miss_rate_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
   labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Velocity And Its Swing & Miss Rate",
@@ -295,8 +294,7 @@ strip.text.x = element_text(color = "white"))
 # Relationship Between A Pitcher's Average 4-Seam Fastball Vertical Break And Its Swing And Miss Percentage
 
 Joined_FanGraphs_Statcast_FF |> 
-  mutate(swing_and_miss_pct_FF = (swing_and_miss_pct_FF / 100)) |> 
-  ggplot(aes(x = avg_v_break_FF, y = swing_and_miss_pct_FF)) +
+  ggplot(aes(x = avg_v_break_FF, y = swing_and_miss_rate_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
   labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Vertical Break And Its Swing & Miss Rate",
@@ -425,8 +423,7 @@ strip.text.x = element_text(color = "white"))
 # Relationship Between A Pitcher's Average 4-Seam Fastball Horizontal Break And Its Swing And Miss Percentage
 
 Joined_FanGraphs_Statcast_FF |> 
-  mutate(swing_and_miss_pct_FF = (swing_and_miss_pct_FF / 100)) |>
-  ggplot(aes(x = avg_h_break_FF, y = swing_and_miss_pct_FF)) +
+  ggplot(aes(x = avg_h_break_FF, y = swing_and_miss_rate_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
   labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Horizontal Break And Its Swing & Miss Rate",
@@ -555,8 +552,7 @@ strip.text.x = element_text(color = "white"))
 # Relationship Between A Pitcher's Average 4-Seam Fastball Spin Rate And Its Swing And Miss Percentage
 
 Joined_FanGraphs_Statcast_FF |> 
-  mutate(swing_and_miss_pct_FF = (swing_and_miss_pct_FF / 100)) |>
-  ggplot(aes(x = avg_spin_rate_FF, y = swing_and_miss_pct_FF)) +
+  ggplot(aes(x = avg_spin_rate_FF, y = swing_and_miss_rate_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
   labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Spin Rate And Its Swing & Miss Rate",
@@ -685,8 +681,7 @@ strip.text.x = element_text(color = "white"))
 # Relationship Between A Pitcher's Average 4-Seam Fastball Release Extension And Its Swing And Miss Rate
 
 Joined_FanGraphs_Statcast_FF |> 
-  mutate(swing_and_miss_pct_FF = (swing_and_miss_pct_FF / 100)) |>
-  ggplot(aes(x = avg_release_extension_FF, y = swing_and_miss_pct_FF)) +
+  ggplot(aes(x = avg_release_extension_FF, y = swing_and_miss_rate_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
   labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Release Extension And Its Swing & Miss Rate",
