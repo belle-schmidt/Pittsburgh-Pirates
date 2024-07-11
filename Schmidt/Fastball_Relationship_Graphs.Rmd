@@ -1,5 +1,5 @@
 ---
-title: "Useful EDA"
+title: "Fastball Relationship Graphs"
 author: "Belle Schmidt"
 date: "2024-07-02"
 output: html_document

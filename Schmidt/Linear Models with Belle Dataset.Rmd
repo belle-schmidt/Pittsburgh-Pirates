@@ -23,8 +23,7 @@ Fastball_Data
 ### Linear Model For Stuff Plus and Horizontal Break - With Centering
 ```{r}
 
-horizontal_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) 
-                          : scale(avg_h_break_FF, scale = F), 
+horizontal_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) * scale(avg_h_break_FF, scale = F), 
                 data = Fastball_Data) 
 
 summary(horizontal_break_lm)
@@ -37,7 +36,7 @@ tidy(horizontal_break_lm)
 ### Linear Model For Stuff Plus and Horizontal Break - Without Centering
 ```{r}
 
-horizontal_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) : avg_h_break_FF, data = Fastball_Data) 
+horizontal_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) * avg_h_break_FF, data = Fastball_Data) 
 
 summary(horizontal_break_lm)
 

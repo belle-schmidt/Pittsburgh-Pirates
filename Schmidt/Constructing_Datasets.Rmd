@@ -41,7 +41,7 @@ glimpse(Statcast_Combined_Pitches)
 
 ```{r}
 
-#write.csv(Statcast_Combined_Pitches, "StatcastCombinedPitches.csv")
+# write.csv(Statcast_Combined_Pitches, "StatcastCombinedPitches.csv")
 
 ```
 
@@ -361,7 +361,7 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2,
 
 ```{r}
 
-#write.csv(Joined_FanGraphs_Statcast, "Joined_FanGraphs_Statcast.csv")
+# write.csv(Joined_FanGraphs_Statcast, "Joined_FanGraphs_Statcast.csv")
 
 Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
 
