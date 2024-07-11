@@ -23,7 +23,7 @@ Fastball_Data
 ### Linear Model For Stuff Plus and Horizontal Break - With Centering
 ```{r}
 
-horizontal_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) * scale(avg_h_break_FF, scale = F), 
+horizontal_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) * 0 + avg_h_break_FF, scale = F, 
                 data = Fastball_Data) 
 
 summary(horizontal_break_lm)
@@ -46,9 +46,10 @@ tidy_horizontal_break <- tidy(horizontal_break_lm)
 
 ### Change of Impact of Horizontal Break On Stuff+ Over Time
 ```{r}
-tidy_horizontal_break_graph <- tidy_horizontal_break |> 
+tidy_horizontal_break_graph <- tidy_horizontal_break |>
+  replace(term, term == "avg_h_break_FF", "2020") |> 
+  filter(term %in% c("avg_h_break_FF", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
   mutate(term = str_extract(term, "\\d{4}")) |> 
-  filter(term != "(Intercept)") |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -68,7 +69,7 @@ tidy_horizontal_break_graph
 ### Linear Model For Aggregated Run Value and Horizontal Break
 ```{r}
 
-horizontal_break_rv <- lm(run_value_per100_FF ~ factor(Season) : avg_h_break_FF, 
+horizontal_break_rv <- lm(run_value_per100_FF ~ factor(Season) * avg_h_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -102,7 +103,7 @@ tidy_horizontal_break_rv_graph
 ### Linear Model For Swing And Miss Percentage and Horizontal Break
 ```{r}
 
-horizontal_break_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_h_break_FF, 
+horizontal_break_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) * avg_h_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -136,7 +137,7 @@ tidy_horizontal_break_swing_miss_graph
 ### Linear Model For Swing Rate and Horizontal Break
 ```{r}
 
-horizontal_break_swing_rate <- lm(swing_rate_FF ~ factor(Season) : avg_h_break_FF, 
+horizontal_break_swing_rate <- lm(swing_rate_FF ~ factor(Season) * avg_h_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -169,7 +170,7 @@ tidy_horizontal_break_swing_rate_graph
 ### Linear Model For Wiff Rate and Horizontal Break
 ```{r}
 
-horizontal_break_wiff_rate <- lm(wiff_rate_FF ~ factor(Season) : avg_h_break_FF, 
+horizontal_break_wiff_rate <- lm(wiff_rate_FF ~ factor(Season) * avg_h_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -204,7 +205,7 @@ tidy_horizontal_break_wiff_rate_graph
 ### Linear Model For Stuff Plus and Vertical Break - Without Centering
 ```{r}
 
-vertical_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) : avg_v_break_FF, data = Fastball_Data) 
+vertical_break_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) * avg_v_break_FF, data = Fastball_Data) 
 
 summary(vertical_break_lm)
 
@@ -236,7 +237,7 @@ tidy_vertical_break_graph
 ### Linear Model For Aggregated Run Value and Vertical Break
 ```{r}
 
-vertical_break_rv <- lm(run_value_per100_FF ~ factor(Season) : avg_v_break_FF, 
+vertical_break_rv <- lm(run_value_per100_FF ~ factor(Season) * avg_v_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -270,7 +271,7 @@ tidy_vertical_break_rv_graph
 ### Linear Model For Swing And Miss Percentage and Vertical Break
 ```{r}
 
-vertical_break_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_v_break_FF, 
+vertical_break_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) * avg_v_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -304,7 +305,7 @@ tidy_vertical_break_swing_miss_graph
 ### Linear Model For Swing Rate and Vertical Break
 ```{r}
 
-vertical_break_swing_rate <- lm(swing_rate_FF ~ factor(Season) : avg_v_break_FF, 
+vertical_break_swing_rate <- lm(swing_rate_FF ~ factor(Season) * avg_v_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -337,7 +338,7 @@ tidy_vertical_break_swing_rate_graph
 ### Linear Model For Wiff Rate and Vertical Break
 ```{r}
 
-vertical_break_wiff_rate <- lm(wiff_rate_FF ~ factor(Season) : avg_v_break_FF, 
+vertical_break_wiff_rate <- lm(wiff_rate_FF ~ factor(Season) * avg_v_break_FF, 
                 data = Fastball_Data) 
 
 
@@ -372,7 +373,7 @@ tidy_vertical_break_wiff_rate_graph
 ### Linear Model For Stuff Plus and Spin Rate - Without Centering
 ```{r}
 
-spin_rate_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) : avg_spin_rate_FF, data = Fastball_Data) 
+spin_rate_lm <- lm(stuff_plus_stuff_FF ~ factor(Season) * avg_spin_rate_FF, data = Fastball_Data) 
 
 summary(spin_rate_lm)
 
