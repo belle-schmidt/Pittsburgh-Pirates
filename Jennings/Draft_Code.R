@@ -248,17 +248,146 @@ statcast_filter |>
 
 
 # TEST CODE ---------------------------------------------------------------
+## remove unnecessary columns from statcast
+statcast_filter <- statcast |> 
+  select(-c(X.1, X, spin_dir:break_length_deprecated, tfs_deprecated, tfs_zulu_deprecated,
+            umpire, sv_id, fielder_2, pitcher.1:fielder_9, home_score:delta_home_win_exp, bat_speed, swing_length)) |> 
+  rename(pitcher_id = pitcher)
+
+### Statcast pitch summary stats
+statcast_filter_test_code <- statcast_filter %>%
+  # only include pitches from FanGraphs (will combine and adjust later b/c of Stuff+ model)
+  filter(pitch_name %in% c("Sinker", "4-Seam Fastball",
+                           "Cutter", "Curveball",
+                           "Changeup", "Split-Finger",
+                           "Slider", "Knuckle Curve",
+                           "Sweeper", "Forkball",
+                           "Slow Curve", "Slurve")) |> 
+  
+  mutate(
+    # change game_year to Season
+    season = factor(game_year, levels = c(2020, 2021, 2022, 2023, 2024)),
+    
+    # Create a swing indicator
+    swing = ifelse(description %in%
+                     c("bunt_foul_tip",
+                       "foul", "foul_bunt",
+                       "foul_pitchout",
+                       "foul_tip", "hit_into_play",
+                       "missed_bunt", "swinging_strike",
+                       "swinging_strike_blocked"), 
+                   1, 0),
+    
+    
+    # Create an indicator for a missed swing attempt
+    miss = ifelse(description %in%
+                    c("missed_bunt", "swinging_strike",
+                      "swinging_strike_blocked", "foul_tip",
+                      "bunt_foul_tip"), 
+                  1, 0),
+    # put lefties on the same scale as righties and convert to inches
+    horizontal_movement_in = ifelse(p_throws == "L", -pfx_x * 12, pfx_x * 12),
+    # convert to inches
+    vertical_movement_in = pfx_z * 12) # ,
+    
+    # combine some pitchers together because of Stuff+ (can comment out when necessary)
+    # pitch_name = recode(pitch_name,
+    #                     "Sweeper" = "Slider",
+    #                     "Slow Curve" = "Curveball", #)) |> ,
+    #                     "Slurve" = "Curveball"))
+
+
+statcast_pitch_summary_stats_test <- statcast_filter_test_code |>  
+  # Now can calculate various stats at the pitch type level:
+  group_by(pitcher_id, p_throws, pitch_name, season) %>%
+  
+  # Use the summarise function to calculate the frequencies for each of
+  # these indicators:
+  summarise(n_pitches = n(),
+            n_swings = sum(swing, na.rm = TRUE),
+            n_miss = sum(miss, na.rm = TRUE),
+            swing_strikes = sum(swing == 1 & miss == 1, na.rm = TRUE),
+            spin = mean(release_spin_rate, na.rm = TRUE),
+            velocity = mean(release_speed, na.rm = TRUE),
+            xwOBA = mean(estimated_woba_using_speedangle, na.rm = TRUE),
+            #wOBA = mean(woba_value, na.rm = TRUE), factors in defense, looking for pitcher's contributions
+            extension = mean(release_extension, na.rm = TRUE),
+            induced_vertical_break = mean(vertical_movement_in, na.rm = TRUE),
+            horizontal_break = mean(horizontal_movement_in, na.rm = TRUE),
+            run_value = sum(delta_run_exp, na.rm = TRUE)) |>   
+  
+  # Using these sums can calculate commonly seen baseball stats:
+  mutate(swing_pct = round(n_swings / n_pitches, 6) * 100,
+         whiff_pct = round(n_miss / n_swings, 6) * 100,
+         swing_and_miss_pct = round(swing_strikes / n_pitches, 6) * 100,
+         spin = round(spin, 0),
+         run_value_per100 = (run_value / n_pitches) * 100) |> 
+  ungroup()
+
+
+### dataset with at least 100 pitches thrown for a pitch
+statcast_pitch_summary_stats_test <- statcast_pitch_summary_stats_test |> 
+  filter(n_pitches >= 100)
+
 
 ########## SLIDERS DO NOT BREAK ANYWHERE AS MUCH AS SWEEPERS
 ########## MAYBE THAT'S WHY SLIDERS ARE SO EFFECTIVE IN STUFF+
-statcast_pitch_summary_stats_q |> 
-  filter(pitch_name %in% c("Sweeper", "Slider", "Curveball", "Slurve")) |>  # & horizontal_break >= 0) |> removing negative sliders doesn't impact avg.
+statcast_pitch_summary_stats_test |> 
+  filter(pitch_name %in% c("Sweeper", "Slider", "Curveball", "Slurve", "Knuckle Curve")) |>  # & horizontal_break >= 0) |> removing negative sliders doesn't impact avg.
   group_by(pitch_name) |> 
   summarize(
     spin = mean(spin, na.rm = TRUE),
     induced_vertical_break = mean(induced_vertical_break, na.rm = TRUE),
     horizontal_break = mean(horizontal_break, na.rm = TRUE),
-    whiff_pct = mean(whiff_pct, na.rm = TRUE)
+    whiff_pct = mean(whiff_pct, na.rm = TRUE),
+    velocity = mean(velocity, na.rm = TRUE)
+  )
+
+#### qualified breaking ball pitchers
+break_qualified <- pitching_models|> 
+  filter(pitch_name %in% c("Sweeper", "Slider", "Curveball", "Slurve", "Knuckle Curve"))
+
+### vertical by horizontal movement plot for sliders and sweepers
+statcast_pitch_summary_stats_test |> 
+  filter(n_pitches >= 100 & pitch_name %in% c("Curveball", "Slurve", "Knuckle Curve")) |> 
+  # for pitcher's POV
+  mutate(horizontal_break = -horizontal_break) |> 
+  # plot
+  ggplot(aes(horizontal_break, induced_vertical_break, color = pitch_name)) +
+  geom_point(size = 2, alpha = 0.5) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
+  scale_color_manual(values = c("firebrick",
+                                "purple",
+                                "dodgerblue")) +
+  scale_y_continuous(breaks = seq(-20, 20, 5),
+                     limits = c(-25, 25),
+                     labels = scales::number_format(suffix = "\"")) +
+  scale_x_continuous(breaks = seq(-20, 20, 5),
+                     limits = c(-25, 25),
+                     labels = scales::number_format(suffix = "\"")) +
+  labs(
+    x = "Horizontal Break",
+    y = "Induced Vertical Break",
+    color = "Pitch Name",
+    title = "Avg. Pitch Movement",
+    subtitle = "2020-24 | Pitcher's POV",
+    caption = "Data: Baseball Savant via baseballr"
+  ) + 
+  facet_wrap(~ season,
+             nrow = 2,
+             ncol = 3) +
+  theme(
+    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
+    strip.background = element_rect(fill = "navy", color = "black", size = 1),
+    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 14, hjust = 0.5),
+    axis.text.y = element_text(size = 14, hjust = 0.5),
+    legend.position = "bottom",
+    plot.caption = element_text(size = 10)
   )
 
 ### velocity
