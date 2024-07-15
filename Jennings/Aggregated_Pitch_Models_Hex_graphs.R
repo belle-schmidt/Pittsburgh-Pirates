@@ -5,9 +5,30 @@ pitching_models <- read.csv("mlb_pitching_stats_2020-24.csv")
 library(tidyverse)
 library(baseballr)
 library(ggthemes)
-# library(plotly)
 library(hexbin)
 
+## set theme
+theme_set(theme_bw())
+
+## create own theme for each graph
+movement_theme <- function(){
+  theme(
+    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
+    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
+    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12)
+  )
+}
 
 # AGGREGATED PITCHING MODELS HEX GRAPHS -----------------------------------
 ## "Qualified" 4-Seam Fastball pitchers
@@ -47,23 +68,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Avg. Velocity") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 ### xwOBA
@@ -98,23 +103,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "xwOBA") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 ### whiff%
@@ -149,23 +138,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Whiff%") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -201,23 +174,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Spin (RPM)") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -253,23 +210,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Stuff+") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -311,23 +252,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Avg. Velocity") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -363,23 +288,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "xwOBA") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -415,23 +324,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Whiff%") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -467,23 +360,7 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Spin (RPM)") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 10)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
 
 
@@ -519,24 +396,10 @@ pitching_models |>
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Stuff+") +
-  theme_bw() +
-  theme(
-    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
-    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
-    plot.caption = element_text(size = 10),
-    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.text.x = element_text(size = 12, hjust = 0.5),
-    axis.text.y = element_text(size = 12, hjust = 0.5),
-    legend.position = "bottom",
-    legend.title.position = "top",
-    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    legend.key.size = unit(0.35, "inches"),
-    legend.text = element_text(size = 12)
-  ) +
+  movement_theme() +
   facet_wrap(~ season)
+
+
 
 
 ## CURVEBALLS
