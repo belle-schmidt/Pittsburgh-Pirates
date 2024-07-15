@@ -28,17 +28,6 @@ statcast_filter <- statcast |>
 fangraphs_filter <- fangraphs |> 
   select(Season:xMLBAMID, Role, stuff_plus_stuff_CH:stuff_plus_stuff_FS, stuff_plus_stuff_FO)
 
-### First look at fastballs, then sliders
-## lm(SaM ~ Velocity * factor(Season)) # Interaction term
-### see different slopes between years
-### weight by number of pitches
-## Minimum of 100 pitches
-### can do lm for other variables as well
-
-### Next steps:
-## if we find relationship, expand into it more
-### view things spatially in the strike zone (heatmap or hexmap)
-
 ## Filter the Data
 ### Statcast pitch summary stats
 statcast_filter <- statcast_filter %>%
