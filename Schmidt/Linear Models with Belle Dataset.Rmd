@@ -44,11 +44,10 @@ tidy_horizontal_break <- tidy(horizontal_break_lm)
 
 ### Change of Impact of Horizontal Break On Stuff+ Over Time
 ```{r}
-tidy_horizontal_break$term[tidy_horizontal_break$term == "avg_h_break_FF"] <- "2020"
-
 tidy_horizontal_break_graph <- tidy_horizontal_break |>
-  filter(term %in% c("2020", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_h_break_FF", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
+  mutate(term = recode(term, "avg_h_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -80,11 +79,33 @@ tidy_horizontal_break_rv <- tidy(horizontal_break_rv)
 
 ### Change of Impact of Horizontal Break On Run Value Over Time
 ```{r}
-tidy_horizontal_break_rv$term[tidy_horizontal_break_rv$term == "avg_h_break_FF"] <- "2020"
 
 tidy_horizontal_break_rv_graph <- tidy_horizontal_break_rv |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_h_break_FF", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
+  mutate(term = recode(term, "avg_h_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Run Value Each Season",
+       x = "Year",
+       y = "Change in RV Per 100 Pitches Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+
+tidy_horizontal_break_rv_graph
+```
+
+```{r}
+
+tidy_horizontal_break_rv_graph <- tidy_horizontal_break_rv |> 
+  filter(term %in% c("(Intercept)", "factor(Season)2021", "factor(Season)2022", "factor(Season)2023", "factor(Season)2024")) |> 
+  mutate(term = recode(term, "(Intercept)" = "2020"), 
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -116,11 +137,11 @@ tidy_horizontal_break_swing_miss <- tidy(horizontal_break_swing_miss)
 
 ### Change of Impact of Horizontal Break On Swing and Miss Rate Over Time
 ```{r}
-tidy_horizontal_break_swing_miss$term[tidy_horizontal_break_swing_miss$term == "avg_h_break_FF"] <- "2020"
 
 tidy_horizontal_break_swing_miss_graph <- tidy_horizontal_break_swing_miss |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_h_break_FF", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
+  mutate(term = recode(term, "avg_h_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -135,6 +156,7 @@ tidy_horizontal_break_swing_miss_graph <- tidy_horizontal_break_swing_miss |>
         axis.text.x = element_text(face = "bold", size = 10))
 
 tidy_horizontal_break_swing_miss_graph
+
 ```
 
 ### Linear Model For Swing Rate and Horizontal Break
@@ -151,11 +173,11 @@ tidy_horizontal_break_swing_rate <- tidy(horizontal_break_swing_rate)
 
 ### Change of Impact of Horizontal Break On Swing Rate Over Time
 ```{r}
-tidy_horizontal_break_swing_rate$term[tidy_horizontal_break_swing_rate$term == "avg_h_break_FF"] <- "2020"
 
 tidy_horizontal_break_swing_rate_graph <- tidy_horizontal_break_swing_rate |> 
-   filter(term %in% c("2020", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+   filter(term %in% c("avg_h_break_FF", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |> 
+  mutate(term = recode(term, "avg_h_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -186,11 +208,10 @@ tidy_horizontal_break_wiff_rate <- tidy(horizontal_break_wiff_rate)
 
 ### Change of Impact of Horizontal Break On Wiff Rate Over Time
 ```{r}
-tidy_horizontal_break_wiff_rate$term[tidy_horizontal_break_wiff_rate$term == "avg_h_break_FF"] <- "2020"
-
 tidy_horizontal_break_wiff_rate_graph <- tidy_horizontal_break_wiff_rate |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |>
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_h_break_FF", "factor(Season)2021:avg_h_break_FF", "factor(Season)2022:avg_h_break_FF", "factor(Season)2023:avg_h_break_FF", "factor(Season)2024:avg_h_break_FF")) |>
+  mutate(term = recode(term, "avg_h_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -222,11 +243,10 @@ tidy_vertical_break <- tidy(vertical_break_lm)
 
 ### Change of Impact of Vertical Break On Stuff+ Over Time
 ```{r}
-tidy_vertical_break$term[tidy_vertical_break$term == "avg_v_break_FF"] <- "2020"
-
 tidy_vertical_break_graph <- tidy_vertical_break |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_v_break_FF", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
+  mutate(term = recode(term, "avg_v_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -258,11 +278,11 @@ tidy_vertical_break_rv <- tidy(vertical_break_rv)
 
 ### Change of Impact of Vertical Break On Run Value Over Time
 ```{r}
-tidy_vertical_break_rv$term[tidy_vertical_break_rv$term == "avg_v_break_FF"] <- "2020"
 
 tidy_vertical_break_rv_graph <- tidy_vertical_break_rv |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_v_break_FF", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
+  mutate(term = recode(term, "avg_v_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -294,11 +314,11 @@ tidy_vertical_break_swing_miss <- tidy(vertical_break_swing_miss)
 
 ### Change of Impact of Vertical Break On Swing and Miss Rate Over Time
 ```{r}
-tidy_vertical_break_swing_miss$term[tidy_vertical_break_swing_miss$term == "avg_v_break_FF"] <- "2020"
 
 tidy_vertical_break_swing_miss_graph <- tidy_vertical_break_swing_miss |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_v_break_FF", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
+  mutate(term = recode(term, "avg_v_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -329,11 +349,11 @@ tidy_vertical_break_swing_rate <- tidy(vertical_break_swing_rate)
 
 ### Change of Impact of Vertical Break On Swing Rate Over Time
 ```{r}
-tidy_vertical_break_swing_rate$term[tidy_vertical_break_swing_rate$term == "avg_v_break_FF"] <- "2020"
 
 tidy_vertical_break_swing_rate_graph <- tidy_vertical_break_swing_rate |> 
-  filter(term %in% c("2020", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+  filter(term %in% c("avg_v_break_FF", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
+  mutate(term = recode(term, "avg_v_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -364,11 +384,11 @@ tidy_vertical_break_wiff_rate <- tidy(vertical_break_wiff_rate)
 
 ### Change of Impact of Vertical Break On Wiff Rate Over Time
 ```{r}
-tidy_vertical_break_wiff_rate$term[tidy_vertical_break_wiff_rate$term == "avg_v_break_FF"] <- "2020"
 
 tidy_vertical_break_wiff_rate_graph <- tidy_vertical_break_wiff_rate |> 
- filter(term %in% c("2020", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
-  mutate(term = str_extract(term, "\\d{4}")) |> 
+ filter(term %in% c("avg_v_break_FF", "factor(Season)2021:avg_v_break_FF", "factor(Season)2022:avg_v_break_FF", "factor(Season)2023:avg_v_break_FF", "factor(Season)2024:avg_v_break_FF")) |>
+  mutate(term = recode(term, "avg_v_break_FF" = "2020"),
+         term = str_extract(term, "\\d{4}")) |> 
   ggplot(aes(x = term, y = estimate)) +
   geom_line(size = 1, group = 1, color = "red") +
   geom_point(color = "black", size = 2) +
@@ -424,7 +444,7 @@ tidy_spin_rate_graph
 ### Linear Model For Aggregated Run Value and Spin Rate
 ```{r}
 
-spin_rate_rv <- lm(run_value_per100_FF ~ factor(Season) : avg_spin_rate_FF, 
+spin_rate_rv <- lm(run_value_per100_FF ~ factor(Season) * avg_spin_rate_FF, 
                 data = Fastball_Data) 
 
 
@@ -459,7 +479,7 @@ tidy_spin_rate_rv_graph
 ### Linear Model For Swing And Miss Rate and Spin Rate
 ```{r}
 
-spin_rate_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) : avg_spin_rate_FF, 
+spin_rate_swing_miss <- lm(swing_and_miss_rate_FF ~ factor(Season) * avg_spin_rate_FF, 
                 data = Fastball_Data) 
 
 
@@ -493,7 +513,7 @@ tidy_spin_rate_swing_miss_graph
 ### Linear Model For Swing Rate and Spin Rate
 ```{r}
 
-spin_rate_swing_rate <- lm(swing_rate_FF ~ factor(Season) : avg_spin_rate_FF, 
+spin_rate_swing_rate <- lm(swing_rate_FF ~ factor(Season) * avg_spin_rate_FF, 
                 data = Fastball_Data) 
 
 
@@ -526,7 +546,7 @@ tidy_spin_rate_swing_rate_graph
 ### Linear Model For Wiff Rate and Horizontal Break
 ```{r}
 
-spin_rate_wiff_rate <- lm(wiff_rate_FF ~ factor(Season) : avg_spin_rate_FF, 
+spin_rate_wiff_rate <- lm(wiff_rate_FF ~ factor(Season) * avg_spin_rate_FF, 
                 data = Fastball_Data) 
 
 

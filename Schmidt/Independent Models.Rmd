@@ -1,0 +1,3706 @@
+---
+title: "Separate Linear Model Per Season"
+author: "Belle Schmidt"
+date: "2024-07-11"
+output: html_document
+---
+
+### Libraries 
+```{r}
+library(tidyverse)
+library(dslabs)
+library(broom)
+library(dplyr)
+library(tidyr)
+```
+
+### Read in the dataset
+```{r}
+Overall_Stats <- read.csv("MLB_Pitching_Stats.csv")
+
+FF_2020_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball",
+         Season == 2020)
+
+FF_2021_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball",
+         Season == 2021)
+
+FF_2022_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball",
+         Season == 2022)
+
+FF_2023_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball",
+         Season == 2023)
+
+FF_2024_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball",
+         Season == 2024)
+```
+
+### Horizontal Break and Stuff+
+
+# Linear Model For Stuff Plus and Horizontal Break (2020)
+```{r}
+horizontal_break_lm_2020 <- lm(stuff_plus ~ horizontal_break, 
+                data = FF_2020_Data) 
+
+summary(horizontal_break_lm_2020)
+
+tidy_horizontal_break_2020 <- horizontal_break_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "horizontal_break" = "horizontal_break_2020"))
+
+tidy_horizontal_break_2020
+```
+
+# Linear Model For Stuff Plus and Horizontal Break (2021)
+```{r}
+horizontal_break_lm_2021 <- lm(stuff_plus ~ horizontal_break, 
+                data = FF_2021_Data) 
+
+summary(horizontal_break_lm_2021)
+
+tidy_horizontal_break_2021 <- horizontal_break_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "horizontal_break" = "horizontal_break_2021"))
+
+tidy_horizontal_break_2021
+```
+
+# Linear Model For Stuff Plus and Horizontal Break (2022)
+```{r}
+horizontal_break_lm_2022 <- lm(stuff_plus ~ horizontal_break, 
+                data = FF_2022_Data) 
+
+summary(horizontal_break_lm_2022)
+
+tidy_horizontal_break_2022 <- horizontal_break_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "horizontal_break" = "horizontal_break_2022"))
+
+tidy_horizontal_break_2022
+```
+
+# Linear Model For Stuff Plus and Horizontal Break (2023)
+```{r}
+horizontal_break_lm_2023 <- lm(stuff_plus ~ horizontal_break, 
+                data = FF_2023_Data) 
+
+summary(horizontal_break_lm_2023)
+
+tidy_horizontal_break_2023 <- horizontal_break_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "horizontal_break" = "horizontal_break_2023"))
+
+tidy_horizontal_break_2023
+```
+
+# Linear Model For Stuff Plus and Horizontal Break (2024)
+```{r}
+horizontal_break_lm_2024 <- lm(stuff_plus ~ horizontal_break, 
+                data = FF_2024_Data) 
+
+
+summary(horizontal_break_lm_2024)
+
+tidy_horizontal_break_2024 <- horizontal_break_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "horizontal_break" = "horizontal_break_2024"))
+
+tidy_horizontal_break_2024
+```
+
+# Combining Each Seasons Model
+```{r}
+horizontal_break <- tidy_horizontal_break_2020 |> 
+  full_join(tidy_horizontal_break_2021) |> 
+  full_join(tidy_horizontal_break_2022) |> 
+  full_join(tidy_horizontal_break_2023) |> 
+  full_join(tidy_horizontal_break_2024)
+
+horizontal_break
+```
+
+# Intercepts Dataset
+```{r}
+horizontal_break_intercept <- horizontal_break |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_intercept
+```
+
+# Slope Dataset
+```{r}
+horizontal_break_slope <- horizontal_break |> 
+  filter(str_detect(term, "horizontal_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_slope
+```
+
+# Slope Graph  
+```{r}
+horizontal_break_slope |> 
+ggplot() +
+  geom_line(aes(x = term, y = estimate), size = 1, group = 1, color = "red") +
+  geom_point(aes(x = term, y = estimate), color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Stuff+ Per Season",
+       x = "Year",
+       y = "Change in Stuff+ Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Horizontal Break and Run Value
+
+# Linear Model For Run Value and Horizontal Break (2020)
+```{r}
+horizontal_break_rv_lm_2020 <- lm(run_value_per100 ~ horizontal_break, 
+                data = FF_2020_Data) 
+
+summary(horizontal_break_rv_lm_2020)
+
+tidy_horizontal_break_rv_2020 <- horizontal_break_rv_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "horizontal_break" = "horizontal_break_2020"))
+
+tidy_horizontal_break_2020
+```
+
+# Linear Model For Run Value and Horizontal Break (2021)
+```{r}
+horizontal_break_rv_lm_2021 <- lm(run_value_per100 ~ horizontal_break, 
+                data = FF_2021_Data) 
+
+summary(horizontal_break_rv_lm_2021)
+
+tidy_horizontal_break_rv_2021 <- horizontal_break_rv_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "horizontal_break" = "horizontal_break_2021"))
+
+tidy_horizontal_break_rv_2021
+```
+
+# Linear Model For Run Value and Horizontal Break (2022)
+```{r}
+horizontal_break_rv_lm_2022 <- lm(run_value_per100 ~ horizontal_break, 
+                data = FF_2022_Data) 
+
+summary(horizontal_break_rv_lm_2022)
+
+tidy_horizontal_break_rv_2022 <- horizontal_break_rv_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "horizontal_break" = "horizontal_break_2022"))
+
+tidy_horizontal_break_rv_2022
+```
+
+# Linear Model For Run Value and Horizontal Break (2023)
+```{r}
+horizontal_break_rv_lm_2023 <- lm(run_value_per100 ~ horizontal_break, 
+                data = FF_2023_Data) 
+
+summary(horizontal_break_rv_lm_2023)
+
+tidy_horizontal_break_rv_2023 <- horizontal_break_rv_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "horizontal_break" = "horizontal_break_2023"))
+
+tidy_horizontal_break_rv_2023
+```
+
+# Linear Model For Run Value and Horizontal Break (2024)
+```{r}
+horizontal_break_rv_lm_2024 <- lm(run_value_per100 ~ horizontal_break, 
+                data = FF_2024_Data) 
+
+
+summary(horizontal_break_rv_lm_2024)
+
+tidy_horizontal_break_rv_2024 <- horizontal_break_rv_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "horizontal_break" = "horizontal_break_2024"))
+
+tidy_horizontal_break_rv_2024
+```
+
+# Combining all the Horizontal Movement and Run Value Models For Each Season 
+```{r}
+horizontal_break_rv <- tidy_horizontal_break_rv_2020 |> 
+  full_join(tidy_horizontal_break_rv_2021) |> 
+  full_join(tidy_horizontal_break_rv_2022) |> 
+  full_join(tidy_horizontal_break_rv_2023) |> 
+  full_join(tidy_horizontal_break_rv_2024)
+
+horizontal_break_rv
+```
+
+# Intercepts Dataset
+```{r}
+horizontal_break_rv_intercept <- horizontal_break_rv |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_rv_intercept
+```
+
+# Slope Dataset
+```{r}
+horizontal_break_rv_slope <- horizontal_break_rv |> 
+  filter(str_detect(term, "horizontal_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_rv_slope
+```
+
+# Slope Graph 
+```{r}
+horizontal_break_rv_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Run Value Each Season",
+       x = "Year",
+       y = "Change in RV Per 100 Pitches Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Horizontal Movement and Swing Percentage
+
+# Linear Model For Swing Percentage and Horizontal Break (2020)
+```{r}
+horizontal_break_swing_pct_lm_2020 <- lm(swing_pct ~ horizontal_break, 
+                data = FF_2020_Data) 
+
+summary(horizontal_break_swing_pct_lm_2020)
+
+tidy_horizontal_break_swing_pct_2020 <- horizontal_break_swing_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "horizontal_break" = "horizontal_break_2020"))
+
+tidy_horizontal_break_swing_pct_2020
+```
+
+# Linear Model For Swing Percentage and Horizontal Break (2021)
+```{r}
+horizontal_break_swing_pct_lm_2021 <- lm(swing_pct ~ horizontal_break, 
+                data = FF_2021_Data) 
+
+summary(horizontal_break_swing_pct_lm_2021)
+
+tidy_horizontal_break_swing_pct_2021 <- horizontal_break_swing_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "horizontal_break" = "horizontal_break_2021"))
+
+tidy_horizontal_break_swing_pct_2021
+```
+
+# Linear Model For Swing Percentage and Horizontal Break (2022)
+```{r}
+horizontal_break_swing_pct_lm_2022 <- lm(swing_pct ~ horizontal_break, 
+                data = FF_2022_Data) 
+
+summary(horizontal_break_swing_pct_lm_2022)
+
+tidy_horizontal_break_swing_pct_2022 <- horizontal_break_swing_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "horizontal_break" = "horizontal_break_2022"))
+
+tidy_horizontal_break_swing_pct_2022
+```
+
+# Linear Model For Swing Percentage and Horizontal Break (2023)
+```{r}
+horizontal_break_swing_pct_lm_2023 <- lm(swing_pct ~ horizontal_break, 
+                data = FF_2023_Data) 
+
+summary(horizontal_break_swing_pct_lm_2023)
+
+tidy_horizontal_break_swing_pct_2023 <- horizontal_break_swing_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "horizontal_break" = "horizontal_break_2023"))
+
+tidy_horizontal_break_swing_pct_2023
+```
+
+# Linear Model For Swing Percentage and Horizontal Break (2024)
+```{r}
+horizontal_break_swing_pct_lm_2024 <- lm(swing_pct ~ horizontal_break, 
+                data = FF_2024_Data) 
+
+
+summary(horizontal_break_swing_pct_lm_2024)
+
+tidy_horizontal_break_swing_pct_2024 <- horizontal_break_swing_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "horizontal_break" = "horizontal_break_2024"))
+
+tidy_horizontal_break_swing_pct_2024
+
+```
+
+# Horizontal Break & Swing Percentage Linear Models
+```{r}
+horizontal_break_swing_pct <- tidy_horizontal_break_swing_pct_2020 |> 
+  full_join(tidy_horizontal_break_swing_pct_2021) |> 
+  full_join(tidy_horizontal_break_swing_pct_2022) |> 
+  full_join(tidy_horizontal_break_swing_pct_2023) |> 
+  full_join(tidy_horizontal_break_swing_pct_2024)
+
+horizontal_break_swing_pct
+```
+
+# Intercepts Dataset
+```{r}
+horizontal_break_swing_pct_intercept <- horizontal_break_swing_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_swing_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+horizontal_break_swing_pct_slope <- horizontal_break_swing_pct |> 
+  filter(str_detect(term, "horizontal_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_swing_pct_slope
+```
+
+# Slope Graph
+```{r}
+horizontal_break_swing_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Swing Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing Percentage Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Horizontal Break and Swing and Miss Percentage
+
+# Linear Model For Swing & Miss Percentage and Horizontal Break (2020)
+```{r}
+
+horizontal_break_swing_miss_lm_2020 <- lm(swing_and_miss_pct ~ horizontal_break, 
+                data = FF_2020_Data) 
+
+summary(horizontal_break_swing_miss_lm_2020)
+
+tidy_horizontal_break_swing_miss_2020 <- horizontal_break_swing_miss_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "horizontal_break" = "horizontal_break_2020"))
+
+tidy_horizontal_break_swing_miss_2020
+
+```
+
+# Linear Model For Swing & Miss and Horizontal Break (2021)
+```{r}
+horizontal_break_swing_miss_lm_2021 <- lm(swing_and_miss_pct ~ horizontal_break, 
+                data = FF_2021_Data) 
+
+summary(horizontal_break_swing_miss_lm_2021)
+
+tidy_horizontal_break_swing_miss_2021 <- horizontal_break_swing_miss_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "horizontal_break" = "horizontal_break_2021"))
+
+tidy_horizontal_break_swing_miss_2021
+
+```
+
+# Linear Model For Swing & Miss and Horizontal Break (2022)
+```{r}
+horizontal_break_swing_miss_lm_2022 <- lm(swing_and_miss_pct ~ horizontal_break, 
+                data = FF_2022_Data) 
+
+summary(horizontal_break_swing_miss_lm_2022)
+
+tidy_horizontal_break_swing_miss_2022 <- horizontal_break_swing_miss_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "horizontal_break" = "horizontal_break_2022"))
+
+tidy_horizontal_break_swing_miss_2022
+
+```
+
+# Linear Model For Swing & Miss and Horizontal Break (2023)
+```{r}
+horizontal_break_swing_miss_lm_2023 <- lm(swing_and_miss_pct ~ horizontal_break, 
+                data = FF_2023_Data) 
+
+summary(horizontal_break_swing_miss_lm_2023)
+
+tidy_horizontal_break_swing_miss_2023 <- horizontal_break_swing_miss_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "horizontal_break" = "horizontal_break_2023"))
+
+tidy_horizontal_break_swing_miss_2023
+
+```
+
+# Linear Model For Swing & Miss and Horizontal Break (2024)
+```{r}
+horizontal_break_swing_miss_lm_2024 <- lm(swing_and_miss_pct ~ horizontal_break, 
+                data = FF_2024_Data) 
+
+summary(horizontal_break_swing_miss_lm_2024)
+
+tidy_horizontal_break_swing_miss_2024 <- horizontal_break_swing_miss_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "horizontal_break" = "horizontal_break_2024"))
+
+tidy_horizontal_break_swing_miss_2024
+
+```
+
+# Combining all the Horizontal Movement and Swing & Miss Models For Each Season 
+```{r}
+horizontal_break_swing_miss <- tidy_horizontal_break_swing_miss_2020 |> 
+  full_join(tidy_horizontal_break_swing_miss_2021) |> 
+  full_join(tidy_horizontal_break_swing_miss_2022) |> 
+  full_join(tidy_horizontal_break_swing_miss_2023) |> 
+  full_join(tidy_horizontal_break_swing_miss_2024)
+
+horizontal_break_swing_miss
+```
+
+# Intercepts Dataset
+```{r}
+horizontal_break_swing_miss_intercept <- horizontal_break_swing_miss |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_swing_miss_intercept
+```
+
+# Slope Dataset
+```{r}
+horizontal_break_swing_miss_slope <- horizontal_break_swing_miss |> 
+  filter(str_detect(term, "horizontal_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_swing_miss_slope
+```
+
+# Slope Graph 
+```{r}
+horizontal_break_swing_miss_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Swing & Miss Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing & Miss Percentage Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Horizontal Break and Whiff Percentage
+
+# Linear Model For Whiff Percentage and Horizontal Break (2020)
+```{r}
+
+horizontal_break_whiff_pct_lm_2020 <- lm(whiff_pct ~ horizontal_break, 
+                data = FF_2020_Data) 
+
+summary(horizontal_break_whiff_pct_lm_2020)
+
+tidy_horizontal_break_whiff_pct_2020 <- horizontal_break_whiff_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "horizontal_break" = "horizontal_break_2020"))
+
+tidy_horizontal_break_whiff_pct_2020
+
+```
+
+# Linear Model For Whiff Percentageand Horizontal Break (2021)
+```{r}
+horizontal_break_whiff_pct_lm_2021 <- lm(whiff_pct ~ horizontal_break, 
+                data = FF_2021_Data) 
+
+summary(horizontal_break_whiff_pct_lm_2021)
+
+tidy_horizontal_break_whiff_pct_2021 <- horizontal_break_whiff_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "horizontal_break" = "horizontal_break_2021"))
+
+tidy_horizontal_break_whiff_pct_2021
+
+```
+
+# Linear Model For Whiff Percentage and Horizontal Break (2022)
+```{r}
+horizontal_break_whiff_pct_lm_2022 <- lm(whiff_pct ~ horizontal_break, 
+                data = FF_2022_Data) 
+
+summary(horizontal_break_whiff_pct_lm_2022)
+
+tidy_horizontal_break_whiff_pct_2022 <- horizontal_break_whiff_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "horizontal_break" = "horizontal_break_2022"))
+
+tidy_horizontal_break_whiff_pct_2022
+```
+
+# Linear Model For Whiff Percentage and Horizontal Break (2023)
+```{r}
+horizontal_break_whiff_pct_lm_2023 <- lm(whiff_pct ~ horizontal_break, 
+                data = FF_2023_Data) 
+
+summary(horizontal_break_whiff_pct_lm_2023)
+
+tidy_horizontal_break_whiff_pct_2023 <- horizontal_break_whiff_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "horizontal_break" = "horizontal_break_2023"))
+
+tidy_horizontal_break_whiff_pct_2023
+
+```
+
+# Linear Model For Whiff Percentage and Horizontal Break (2024)
+```{r}
+horizontal_break_whiff_pct_lm_2024 <- lm(whiff_pct ~ horizontal_break, 
+                data = FF_2024_Data) 
+
+summary(horizontal_break_whiff_pct_lm_2024)
+
+tidy_horizontal_break_whiff_pct_2024 <- horizontal_break_whiff_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "horizontal_break" = "horizontal_break_2024"))
+
+tidy_horizontal_break_whiff_pct_2024
+
+```
+
+# Combining all the Horizontal Movement and Whiff Percentage Models For Each Season 
+```{r}
+horizontal_break_whiff_pct <- tidy_horizontal_break_whiff_pct_2020 |> 
+  full_join(tidy_horizontal_break_whiff_pct_2021) |> 
+  full_join(tidy_horizontal_break_whiff_pct_2022) |> 
+  full_join(tidy_horizontal_break_whiff_pct_2023) |> 
+  full_join(tidy_horizontal_break_whiff_pct_2024)
+
+horizontal_break_whiff_pct
+```
+
+# Intercepts Dataset
+```{r}
+horizontal_break_whiff_pct_intercept <- horizontal_break_whiff_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_whiff_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+horizontal_break_whiff_pct_slope <- horizontal_break_whiff_pct |> 
+  filter(str_detect(term, "horizontal_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_whiff_pct_slope
+```
+
+# Slope Graph 
+```{r}
+horizontal_break_whiff_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Whiff Percentage Each Season",
+       x = "Year",
+       y = "Change in Whiff Percentage Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Horizontal Break and xWOBA Percentage
+
+# Linear Model For xWOBA and Horizontal Break (2020)
+```{r}
+horizontal_break_xwOBA_lm_2020 <- lm(xwOBA ~ horizontal_break, 
+                data = FF_2020_Data) 
+
+summary(horizontal_break_xwOBA_lm_2020)
+
+tidy_horizontal_break_xwOBA_2020 <- horizontal_break_xwOBA_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "horizontal_break" = "horizontal_break_2020"))
+
+tidy_horizontal_break_xwOBA_2020
+```
+
+# Linear Model For xWOBA and Horizontal Break (2021)
+```{r}
+horizontal_break_xwOBA_lm_2021 <- lm(xwOBA ~ horizontal_break, 
+                data = FF_2021_Data) 
+
+summary(horizontal_break_xwOBA_lm_2021)
+
+tidy_horizontal_break_xwOBA_2021 <- horizontal_break_xwOBA_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "horizontal_break" = "horizontal_break_2021"))
+
+tidy_horizontal_break_xwOBA_2021
+```
+
+# Linear Model For xWOBA and Horizontal Break (2022)
+```{r}
+horizontal_break_xwOBA_lm_2022 <- lm(xwOBA ~ horizontal_break, 
+                data = FF_2022_Data) 
+
+summary(horizontal_break_xwOBA_lm_2022)
+
+tidy_horizontal_break_xwOBA_2022 <- horizontal_break_xwOBA_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "horizontal_break" = "horizontal_break_2022"))
+
+tidy_horizontal_break_xwOBA_2022
+```
+
+# Linear Model For xWOBA and Horizontal Break (2023)
+```{r}
+horizontal_break_xwOBA_lm_2023 <- lm(xwOBA ~ horizontal_break, 
+                data = FF_2023_Data) 
+
+summary(horizontal_break_xwOBA_lm_2023)
+
+tidy_horizontal_break_xwOBA_2023 <- horizontal_break_xwOBA_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "horizontal_break" = "horizontal_break_2023"))
+
+tidy_horizontal_break_xwOBA_2023
+```
+
+# Linear Model For xWOBA and Horizontal Break (2024)
+```{r}
+horizontal_break_xwOBA_lm_2024 <- lm(xwOBA ~ horizontal_break, 
+                data = FF_2024_Data) 
+
+summary(horizontal_break_xwOBA_lm_2024)
+
+tidy_horizontal_break_xwOBA_2024 <- horizontal_break_xwOBA_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "horizontal_break" = "horizontal_break_2024"))
+
+tidy_horizontal_break_xwOBA_2024
+
+```
+
+# Combining all the Horizontal Movement and xwOBA Models For Each Season 
+```{r}
+horizontal_break_xwOBA <- tidy_horizontal_break_xwOBA_2020 |> 
+  full_join(tidy_horizontal_break_xwOBA_2021) |> 
+  full_join(tidy_horizontal_break_xwOBA_2022) |> 
+  full_join(tidy_horizontal_break_xwOBA_2023) |> 
+  full_join(tidy_horizontal_break_xwOBA_2024)
+
+horizontal_break_xwOBA
+```
+
+# Intercepts Dataset
+```{r}
+horizontal_break_xwOBA_intercept <- horizontal_break_xwOBA |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_xwOBA_intercept
+```
+
+# Slope Dataset
+```{r}
+horizontal_break_xwOBA_slope <- horizontal_break_xwOBA |> 
+  filter(str_detect(term, "horizontal_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+horizontal_break_xwOBA_slope
+```
+
+# Slope Graph 
+```{r}
+horizontal_break_xwOBA_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Horizontal Break Has on Expected wOBA Each Season",
+       x = "Year",
+       y = "Change in Expected wOBA Per Inch of Horizontal Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Vertical Break and Stuff+
+
+# Linear Model For Stuff Plus and Vertical Break (2020)
+```{r}
+
+vertical_break_lm_2020 <- lm(stuff_plus ~ induced_vertical_break, 
+                data = FF_2020_Data) 
+
+summary(vertical_break_lm_2020)
+
+tidy_vertical_break_2020 <- vertical_break_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "induced_vertical_break" = "vertical_break_2020"))
+
+tidy_vertical_break_2020
+
+```
+
+# Linear Model For Stuff Plus and Vertical Break (2021)
+```{r}
+vertical_break_lm_2021 <- lm(stuff_plus ~ induced_vertical_break, 
+                data = FF_2021_Data) 
+
+summary(vertical_break_lm_2021)
+
+tidy_vertical_break_2021 <- vertical_break_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "induced_vertical_break" = "vertical_break_2021"))
+
+tidy_vertical_break_2021
+
+```
+
+# Linear Model For Stuff Plus and Vertical Break (2022)
+```{r}
+vertical_break_lm_2022 <- lm(stuff_plus ~ induced_vertical_break, 
+                data = FF_2022_Data) 
+
+summary(vertical_break_lm_2022)
+
+tidy_vertical_break_2022 <- vertical_break_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "induced_vertical_break" = "vertical_break_2022"))
+
+tidy_vertical_break_2022
+
+```
+
+# Linear Model For Stuff Plus and Vertical Break (2023)
+```{r}
+vertical_break_lm_2023 <- lm(stuff_plus ~ induced_vertical_break, 
+                data = FF_2023_Data) 
+
+summary(vertical_break_lm_2023)
+
+tidy_vertical_break_2023 <- vertical_break_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "induced_vertical_break" = "vertical_break_2023"))
+
+tidy_vertical_break_2023
+
+```
+
+# Linear Model For Stuff Plus and Vertical Break (2024)
+```{r}
+vertical_break_lm_2024 <- lm(stuff_plus ~ induced_vertical_break, 
+                data = FF_2024_Data) 
+
+summary(vertical_break_lm_2024)
+
+tidy_vertical_break_2024 <- vertical_break_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "induced_vertical_break" = "vertical_break_2024"))
+
+tidy_vertical_break_2024
+
+```
+
+# Combining Each Seasons Model
+```{r}
+vertical_break <- tidy_vertical_break_2020 |> 
+  full_join(tidy_vertical_break_2021) |> 
+  full_join(tidy_vertical_break_2022) |> 
+  full_join(tidy_vertical_break_2023) |> 
+  full_join(tidy_vertical_break_2024)
+
+vertical_break
+```
+
+# Intercepts Dataset
+```{r}
+vertical_break_intercept <- vertical_break |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_intercept
+```
+
+# Slope Dataset
+```{r}
+vertical_break_slope <- vertical_break |> 
+  filter(str_detect(term, "vertical_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+```
+
+# Slope Graph  
+```{r}
+vertical_break_slope |> 
+ggplot() +
+  geom_line(aes(x = term, y = estimate), size = 1, group = 1, color = "red") +
+  geom_point(aes(x = term, y = estimate), color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Vertical Break Has on Stuff+ Each Season",
+       x = "Year",
+       y = "Change in Stuff+ Per Inch of Vertical Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Vertical Break and Run Value
+
+# Linear Model For Run Value and Vertical Break (2020)
+```{r}
+
+vertical_break_rv_lm_2020 <- lm(run_value_per100 ~ induced_vertical_break, 
+                data = FF_2020_Data) 
+
+summary(vertical_break_rv_lm_2020)
+
+tidy_vertical_break_rv_2020 <- vertical_break_rv_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "induced_vertical_break" = "vertical_break_2020"))
+
+tidy_vertical_break_2020
+
+```
+
+# Linear Model For Run Value and Vertical Break (2021)
+```{r}
+vertical_break_rv_lm_2021 <- lm(run_value_per100 ~ induced_vertical_break, 
+                data = FF_2021_Data) 
+
+summary(vertical_break_rv_lm_2021)
+
+tidy_vertical_break_rv_2021 <- vertical_break_rv_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "induced_vertical_break" = "vertical_break_2021"))
+
+tidy_vertical_break_2021
+
+```
+
+# Linear Model For Run Value and Vertical Break (2022)
+```{r}
+vertical_break_rv_lm_2022 <- lm(run_value_per100 ~ induced_vertical_break, 
+                data = FF_2022_Data) 
+
+summary(vertical_break_rv_lm_2022)
+
+tidy_vertical_break_rv_2022 <- vertical_break_rv_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "induced_vertical_break" = "vertical_break_2022"))
+
+tidy_vertical_break_2022
+
+```
+
+# Linear Model For Run Value and Vertical Break (2023)
+```{r}
+vertical_break_rv_lm_2023 <- lm(run_value_per100 ~ induced_vertical_break, 
+                data = FF_2023_Data) 
+
+summary(vertical_break_rv_lm_2023)
+
+tidy_vertical_break_rv_2023 <- vertical_break_rv_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "induced_vertical_break" = "vertical_break_2023"))
+
+tidy_vertical_break_2023
+
+```
+
+# Linear Model For Run Value and Vertical Break (2024)
+```{r}
+vertical_break_rv_lm_2024 <- lm(run_value_per100 ~ induced_vertical_break, 
+                data = FF_2024_Data) 
+
+summary(vertical_break_rv_lm_2024)
+
+tidy_vertical_break_rv_2024 <- vertical_break_rv_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "induced_vertical_break" = "vertical_break_2024"))
+
+tidy_vertical_break_2024
+
+```
+
+# Combining all the Vertical Movement and Run Value Models For Each Season 
+```{r}
+vertical_break_rv <- tidy_vertical_break_rv_2020 |> 
+  full_join(tidy_vertical_break_rv_2021) |> 
+  full_join(tidy_vertical_break_rv_2022) |> 
+  full_join(tidy_vertical_break_rv_2023) |> 
+  full_join(tidy_vertical_break_rv_2024)
+```
+
+# Intercepts Dataset
+```{r}
+vertical_break_rv_intercept <- vertical_break_rv |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+```
+
+# Slope Dataset
+```{r}
+vertical_break_rv_slope <- vertical_break_rv |> 
+  filter(str_detect(term, "vertical_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_rv_slope
+```
+
+# Slope Graph 
+```{r}
+vertical_break_rv_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Vertical Break Has on Run Value Each Season",
+       x = "Year",
+       y = "Change in RV Per 100 Pitches Per Inch of Vertical Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Vertical Movement and Swing Percentage
+
+# Linear Model For Swing Percentage and Vertical Break (2020)
+```{r}
+
+vertical_break_swing_pct_lm_2020 <- lm(swing_pct ~ induced_vertical_break, 
+                data = FF_2020_Data) 
+
+summary(vertical_break_swing_pct_lm_2020)
+
+tidy_vertical_break_swing_pct_2020 <- vertical_break_swing_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "induced_vertical_break" = "vertical_break_2020"))
+
+tidy_vertical_break_swing_pct_2020
+
+```
+
+# Linear Model For Swing Percentage and Vertical Break (2021)
+```{r}
+vertical_break_swing_pct_lm_2021 <- lm(swing_pct ~ induced_vertical_break, 
+                data = FF_2021_Data) 
+
+summary(vertical_break_swing_pct_lm_2021)
+
+tidy_vertical_break_swing_pct_2021 <- vertical_break_swing_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "induced_vertical_break" = "vertical_break_2021"))
+
+tidy_vertical_break_swing_pct_2021
+
+```
+
+# Linear Model For Swing Percentage and Vertical Break (2022)
+```{r}
+vertical_break_swing_pct_lm_2022 <- lm(swing_pct ~ induced_vertical_break, 
+                data = FF_2022_Data) 
+
+summary(vertical_break_swing_pct_lm_2022)
+
+tidy_vertical_break_swing_pct_2022 <- vertical_break_swing_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "induced_vertical_break" = "vertical_break_2022"))
+
+tidy_vertical_break_swing_pct_2022
+
+```
+
+# Linear Model For Swing Percentage and Vertical Break (2023)
+```{r}
+vertical_break_swing_pct_lm_2023 <- lm(swing_pct ~ induced_vertical_break, 
+                data = FF_2023_Data) 
+
+summary(vertical_break_swing_pct_lm_2023)
+
+tidy_vertical_break_swing_pct_2023 <- vertical_break_swing_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "induced_vertical_break" = "vertical_break_2023"))
+
+tidy_vertical_break_swing_pct_2023
+
+```
+
+# Linear Model For Swing Percentage and Vertical Break (2024)
+```{r}
+vertical_break_swing_pct_lm_2024 <- lm(swing_pct ~ induced_vertical_break, 
+                data = FF_2024_Data) 
+
+summary(vertical_break_swing_pct_lm_2024)
+
+tidy_vertical_break_swing_pct_2024 <- vertical_break_swing_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "induced_vertical_break" = "vertical_break_2024"))
+
+tidy_vertical_break_swing_pct_2024
+
+```
+
+# Vertical Break & Swing Percentage Linear Models
+```{r}
+vertical_break_swing_pct <- tidy_vertical_break_swing_pct_2020 |> 
+  full_join(tidy_vertical_break_swing_pct_2021) |> 
+  full_join(tidy_vertical_break_swing_pct_2022) |> 
+  full_join(tidy_vertical_break_swing_pct_2023) |> 
+  full_join(tidy_vertical_break_swing_pct_2024)
+
+vertical_break_swing_pct
+```
+
+# Intercepts Dataset
+```{r}
+vertical_break_swing_pct_intercept <- vertical_break_swing_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_swing_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+vertical_break_swing_pct_slope <- vertical_break_swing_pct |> 
+  filter(str_detect(term, "vertical_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_swing_pct_slope
+```
+
+# Slope Graph
+```{r}
+vertical_break_swing_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Vertical Break Has on Swing Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing Percentage Per Inch of Vertical Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Vertical Break and Swing and Miss Percentage
+
+# Linear Model For Swing & Miss Percentage and Vertical Break (2020)
+```{r}
+
+vertical_break_swing_miss_lm_2020 <- lm(swing_and_miss_pct ~ induced_vertical_break, 
+                data = FF_2020_Data) 
+
+summary(vertical_break_swing_miss_lm_2020)
+
+tidy_vertical_break_swing_miss_2020 <- vertical_break_swing_miss_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "induced_vertical_break" = "vertical_break_2020"))
+
+tidy_vertical_break_swing_miss_2020
+
+```
+
+# Linear Model For Swing & Miss and Vertical Break (2021)
+```{r}
+vertical_break_swing_miss_lm_2021 <- lm(swing_and_miss_pct ~ induced_vertical_break, 
+                data = FF_2021_Data) 
+
+summary(vertical_break_swing_miss_lm_2021)
+
+tidy_vertical_break_swing_miss_2021 <- vertical_break_swing_miss_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "induced_vertical_break" = "vertical_break_2021"))
+
+tidy_vertical_break_swing_miss_2021
+
+```
+
+# Linear Model For Swing & Miss and Vertical Break (2022)
+```{r}
+vertical_break_swing_miss_lm_2022 <- lm(swing_and_miss_pct ~ induced_vertical_break, 
+                data = FF_2022_Data) 
+
+summary(vertical_break_swing_miss_lm_2022)
+
+tidy_vertical_break_swing_miss_2022 <- vertical_break_swing_miss_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "induced_vertical_break" = "vertical_break_2022"))
+
+tidy_vertical_break_swing_miss_2022
+
+```
+
+# Linear Model For Swing & Miss and Vertical Break (2023)
+```{r}
+vertical_break_swing_miss_lm_2023 <- lm(swing_and_miss_pct ~ induced_vertical_break, 
+                data = FF_2023_Data) 
+
+summary(vertical_break_swing_miss_lm_2023)
+
+tidy_vertical_break_swing_miss_2023 <- vertical_break_swing_miss_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "induced_vertical_break" = "vertical_break_2023"))
+
+tidy_vertical_break_swing_miss_2023
+
+```
+
+# Linear Model For Swing & Miss and Vertical Break (2024)
+```{r}
+vertical_break_swing_miss_lm_2024 <- lm(swing_and_miss_pct ~ induced_vertical_break, 
+                data = FF_2024_Data) 
+
+summary(vertical_break_swing_miss_lm_2024)
+
+tidy_vertical_break_swing_miss_2024 <- vertical_break_swing_miss_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "induced_vertical_break" = "vertical_break_2024"))
+
+tidy_vertical_break_swing_miss_2024
+
+```
+
+# Combining all the Vertical Movement and Swing & Miss Models For Each Season 
+```{r}
+vertical_break_swing_miss <- tidy_vertical_break_swing_miss_2020 |> 
+  full_join(tidy_vertical_break_swing_miss_2021) |> 
+  full_join(tidy_vertical_break_swing_miss_2022) |> 
+  full_join(tidy_vertical_break_swing_miss_2023) |> 
+  full_join(tidy_vertical_break_swing_miss_2024)
+
+vertical_break_swing_miss
+```
+
+# Intercepts Dataset
+```{r}
+vertical_break_swing_miss_intercept <- vertical_break_swing_miss |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_swing_miss_intercept
+```
+
+# Slope Dataset
+```{r}
+vertical_break_swing_miss_slope <- vertical_break_swing_miss |> 
+  filter(str_detect(term, "vertical_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_swing_miss_slope
+```
+
+# Slope Graph 
+```{r}
+vertical_break_swing_miss_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Vertical Break Has on Swing & Miss Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing & Miss Percentage Per Inch of Vertical Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Vertical Break and Whiff Percentage
+
+# Linear Model For Whiff Percentage and Vertical Break (2020)
+```{r}
+
+vertical_break_whiff_pct_lm_2020 <- lm(whiff_pct ~ induced_vertical_break, 
+                data = FF_2020_Data) 
+
+summary(vertical_break_whiff_pct_lm_2020)
+
+tidy_vertical_break_whiff_pct_2020 <- vertical_break_whiff_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "induced_vertical_break" = "vertical_break_2020"))
+
+tidy_vertical_break_whiff_pct_2020
+
+```
+
+# Linear Model For Whiff Percentage and Vertical Break (2021)
+```{r}
+vertical_break_whiff_pct_lm_2021 <- lm(whiff_pct ~ induced_vertical_break, 
+                data = FF_2021_Data) 
+
+summary(vertical_break_whiff_pct_lm_2021)
+
+tidy_vertical_break_whiff_pct_2021 <- vertical_break_whiff_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "induced_vertical_break" = "vertical_break_2021"))
+
+tidy_vertical_break_whiff_pct_2021
+```
+
+# Linear Model For Whiff Percentage and Vertical Break (2022)
+```{r}
+vertical_break_whiff_pct_lm_2022 <- lm(whiff_pct ~ induced_vertical_break, 
+                data = FF_2022_Data) 
+
+summary(vertical_break_whiff_pct_lm_2022)
+
+tidy_vertical_break_whiff_pct_2022 <- vertical_break_whiff_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "induced_vertical_break" = "vertical_break_2022"))
+
+tidy_vertical_break_whiff_pct_2022
+```
+
+# Linear Model For Whiff Percentage and Vertical Break (2023)
+```{r}
+vertical_break_whiff_pct_lm_2023 <- lm(whiff_pct ~ induced_vertical_break, 
+                data = FF_2023_Data) 
+
+summary(vertical_break_whiff_pct_lm_2023)
+
+tidy_vertical_break_whiff_pct_2023 <- vertical_break_whiff_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "induced_vertical_break" = "vertical_break_2023"))
+
+tidy_vertical_break_whiff_pct_2023
+
+```
+
+# Linear Model For Whiff Percentage and Vertical Break (2024)
+```{r}
+vertical_break_whiff_pct_lm_2024 <- lm(whiff_pct ~ induced_vertical_break, 
+                data = FF_2024_Data) 
+
+summary(vertical_break_whiff_pct_lm_2024)
+
+tidy_vertical_break_whiff_pct_2024 <- vertical_break_whiff_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "induced_vertical_break" = "vertical_break_2024"))
+
+tidy_vertical_break_whiff_pct_2024
+
+```
+
+# Combining all the Vertical Movement and Whiff Percentage Models For Each Season 
+```{r}
+vertical_break_whiff_pct <- tidy_vertical_break_whiff_pct_2020 |> 
+  full_join(tidy_vertical_break_whiff_pct_2021) |> 
+  full_join(tidy_vertical_break_whiff_pct_2022) |> 
+  full_join(tidy_vertical_break_whiff_pct_2023) |> 
+  full_join(tidy_vertical_break_whiff_pct_2024)
+
+vertical_break_whiff_pct
+```
+
+# Intercepts Dataset
+```{r}
+vertical_break_whiff_pct_intercept <- vertical_break_whiff_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_whiff_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+vertical_break_whiff_pct_slope <- vertical_break_whiff_pct |> 
+  filter(str_detect(term, "vertical_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_whiff_pct_slope
+```
+
+# Slope Graph 
+```{r}
+vertical_break_whiff_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Vertical Break Has on Whiff Percentage Each Season",
+       x = "Year",
+       y = "Change in Whiff Percentage Per Inch of Vertical Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Vertical Break and xWOBA Percentage
+
+# Linear Model For xWOBA and Vertical Break (2020)
+```{r}
+
+vertical_break_xwOBA_lm_2020 <- lm(xwOBA ~ induced_vertical_break, 
+                data = FF_2020_Data) 
+
+summary(vertical_break_xwOBA_lm_2020)
+
+tidy_vertical_break_xwOBA_2020 <- vertical_break_xwOBA_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "induced_vertical_break" = "vertical_break_2020"))
+
+tidy_vertical_break_xwOBA_2020
+
+```
+
+# Linear Model For xWOBA and Vertical Break (2021)
+```{r}
+vertical_break_xwOBA_lm_2021 <- lm(xwOBA ~ induced_vertical_break, 
+                data = FF_2021_Data) 
+
+summary(vertical_break_xwOBA_lm_2021)
+
+tidy_vertical_break_xwOBA_2021 <- vertical_break_xwOBA_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "induced_vertical_break" = "vertical_break_2021"))
+
+tidy_vertical_break_xwOBA_2021
+
+```
+
+# Linear Model For xWOBA and Vertical Break (2022)
+```{r}
+vertical_break_xwOBA_lm_2022 <- lm(xwOBA ~ induced_vertical_break, 
+                data = FF_2022_Data) 
+
+summary(vertical_break_xwOBA_lm_2022)
+
+tidy_vertical_break_xwOBA_2022 <- vertical_break_xwOBA_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "induced_vertical_break" = "vertical_break_2022"))
+
+tidy_vertical_break_xwOBA_2022
+
+```
+
+# Linear Model For xWOBA and Vertical Break (2023)
+```{r}
+vertical_break_xwOBA_lm_2023 <- lm(xwOBA ~ induced_vertical_break, 
+                data = FF_2023_Data) 
+
+summary(vertical_break_xwOBA_lm_2023)
+
+tidy_vertical_break_xwOBA_2023 <- vertical_break_xwOBA_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "induced_vertical_break" = "vertical_break_2023"))
+
+tidy_vertical_break_xwOBA_2023
+
+
+```
+
+# Linear Model For xWOBA and Vertical Break (2024)
+```{r}
+vertical_break_xwOBA_lm_2024 <- lm(xwOBA ~ induced_vertical_break, 
+                data = FF_2024_Data) 
+
+summary(vertical_break_xwOBA_lm_2024)
+
+tidy_vertical_break_xwOBA_2024 <- vertical_break_xwOBA_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "induced_vertical_break" = "vertical_break_2024"))
+
+tidy_vertical_break_xwOBA_2024
+
+
+```
+
+# Combining all the Vertical Movement and xwOBA Models For Each Season 
+```{r}
+vertical_break_xwOBA <- tidy_vertical_break_xwOBA_2020 |> 
+  full_join(tidy_vertical_break_xwOBA_2021) |> 
+  full_join(tidy_vertical_break_xwOBA_2022) |> 
+  full_join(tidy_vertical_break_xwOBA_2023) |> 
+  full_join(tidy_vertical_break_xwOBA_2024)
+
+vertical_break_xwOBA
+```
+
+# Intercepts Dataset
+```{r}
+vertical_break_xwOBA_intercept <- vertical_break_xwOBA |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_xwOBA_intercept
+```
+
+# Slope Dataset
+```{r}
+vertical_break_xwOBA_slope <- vertical_break_xwOBA |> 
+  filter(str_detect(term, "vertical_break")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+vertical_break_xwOBA_slope
+```
+
+# Slope Graph 
+```{r}
+vertical_break_xwOBA_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Inch of Vertical Break Has on Expected wOBA Each Season",
+       x = "Year",
+       y = "Change in Expected wOBA Per Inch of Vertical Break") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Spin Rate and Stuff+
+
+# Linear Model For Stuff Plus and Spin Rate (2020)
+```{r}
+
+spin_lm_2020 <- lm(stuff_plus ~ spin, 
+                data = FF_2020_Data) 
+
+summary(spin_lm_2020)
+
+tidy_spin_2020 <- spin_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "spin" = "spin_2020"))
+
+tidy_spin_2020
+
+```
+
+# Linear Model For Stuff Plus and Spin Rate (2021)
+```{r}
+spin_lm_2021 <- lm(stuff_plus ~ spin, 
+                data = FF_2021_Data) 
+
+summary(spin_lm_2021)
+
+tidy_spin_2021 <- spin_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "spin" = "spin_2021"))
+
+tidy_spin_2021
+
+```
+
+# Linear Model For Stuff Plus and Spin Rate (2022)
+```{r}
+spin_lm_2022 <- lm(stuff_plus ~ spin, 
+                data = FF_2022_Data) 
+
+summary(spin_lm_2022)
+
+tidy_spin_2022 <- spin_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "spin" = "spin_2022"))
+
+tidy_spin_2022
+
+
+```
+
+# Linear Model For Stuff Plus and Spin Rate (2023)
+```{r}
+spin_lm_2023 <- lm(stuff_plus ~ spin, 
+                data = FF_2023_Data) 
+
+summary(spin_lm_2023)
+
+tidy_spin_2023 <- spin_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "spin" = "spin_2023"))
+
+tidy_spin_2023
+
+```
+
+# Linear Model For Stuff Plus and Spin Rate (2024)
+```{r}
+spin_lm_2024 <- lm(stuff_plus ~ spin, 
+                data = FF_2024_Data) 
+
+summary(spin_lm_2024)
+
+tidy_spin_2024 <- spin_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "spin" = "spin_2024"))
+
+tidy_spin_2024
+
+```
+
+# Combining Each Seasons Model
+```{r}
+spin <- tidy_spin_2020 |> 
+  full_join(tidy_spin_2021) |> 
+  full_join(tidy_spin_2022) |> 
+  full_join(tidy_spin_2023) |> 
+  full_join(tidy_spin_2024)
+
+spin
+```
+
+# Intercepts Dataset
+```{r}
+spin_intercept <- spin |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_intercept
+```
+
+# Slope Dataset
+```{r}
+spin_slope <- spin |> 
+  filter(str_detect(term, "spin")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_slope
+```
+
+# Slope Graph  
+```{r}
+spin_slope |> 
+ggplot() +
+  geom_line(aes(x = term, y = estimate), size = 1, group = 1, color = "red") +
+  geom_point(aes(x = term, y = estimate), color = "black", size = 2) +
+  labs(title = "Impact Each RPM Has on Stuff+ Each Season",
+       x = "Year",
+       y = "Change in Stuff+ Per RPM") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Spin Rate and Run Value
+
+# Linear Model For Run Value and Spin Rate (2020)
+```{r}
+
+spin_rv_lm_2020 <- lm(run_value_per100 ~ spin, 
+                data = FF_2020_Data) 
+
+summary(spin_rv_lm_2020)
+
+tidy_spin_rv_2020 <- spin_rv_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "spin" = "spin_2020"))
+
+tidy_spin_2020
+
+```
+
+# Linear Model For Run Value and Spin Rate (2021)
+```{r}
+spin_rv_lm_2021 <- lm(run_value_per100 ~ spin, 
+                data = FF_2021_Data) 
+
+summary(spin_rv_lm_2021)
+
+tidy_spin_rv_2021 <- spin_rv_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "spin" = "spin_2021"))
+
+tidy_spin_2021
+
+```
+
+# Linear Model For Run Value and Spin Rate (2022)
+```{r}
+spin_rv_lm_2022 <- lm(run_value_per100 ~ spin, 
+                data = FF_2022_Data) 
+
+summary(spin_rv_lm_2022)
+
+tidy_spin_rv_2022 <- spin_rv_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "spin" = "spin_2022"))
+
+tidy_spin_2022
+
+```
+
+# Linear Model For Run Value and Spin Rate (2023)
+```{r}
+spin_rv_lm_2023 <- lm(run_value_per100 ~ spin, 
+                data = FF_2023_Data) 
+
+summary(spin_rv_lm_2023)
+
+tidy_spin_rv_2023 <- spin_rv_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "spin" = "spin_2023"))
+
+tidy_spin_2023
+
+```
+
+# Linear Model For Run Value and Spin Rate (2024)
+```{r}
+spin_rv_lm_2024 <- lm(run_value_per100 ~ spin, 
+                data = FF_2024_Data) 
+
+summary(spin_rv_lm_2024)
+
+tidy_spin_rv_2024 <- spin_rv_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "spin" = "spin_2024"))
+
+tidy_spin_2024
+
+```
+
+# Combining all the Spin Rate and Run Value Models For Each Season 
+```{r}
+spin_rv <- tidy_spin_rv_2020 |> 
+  full_join(tidy_spin_rv_2021) |> 
+  full_join(tidy_spin_rv_2022) |> 
+  full_join(tidy_spin_rv_2023) |> 
+  full_join(tidy_spin_rv_2024)
+
+spin_rv
+```
+
+# Intercepts Dataset
+```{r}
+spin_rv_intercept <- spin_rv |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_rv_intercept
+```
+
+# Slope Dataset
+```{r}
+spin_rv_slope <- spin_rv |> 
+  filter(str_detect(term, "spin")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_rv_slope
+```
+
+# Slope Graph 
+```{r}
+spin_rv_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each RPM Has on Run Value Each Season",
+       x = "Year",
+       y = "Change in RV Per 100 Pitches Per RPM") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Spin Rate and Swing Percentage
+
+# Linear Model For Swing Percentage and Spin Rate (2020)
+```{r}
+
+spin_swing_pct_lm_2020 <- lm(swing_pct ~ spin, 
+                data = FF_2020_Data) 
+
+summary(spin_swing_pct_lm_2020)
+
+tidy_spin_swing_pct_2020 <- spin_swing_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "spin" = "spin_2020"))
+
+tidy_spin_swing_pct_2020
+
+```
+
+# Linear Model For Swing Percentage and Spin Rate (2021)
+```{r}
+spin_swing_pct_lm_2021 <- lm(swing_pct ~ spin, 
+                data = FF_2021_Data) 
+
+summary(spin_swing_pct_lm_2021)
+
+tidy_spin_swing_pct_2021 <- spin_swing_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "spin" = "spin_2021"))
+
+tidy_spin_swing_pct_2021
+
+```
+
+# Linear Model For Swing Percentage and Spin Rate (2022)
+```{r}
+spin_swing_pct_lm_2022 <- lm(swing_pct ~ spin, 
+                data = FF_2022_Data) 
+
+summary(spin_swing_pct_lm_2022)
+
+tidy_spin_swing_pct_2022 <- spin_swing_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "spin" = "spin_2022"))
+
+tidy_spin_swing_pct_2022
+
+```
+
+# Linear Model For Swing Percentage and Spin Rate (2023)
+```{r}
+spin_swing_pct_lm_2023 <- lm(swing_pct ~ spin, 
+                data = FF_2023_Data) 
+
+summary(spin_swing_pct_lm_2023)
+
+tidy_spin_swing_pct_2023 <- spin_swing_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "spin" = "spin_2023"))
+
+tidy_spin_swing_pct_2023
+
+```
+
+# Linear Model For Swing Percentage and Spin Rate (2024)
+```{r}
+spin_swing_pct_lm_2024 <- lm(swing_pct ~ spin, 
+                data = FF_2024_Data) 
+
+summary(spin_swing_pct_lm_2024)
+
+tidy_spin_swing_pct_2024 <- spin_swing_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "spin" = "spin_2024"))
+
+tidy_spin_swing_pct_2024
+
+```
+
+# Spin Rate & Swing Percentage Linear Models
+```{r}
+spin_swing_pct <- tidy_spin_swing_pct_2020 |> 
+  full_join(tidy_spin_swing_pct_2021) |> 
+  full_join(tidy_spin_swing_pct_2022) |> 
+  full_join(tidy_spin_swing_pct_2023) |> 
+  full_join(tidy_spin_swing_pct_2024)
+
+spin_swing_pct
+```
+
+# Intercepts Dataset
+```{r}
+spin_swing_pct_intercept <- spin_swing_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_swing_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+spin_swing_pct_slope <- spin_swing_pct |> 
+  filter(str_detect(term, "spin")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_swing_pct_slope
+```
+
+```{r}
+spin_swing_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each RPM Has on Swing Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing Percentage Per RPM") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Spin Rate and Swing and Miss Percentage
+
+# Linear Model For Swing & Miss Percentage and Spin Rate (2020)
+```{r}
+
+spin_swing_miss_lm_2020 <- lm(swing_and_miss_pct ~ spin, 
+                data = FF_2020_Data) 
+
+summary(spin_swing_miss_lm_2020)
+
+tidy_spin_swing_miss_2020 <- spin_swing_miss_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "spin" = "spin_2020"))
+
+tidy_spin_swing_miss_2020
+
+```
+
+# Linear Model For Swing & Miss and Spin Rate (2021)
+```{r}
+spin_swing_miss_lm_2021 <- lm(swing_and_miss_pct ~ spin, 
+                data = FF_2021_Data) 
+
+summary(spin_swing_miss_lm_2021)
+
+tidy_spin_swing_miss_2021 <- spin_swing_miss_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "spin" = "spin_2021"))
+
+tidy_spin_swing_miss_2021
+
+```
+
+# Linear Model For Swing & Miss and Spin Rate (2022)
+```{r}
+spin_swing_miss_lm_2022 <- lm(swing_and_miss_pct ~ spin, 
+                data = FF_2022_Data) 
+
+summary(spin_swing_miss_lm_2022)
+
+tidy_spin_swing_miss_2022 <- spin_swing_miss_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "spin" = "spin_2022"))
+
+tidy_spin_swing_miss_2022
+
+```
+
+# Linear Model For Swing & Miss and Spin Rate (2023)
+```{r}
+spin_swing_miss_lm_2023 <- lm(swing_and_miss_pct ~ spin, 
+                data = FF_2023_Data) 
+
+summary(spin_swing_miss_lm_2023)
+
+tidy_spin_swing_miss_2023 <- spin_swing_miss_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "spin" = "spin_2023"))
+
+tidy_spin_swing_miss_2023
+
+```
+
+# Linear Model For Swing & Miss and Spin Rate (2024)
+```{r}
+spin_swing_miss_lm_2024 <- lm(swing_and_miss_pct ~ spin, 
+                data = FF_2024_Data) 
+
+summary(spin_swing_miss_lm_2024)
+
+tidy_spin_swing_miss_2024 <- spin_swing_miss_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "spin" = "spin_2024"))
+
+tidy_spin_swing_miss_2024
+
+```
+
+# Combining all the Spin Rate and Swing & Miss Models For Each Season 
+```{r}
+spin_swing_miss <- tidy_spin_swing_miss_2020 |> 
+  full_join(tidy_spin_swing_miss_2021) |> 
+  full_join(tidy_spin_swing_miss_2022) |> 
+  full_join(tidy_spin_swing_miss_2023) |> 
+  full_join(tidy_spin_swing_miss_2024)
+
+spin_swing_miss
+```
+
+```{r}
+# Intercepts Dataset
+
+spin_swing_miss_intercept <- spin_swing_miss |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_swing_miss_intercept
+```
+
+```{r}
+# Slope Dataset
+
+spin_swing_miss_slope <- spin_swing_miss |> 
+  filter(str_detect(term, "spin")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_swing_miss_slope
+```
+
+# Slope Graph 
+
+```{r}
+spin_swing_miss_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each RPM Has on Swing & Miss Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing & Miss Percentage Per RPM") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Spin Rate and Whiff Percentage
+
+# Linear Model For Whiff Percentage and Spin Rate (2020)
+```{r}
+
+spin_whiff_pct_lm_2020 <- lm(whiff_pct ~ spin, 
+                data = FF_2020_Data) 
+
+summary(spin_whiff_pct_lm_2020)
+
+tidy_spin_whiff_pct_2020 <- spin_whiff_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "spin" = "spin_2020"))
+
+tidy_spin_whiff_pct_2020
+
+```
+
+# Linear Model For Whiff Percentage and Spin Rate (2021)
+```{r}
+spin_whiff_pct_lm_2021 <- lm(whiff_pct ~ spin, 
+                data = FF_2021_Data) 
+
+summary(spin_whiff_pct_lm_2021)
+
+tidy_spin_whiff_pct_2021 <- spin_whiff_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "spin" = "spin_2021"))
+
+tidy_spin_whiff_pct_2021
+
+```
+
+# Linear Model For Whiff Percentage and Spin Rate (2022)
+```{r}
+spin_whiff_pct_lm_2022 <- lm(whiff_pct ~ spin, 
+                data = FF_2022_Data) 
+
+summary(spin_whiff_pct_lm_2022)
+
+tidy_spin_whiff_pct_2022 <- spin_whiff_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "spin" = "spin_2022"))
+
+tidy_spin_whiff_pct_2022
+```
+
+# Linear Model For Whiff Percentage and Spin Rate (2023)
+```{r}
+spin_whiff_pct_lm_2023 <- lm(whiff_pct ~ spin, 
+                data = FF_2023_Data) 
+
+summary(spin_whiff_pct_lm_2023)
+
+tidy_spin_whiff_pct_2023 <- spin_whiff_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "spin" = "spin_2023"))
+
+tidy_spin_whiff_pct_2023
+
+```
+
+# Linear Model For Whiff Percentage and Spin Rate (2024)
+```{r}
+spin_whiff_pct_lm_2024 <- lm(whiff_pct ~ spin, 
+                data = FF_2024_Data) 
+
+summary(spin_whiff_pct_lm_2024)
+
+tidy_spin_whiff_pct_2024 <- spin_whiff_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "spin" = "spin_2024"))
+
+tidy_spin_whiff_pct_2024
+
+```
+
+# Combining all the Spin Rate and Whiff Percentage Models For Each Season 
+```{r}
+spin_whiff_pct <- tidy_spin_whiff_pct_2020 |> 
+  full_join(tidy_spin_whiff_pct_2021) |> 
+  full_join(tidy_spin_whiff_pct_2022) |> 
+  full_join(tidy_spin_whiff_pct_2023) |> 
+  full_join(tidy_spin_whiff_pct_2024)
+
+spin_whiff_pct
+```
+
+# Intercepts Dataset
+```{r}
+spin_whiff_pct_intercept <- spin_whiff_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_whiff_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+spin_whiff_pct_slope <- spin_whiff_pct |> 
+  filter(str_detect(term, "spin")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_whiff_pct_slope
+```
+
+# Slope Graph 
+
+```{r}
+spin_whiff_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each RPM Has on Whiff Percentage Each Season",
+       x = "Year",
+       y = "Change in Whiff Percentage Per RPM") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 17),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Spin Rate and xWOBA Percentage
+
+# Linear Model For xWOBA and Spin Rate (2020)
+```{r}
+
+spin_xwOBA_lm_2020 <- lm(xwOBA ~ spin, 
+                data = FF_2020_Data) 
+
+summary(spin_xwOBA_lm_2020)
+
+tidy_spin_xwOBA_2020 <- spin_xwOBA_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "spin" = "spin_2020"))
+
+tidy_spin_xwOBA_2020
+
+```
+
+# Linear Model For xWOBA and Spin Rate (2021)
+```{r}
+spin_xwOBA_lm_2021 <- lm(xwOBA ~ spin, 
+                data = FF_2021_Data) 
+
+summary(spin_xwOBA_lm_2021)
+
+tidy_spin_xwOBA_2021 <- spin_xwOBA_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "spin" = "spin_2021"))
+
+tidy_spin_xwOBA_2021
+```
+
+# Linear Model For xWOBA and Spin Rate (2022)
+```{r}
+spin_xwOBA_lm_2022 <- lm(xwOBA ~ spin, 
+                data = FF_2022_Data) 
+
+summary(spin_xwOBA_lm_2022)
+
+tidy_spin_xwOBA_2022 <- spin_xwOBA_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "spin" = "spin_2022"))
+
+tidy_spin_xwOBA_2022
+```
+
+# Linear Model For xWOBA and Spin Rate (2023)
+```{r}
+spin_xwOBA_lm_2023 <- lm(xwOBA ~ spin, 
+                data = FF_2023_Data) 
+
+summary(spin_xwOBA_lm_2023)
+
+tidy_spin_xwOBA_2023 <- spin_xwOBA_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "spin" = "spin_2023"))
+
+tidy_spin_xwOBA_2023
+
+```
+
+# Linear Model For xWOBA and Spin Rate (2024)
+```{r}
+spin_xwOBA_lm_2024 <- lm(xwOBA ~ spin, 
+                data = FF_2024_Data) 
+
+summary(spin_xwOBA_lm_2024)
+
+tidy_spin_xwOBA_2024 <- spin_xwOBA_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "spin" = "spin_2024"))
+
+tidy_spin_xwOBA_2024
+
+```
+
+# Combining all the Spin Rate and xwOBA Models For Each Season 
+```{r}
+spin_xwOBA <- tidy_spin_xwOBA_2020 |> 
+  full_join(tidy_spin_xwOBA_2021) |> 
+  full_join(tidy_spin_xwOBA_2022) |> 
+  full_join(tidy_spin_xwOBA_2023) |> 
+  full_join(tidy_spin_xwOBA_2024)
+
+spin_xwOBA
+```
+
+```{r}
+# Intercepts Dataset
+
+spin_xwOBA_intercept <- spin_xwOBA |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_xwOBA_intercept
+```
+
+```{r}
+# Slope Dataset
+
+spin_xwOBA_slope <- spin_xwOBA |> 
+  filter(str_detect(term, "spin")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+spin_xwOBA_slope
+```
+
+# Slope Graph 
+
+```{r}
+spin_xwOBA_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each RPM Has on Expected wOBA Each Season",
+       x = "Year",
+       y = "Change in Expected wOBA Per RPM") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Velocity and Stuff+
+
+# Linear Model For Stuff Plus and Velocity (2020)
+```{r}
+
+velocity_lm_2020 <- lm(stuff_plus ~ velocity, 
+                data = FF_2020_Data) 
+
+summary(velocity_lm_2020)
+
+tidy_velocity_2020 <- velocity_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "velocity" = "velocity_2020"))
+
+tidy_velocity_2020
+
+```
+
+# Linear Model For Stuff Plus and Velocity (2021)
+```{r}
+velocity_lm_2021 <- lm(stuff_plus ~ velocity, 
+                data = FF_2021_Data) 
+
+summary(velocity_lm_2021)
+
+tidy_velocity_2021 <- velocity_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "velocity" = "velocity_2021"))
+
+tidy_velocity_2021
+
+```
+
+# Linear Model For Stuff Plus and Velocity (2022)
+```{r}
+velocity_lm_2022 <- lm(stuff_plus ~ velocity, 
+                data = FF_2022_Data) 
+
+summary(velocity_lm_2022)
+
+tidy_velocity_2022 <- velocity_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "velocity" = "velocity_2022"))
+
+tidy_velocity_2022
+
+
+```
+
+# Linear Model For Stuff Plus and Velocity (2023)
+```{r}
+velocity_lm_2023 <- lm(stuff_plus ~ velocity, 
+                data = FF_2023_Data) 
+
+summary(velocity_lm_2023)
+
+tidy_velocity_2023 <- velocity_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "velocity" = "velocity_2023"))
+
+tidy_velocity_2023
+
+```
+
+# Linear Model For Stuff Plus and Velocity (2024)
+```{r}
+velocity_lm_2024 <- lm(stuff_plus ~ velocity, 
+                data = FF_2024_Data) 
+
+summary(velocity_lm_2024)
+
+tidy_velocity_2024 <- velocity_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "velocity" = "velocity_2024"))
+
+tidy_velocity_2024
+
+```
+
+# Combining Each Seasons Model
+```{r}
+velocity <- tidy_velocity_2020 |> 
+  full_join(tidy_velocity_2021) |> 
+  full_join(tidy_velocity_2022) |> 
+  full_join(tidy_velocity_2023) |> 
+  full_join(tidy_velocity_2024)
+
+velocity
+```
+
+# Intercepts Dataset
+```{r}
+velocity_intercept <- velocity |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_intercept
+```
+
+# Slope Dataset
+```{r}
+velocity_slope <- velocity |> 
+  filter(str_detect(term, "velocity")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_slope
+```
+
+# Slope Graph  
+
+```{r}
+velocity_slope |> 
+ggplot() +
+  geom_line(aes(x = term, y = estimate), size = 1, group = 1, color = "red") +
+  geom_point(aes(x = term, y = estimate), color = "black", size = 2) +
+  labs(title = "Impact Each Additional MPH Has on Stuff+ Each Season",
+       x = "Year",
+       y = "Change in Stuff+ Per MPH") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Velocity and Run Value
+
+# Linear Model For Run Value and Velocity (2020)
+```{r}
+velocity_rv_lm_2020 <- lm(run_value_per100 ~ velocity,
+                data = FF_2020_Data) 
+
+summary(velocity_rv_lm_2020)
+
+tidy_velocity_rv_2020 <- velocity_rv_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "velocity" = "velocity_2020"))
+
+tidy_velocity_rv_2020
+```
+
+# Linear Model For Run Value and Velocity (2021)
+```{r}
+velocity_rv_lm_2021 <- lm(run_value_per100 ~ velocity,
+                data = FF_2021_Data) 
+
+summary(velocity_rv_lm_2021)
+
+tidy_velocity_rv_2021 <- velocity_rv_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "velocity" = "velocity_2021"))
+
+tidy_velocity_rv_2021
+```
+
+# Linear Model For Run Value and Velocity (2022)
+```{r}
+velocity_rv_lm_2022 <- lm(run_value_per100 ~ velocity,
+                data = FF_2022_Data) 
+
+summary(velocity_rv_lm_2022)
+
+tidy_velocity_rv_2022 <- velocity_rv_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "velocity" = "velocity_2022"))
+
+tidy_velocity_rv_2022
+```
+
+# Linear Model For Run Value and Velocity (2023)
+```{r}
+velocity_rv_lm_2023 <- lm(run_value_per100 ~ velocity,
+                data = FF_2023_Data) 
+
+summary(velocity_rv_lm_2023)
+
+tidy_velocity_rv_2023 <- velocity_rv_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "velocity" = "velocity_2023"))
+
+tidy_velocity_rv_2023
+
+```
+
+# Linear Model For Run Value and Velocity (2024)
+```{r}
+velocity_rv_lm_2024 <- lm(run_value_per100 ~ velocity,
+                data = FF_2024_Data) 
+
+summary(velocity_rv_lm_2024)
+
+tidy_velocity_rv_2024 <- velocity_rv_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "velocity" = "velocity_2024"))
+
+tidy_velocity_rv_2024
+```
+
+# Combining all the Velocity and Run Value Models For Each Season 
+```{r}
+velocity_rv <- tidy_velocity_rv_2020 |> 
+  full_join(tidy_velocity_rv_2021) |> 
+  full_join(tidy_velocity_rv_2022) |> 
+  full_join(tidy_velocity_rv_2023) |> 
+  full_join(tidy_velocity_rv_2024)
+
+velocity_rv
+```
+
+# Intercepts Dataset
+```{r}
+velocity_rv_intercept <- velocity_rv |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_rv_intercept
+```
+
+# Slope Dataset
+```{r}
+
+velocity_rv_slope <- velocity_rv |> 
+  filter(str_detect(term, "velocity")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_rv_slope
+```
+
+# Slope Graph 
+```{r}
+velocity_rv_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional MPH Has on Run Value Each Season",
+       x = "Year",
+       y = "Change in RV Per 100 Pitches Per MPH") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Velocity and Swing Rate
+
+# Linear Model For Swing Percentage and Velocity (2020)
+```{r}
+velocity_swing_pct_lm_2020 <- lm(swing_pct ~ velocity, 
+                data = FF_2020_Data) 
+
+summary(velocity_swing_pct_lm_2020)
+
+tidy_velocity_swing_pct_2020 <- velocity_swing_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "velocity" = "velocity_2020"))
+
+tidy_velocity_swing_pct_2020
+```
+
+# Linear Model For Swing Percentage and Velocity (2021)
+```{r}
+velocity_swing_pct_lm_2021 <- lm(swing_pct ~ velocity, 
+                data = FF_2021_Data) 
+
+summary(velocity_swing_pct_lm_2021)
+
+tidy_velocity_swing_pct_2021 <- velocity_swing_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "velocity" = "velocity_2021"))
+
+tidy_velocity_swing_pct_2021
+```
+
+# Linear Model For Swing Percentage and Velocity (2022)
+```{r}
+velocity_swing_pct_lm_2022 <- lm(swing_pct ~ velocity, 
+                data = FF_2022_Data) 
+
+summary(velocity_swing_pct_lm_2022)
+
+tidy_velocity_swing_pct_2022 <- velocity_swing_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "velocity" = "velocity_2022"))
+
+tidy_velocity_swing_pct_2022
+```
+
+# Linear Model For Swing Percentage and Velocity (2023)
+```{r}
+velocity_swing_pct_lm_2023 <- lm(swing_pct ~ velocity, 
+                data = FF_2023_Data) 
+
+summary(velocity_swing_pct_lm_2023)
+
+tidy_velocity_swing_pct_2023 <- velocity_swing_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "velocity" = "velocity_2023"))
+
+tidy_velocity_swing_pct_2023
+```
+
+# Linear Model For Swing Percentage and Velocity (2024)
+```{r}
+velocity_swing_pct_lm_2024 <- lm(swing_pct ~ velocity, 
+                data = FF_2024_Data) 
+
+summary(velocity_swing_pct_lm_2024)
+
+tidy_velocity_swing_pct_2024 <- velocity_swing_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "velocity" = "velocity_2024"))
+
+tidy_velocity_swing_pct_2024
+```
+
+# Velocity & Swing Percentage Linear Models
+```{r}
+velocity_swing_pct <- tidy_velocity_swing_pct_2020 |> 
+  full_join(tidy_velocity_swing_pct_2021) |> 
+  full_join(tidy_velocity_swing_pct_2022) |> 
+  full_join(tidy_velocity_swing_pct_2023) |> 
+  full_join(tidy_velocity_swing_pct_2024)
+
+velocity_swing_pct
+```
+
+# Intercepts Dataset
+```{r}
+velocity_swing_pct_intercept <- velocity_swing_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_swing_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+
+velocity_swing_pct_slope <- velocity_swing_pct |> 
+  filter(str_detect(term, "velocity")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_swing_pct_slope
+```
+
+# Slope Graph
+```{r}
+velocity_swing_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each MPH Has on Swing Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing Percentage Per Additional MPH") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Velocity and Swing and Miss Percentage
+
+# Linear Model For Swing & Miss Percentage and Velocity (2020)
+```{r}
+
+velocity_swing_miss_lm_2020 <- lm(swing_and_miss_pct ~ velocity, 
+                data = FF_2020_Data) 
+
+summary(velocity_swing_miss_lm_2020)
+
+tidy_velocity_swing_miss_2020 <- velocity_swing_miss_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "velocity" = "velocity_2020"))
+
+tidy_velocity_swing_miss_2020
+
+```
+
+# Linear Model For Swing & Miss and Velocity (2021)
+```{r}
+velocity_swing_miss_lm_2021 <- lm(swing_and_miss_pct ~ velocity, 
+                data = FF_2021_Data) 
+
+summary(velocity_swing_miss_lm_2021)
+
+tidy_velocity_swing_miss_2021 <- velocity_swing_miss_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "velocity" = "velocity_2021"))
+
+tidy_velocity_swing_miss_2021
+```
+
+# Linear Model For Swing & Miss and Velocity (2022)
+```{r}
+velocity_swing_miss_lm_2022 <- lm(swing_and_miss_pct ~ velocity, 
+                data = FF_2022_Data) 
+
+summary(velocity_swing_miss_lm_2022)
+
+tidy_velocity_swing_miss_2022 <- velocity_swing_miss_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "velocity" = "velocity_2022"))
+
+tidy_velocity_swing_miss_2022
+```
+
+# Linear Model For Swing & Miss and Velocity (2023)
+```{r}
+velocity_swing_miss_lm_2023 <- lm(swing_and_miss_pct ~ velocity, 
+                data = FF_2023_Data) 
+
+summary(velocity_swing_miss_lm_2023)
+
+tidy_velocity_swing_miss_2023 <- velocity_swing_miss_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "velocity" = "velocity_2023"))
+
+tidy_velocity_swing_miss_2023
+```
+
+# Linear Model For Swing & Miss and Velocity (2024)
+```{r}
+velocity_swing_miss_lm_2024 <- lm(swing_and_miss_pct ~ velocity, 
+                data = FF_2024_Data) 
+
+summary(velocity_swing_miss_lm_2024)
+
+tidy_velocity_swing_miss_2024 <- velocity_swing_miss_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "velocity" = "velocity_2024"))
+
+tidy_velocity_swing_miss_2024
+```
+
+# Combining all the Velocity and Swing & Miss Models For Each Season 
+```{r}
+velocity_swing_miss <- tidy_velocity_swing_miss_2020 |> 
+  full_join(tidy_velocity_swing_miss_2021) |> 
+  full_join(tidy_velocity_swing_miss_2022) |> 
+  full_join(tidy_velocity_swing_miss_2023) |> 
+  full_join(tidy_velocity_swing_miss_2024)
+
+velocity_swing_miss
+```
+
+# Intercepts Dataset
+```{r}
+velocity_swing_miss_intercept <- velocity_swing_miss |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_swing_miss_intercept
+```
+
+# Slope Dataset
+```{r}
+velocity_swing_miss_slope <- velocity_swing_miss |> 
+  filter(str_detect(term, "velocity")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_swing_miss_slope
+```
+
+# Slope Graph 
+```{r}
+velocity_swing_miss_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional MPH Has on Swing & Miss Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing & Miss Percentage Each Additional MPH") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Velocity and Whiff Percentage
+
+# Linear Model For Whiff Percentage and Velocity (2020)
+```{r}
+velocity_whiff_pct_lm_2020 <- lm(whiff_pct ~ velocity, 
+                data = FF_2020_Data) 
+
+summary(velocity_whiff_pct_lm_2020)
+
+tidy_velocity_whiff_pct_2020 <- velocity_whiff_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "velocity" = "velocity_2020"))
+
+tidy_velocity_whiff_pct_2020
+```
+
+# Linear Model For Whiff Percentage and Velocity (2021)
+```{r}
+velocity_whiff_pct_lm_2021 <- lm(whiff_pct ~ velocity, 
+                data = FF_2021_Data) 
+
+summary(velocity_whiff_pct_lm_2021)
+
+tidy_velocity_whiff_pct_2021 <- velocity_whiff_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "velocity" = "velocity_2021"))
+
+tidy_velocity_whiff_pct_2021
+```
+
+# Linear Model For Whiff Percentage and Velocity (2022)
+```{r}
+velocity_whiff_pct_lm_2022 <- lm(whiff_pct ~ velocity, 
+                data = FF_2022_Data) 
+
+summary(velocity_whiff_pct_lm_2022)
+
+tidy_velocity_whiff_pct_2022 <- velocity_whiff_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "velocity" = "velocity_2022"))
+
+tidy_velocity_whiff_pct_2022
+```
+
+# Linear Model For Whiff Percentage and Velocity (2023)
+```{r}
+velocity_whiff_pct_lm_2023 <- lm(whiff_pct ~ velocity, 
+                data = FF_2023_Data) 
+
+summary(velocity_whiff_pct_lm_2023)
+
+tidy_velocity_whiff_pct_2023 <- velocity_whiff_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "velocity" = "velocity_2023"))
+
+tidy_velocity_whiff_pct_2023
+```
+
+# Linear Model For Whiff Percentage and Velocity (2024)
+```{r}
+velocity_whiff_pct_lm_2024 <- lm(whiff_pct ~ velocity, 
+                data = FF_2024_Data) 
+
+summary(velocity_whiff_pct_lm_2024)
+
+tidy_velocity_whiff_pct_2024 <- velocity_whiff_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "velocity" = "velocity_2024"))
+
+tidy_velocity_whiff_pct_2024
+```
+
+# Combining all the Velocity and Whiff Percentage Models For Each Season 
+```{r}
+velocity_whiff_pct <- tidy_velocity_whiff_pct_2020 |> 
+  full_join(tidy_velocity_whiff_pct_2021) |> 
+  full_join(tidy_velocity_whiff_pct_2022) |> 
+  full_join(tidy_velocity_whiff_pct_2023) |> 
+  full_join(tidy_velocity_whiff_pct_2024)
+
+velocity_whiff_pct
+```
+
+# Intercepts Dataset
+```{r}
+velocity_whiff_pct_intercept <- velocity_whiff_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_whiff_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+velocity_whiff_pct_slope <- velocity_whiff_pct |> 
+  filter(str_detect(term, "velocity")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_whiff_pct_slope
+```
+
+# Slope Graph 
+```{r}
+velocity_whiff_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional MPH Has on Whiff Percentage Each Season",
+       x = "Year",
+       y = "Change in Whiff Percentage Each Additional MPH") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Velocity and xWOBA Percentage
+
+# Linear Model For xWOBA and Velocity (2020)
+```{r}
+velocity_xwOBA_lm_2020 <- lm(xwOBA ~ velocity, 
+                data = FF_2020_Data) 
+
+summary(velocity_xwOBA_lm_2020)
+
+tidy_velocity_xwOBA_2020 <- velocity_xwOBA_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "velocity" = "velocity_2020"))
+
+tidy_velocity_xwOBA_2020
+```
+
+# Linear Model For xWOBA and Velocity (2021)
+```{r}
+velocity_xwOBA_lm_2021 <- lm(xwOBA ~ velocity, 
+                data = FF_2021_Data) 
+
+summary(velocity_xwOBA_lm_2021)
+
+tidy_velocity_xwOBA_2021 <- velocity_xwOBA_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "velocity" = "velocity_2021"))
+
+tidy_velocity_xwOBA_2021
+```
+
+# Linear Model For xWOBA and Velocity (2022)
+```{r}
+velocity_xwOBA_lm_2022 <- lm(xwOBA ~ velocity, 
+                data = FF_2022_Data) 
+
+summary(velocity_xwOBA_lm_2022)
+
+tidy_velocity_xwOBA_2022 <- velocity_xwOBA_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "velocity" = "velocity_2022"))
+
+tidy_velocity_xwOBA_2022
+```
+
+# Linear Model For xWOBA and Velocity (2023)
+```{r}
+velocity_xwOBA_lm_2023 <- lm(xwOBA ~ velocity, 
+                data = FF_2023_Data) 
+
+summary(velocity_xwOBA_lm_2023)
+
+tidy_velocity_xwOBA_2023 <- velocity_xwOBA_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "velocity" = "velocity_2023"))
+
+tidy_velocity_xwOBA_2023
+```
+
+# Linear Model For xWOBA and Velocity (2024)
+```{r}
+velocity_xwOBA_lm_2024 <- lm(xwOBA ~ velocity, 
+                data = FF_2024_Data) 
+
+summary(velocity_xwOBA_lm_2024)
+
+tidy_velocity_xwOBA_2024 <- velocity_xwOBA_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "velocity" = "velocity_2024"))
+
+tidy_velocity_xwOBA_2024
+```
+
+# Combining all the Velocity and xwOBA Models For Each Season 
+```{r}
+velocity_xwOBA <- tidy_velocity_xwOBA_2020 |> 
+  full_join(tidy_velocity_xwOBA_2021) |> 
+  full_join(tidy_velocity_xwOBA_2022) |> 
+  full_join(tidy_velocity_xwOBA_2023) |> 
+  full_join(tidy_velocity_xwOBA_2024)
+
+velocity_xwOBA
+```
+
+# Intercepts Dataset
+```{r}
+velocity_xwOBA_intercept <- velocity_xwOBA |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_xwOBA_intercept
+```
+
+# Slope Dataset
+```{r}
+velocity_xwOBA_slope <- velocity_xwOBA |> 
+  filter(str_detect(term, "velocity")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+velocity_xwOBA_slope
+```
+
+# Slope Graph 
+```{r}
+velocity_xwOBA_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional MPH Has on Expected wOBA Each Season",
+       x = "Year",
+       y = "Change in Expected wOBA Each Additional MPH") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Extension and Stuff+
+
+# Linear Model For Stuff Plus and Extension (2020)
+```{r}
+extension_lm_2020 <- lm(stuff_plus ~ extension, 
+                data = FF_2020_Data) 
+
+summary(extension_lm_2020)
+
+tidy_extension_2020 <- extension_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "extension" = "extension_2020"))
+
+tidy_extension_2020
+```
+
+# Linear Model For Stuff Plus and Extension (2021)
+```{r}
+extension_lm_2021 <- lm(stuff_plus ~ extension, 
+                data = FF_2021_Data) 
+
+summary(extension_lm_2021)
+
+tidy_extension_2021 <- extension_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "extension" = "extension_2021"))
+
+tidy_extension_2021
+```
+
+# Linear Model For Stuff Plus and Extension (2022)
+```{r}
+extension_lm_2022 <- lm(stuff_plus ~ extension, 
+                data = FF_2022_Data) 
+
+summary(extension_lm_2022)
+
+tidy_extension_2022 <- extension_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "extension" = "extension_2022"))
+
+tidy_extension_2022
+```
+
+# Linear Model For Stuff Plus and Extension (2023)
+```{r}
+extension_lm_2023 <- lm(stuff_plus ~ extension, 
+                data = FF_2023_Data) 
+
+summary(extension_lm_2023)
+
+tidy_extension_2023 <- extension_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "extension" = "extension_2023"))
+
+tidy_extension_2023
+```
+
+# Linear Model For Stuff Plus and Extension (2024)
+```{r}
+extension_lm_2024 <- lm(stuff_plus ~ extension, 
+                data = FF_2024_Data) 
+
+summary(extension_lm_2024)
+
+tidy_extension_2024 <- extension_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "extension" = "extension_2024"))
+
+tidy_extension_2024
+```
+
+# Combining Each Seasons Model
+```{r}
+extension <- tidy_extension_2020 |> 
+  full_join(tidy_extension_2021) |> 
+  full_join(tidy_extension_2022) |> 
+  full_join(tidy_extension_2023) |> 
+  full_join(tidy_extension_2024)
+
+extension
+```
+
+# Intercepts Dataset
+```{r}
+extension_intercept <- extension |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_intercept
+```
+
+# Slope Dataset
+```{r}
+extension_slope <- extension |> 
+  filter(str_detect(term, "extension")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_slope
+```
+
+# Slope Graph  
+```{r}
+extension_slope |> 
+ggplot() +
+  geom_line(aes(x = term, y = estimate), size = 1, group = 1, color = "red") +
+  geom_point(aes(x = term, y = estimate), color = "black", size = 2) +
+  labs(title = "Impact Each Additional Foot Strided on Stuff+ Each Season",
+       x = "Year",
+       y = "Change in Stuff+ Per Foot Strided") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Extension and Run Value
+
+# Linear Model For Run Value and Extension (2020)
+```{r}
+extension_rv_lm_2020 <- lm(run_value_per100 ~ extension,
+                data = FF_2020_Data) 
+
+summary(extension_rv_lm_2020)
+
+tidy_extension_rv_2020 <- extension_rv_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "extension" = "extension_2020"))
+
+tidy_extension_rv_2020
+```
+
+# Linear Model For Run Value and Extension (2021)
+```{r}
+extension_rv_lm_2021 <- lm(run_value_per100 ~ extension,
+                data = FF_2021_Data) 
+
+summary(extension_rv_lm_2021)
+
+tidy_extension_rv_2021 <- extension_rv_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "extension" = "extension_2021"))
+
+tidy_extension_rv_2021
+```
+
+# Linear Model For Run Value and Extension (2022)
+```{r}
+extension_rv_lm_2022 <- lm(run_value_per100 ~ extension,
+                data = FF_2022_Data) 
+
+summary(extension_rv_lm_2022)
+
+tidy_extension_rv_2022 <- extension_rv_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "extension" = "extension_2022"))
+
+tidy_extension_rv_2022
+```
+
+# Linear Model For Run Value and Extension (2023)
+```{r}
+extension_rv_lm_2023 <- lm(run_value_per100 ~ extension,
+                data = FF_2023_Data) 
+
+summary(extension_rv_lm_2023)
+
+tidy_extension_rv_2023 <- extension_rv_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "extension" = "extension_2023"))
+
+tidy_extension_rv_2023
+```
+
+# Linear Model For Run Value and Extension (2024)
+```{r}
+extension_rv_lm_2024 <- lm(run_value_per100 ~ extension,
+                data = FF_2024_Data) 
+
+summary(extension_rv_lm_2024)
+
+tidy_extension_rv_2024 <- extension_rv_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "extension" = "extension_2024"))
+
+tidy_extension_rv_2024
+```
+
+# Combining all the Extension and Run Value Models For Each Season 
+```{r}
+extension_rv <- tidy_extension_rv_2020 |> 
+  full_join(tidy_extension_rv_2021) |> 
+  full_join(tidy_extension_rv_2022) |> 
+  full_join(tidy_extension_rv_2023) |> 
+  full_join(tidy_extension_rv_2024)
+```
+
+# Intercepts Dataset
+```{r}
+extension_rv_intercept <- extension_rv |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_rv_intercept
+```
+
+# Slope Dataset
+```{r}
+extension_rv_slope <- extension_rv |> 
+  filter(str_detect(term, "extension")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_rv_slope
+```
+
+# Slope Graph 
+```{r}
+extension_rv_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional Foot Strided Has on Run Value Each Season",
+       x = "Year",
+       y = "Change in RV Per 100 Pitches Per Foot Strided") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Extension and Swing Percentage
+
+# Linear Model For Swing Percentage and Extension (2020)
+```{r}
+extension_swing_pct_lm_2020 <- lm(swing_pct ~ extension, 
+                data = FF_2020_Data) 
+
+summary(extension_swing_pct_lm_2020)
+
+tidy_extension_swing_pct_2020 <- extension_swing_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "extension" = "extension_2020"))
+
+tidy_extension_swing_pct_2020
+```
+
+# Linear Model For Swing Percentage and Extension (2021)
+```{r}
+extension_swing_pct_lm_2021 <- lm(swing_pct ~ extension, 
+                data = FF_2021_Data) 
+
+summary(extension_swing_pct_lm_2021)
+
+tidy_extension_swing_pct_2021 <- extension_swing_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "extension" = "extension_2021"))
+
+tidy_extension_swing_pct_2021
+```
+
+# Linear Model For Swing Percentage and Extension (2022)
+```{r}
+extension_swing_pct_lm_2022 <- lm(swing_pct ~ extension, 
+                data = FF_2022_Data) 
+
+summary(extension_swing_pct_lm_2022)
+
+tidy_extension_swing_pct_2022 <- extension_swing_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "extension" = "extension_2022"))
+
+tidy_extension_swing_pct_2022
+```
+
+# Linear Model For Swing Percentage and Extension (2023)
+```{r}
+extension_swing_pct_lm_2023 <- lm(swing_pct ~ extension, 
+                data = FF_2023_Data) 
+
+summary(extension_swing_pct_lm_2023)
+
+tidy_extension_swing_pct_2023 <- extension_swing_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "extension" = "extension_2023"))
+
+tidy_extension_swing_pct_2023
+```
+
+# Linear Model For Swing Percentage and Extension (2024)
+```{r}
+extension_swing_pct_lm_2024 <- lm(swing_pct ~ extension, 
+                data = FF_2024_Data) 
+
+summary(extension_swing_pct_lm_2024)
+
+tidy_extension_swing_pct_2024 <- extension_swing_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "extension" = "extension_2024"))
+
+tidy_extension_swing_pct_2024
+```
+
+# Extension & Swing Percentage Linear Models
+```{r}
+extension_swing_pct <- tidy_extension_swing_pct_2020 |> 
+  full_join(tidy_extension_swing_pct_2021) |> 
+  full_join(tidy_extension_swing_pct_2022) |> 
+  full_join(tidy_extension_swing_pct_2023) |> 
+  full_join(tidy_extension_swing_pct_2024)
+
+extension_swing_pct
+```
+
+# Intercepts Dataset
+```{r}
+extension_swing_pct_intercept <- extension_swing_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_swing_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+extension_swing_pct_slope <- extension_swing_pct |> 
+  filter(str_detect(term, "extension")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_swing_pct_slope
+```
+
+# Slope Graph
+```{r}
+extension_swing_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional Foot Strided Has on Swing Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing Percentage Per Additional Foot Strided") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Extension and Swing and Miss Percentage
+
+# Linear Model For Swing & Miss Percentage and Extension (2020)
+```{r}
+extension_swing_miss_lm_2020 <- lm(swing_and_miss_pct ~ extension, 
+                data = FF_2020_Data) 
+
+summary(extension_swing_miss_lm_2020)
+
+tidy_extension_swing_miss_2020 <- extension_swing_miss_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "extension" = "extension_2020"))
+
+tidy_extension_swing_miss_2020
+```
+
+# Linear Model For Swing & Miss and Extension (2021)
+```{r}
+extension_swing_miss_lm_2021 <- lm(swing_and_miss_pct ~ extension, 
+                data = FF_2021_Data) 
+
+summary(extension_swing_miss_lm_2021)
+
+tidy_extension_swing_miss_2021 <- extension_swing_miss_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "extension" = "extension_2021"))
+
+tidy_extension_swing_miss_2021
+```
+
+# Linear Model For Swing & Miss and Extension (2022)
+```{r}
+extension_swing_miss_lm_2022 <- lm(swing_and_miss_pct ~ extension, 
+                data = FF_2022_Data) 
+
+summary(extension_swing_miss_lm_2022)
+
+tidy_extension_swing_miss_2022 <- extension_swing_miss_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "extension" = "extension_2022"))
+
+tidy_extension_swing_miss_2022
+```
+
+# Linear Model For Swing & Miss and Extension (2023)
+```{r}
+extension_swing_miss_lm_2023 <- lm(swing_and_miss_pct ~ extension, 
+                data = FF_2023_Data) 
+
+summary(extension_swing_miss_lm_2023)
+
+tidy_extension_swing_miss_2023 <- extension_swing_miss_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "extension" = "extension_2023"))
+
+tidy_extension_swing_miss_2023
+```
+
+# Linear Model For Swing & Miss and Extension (2024)
+```{r}
+extension_swing_miss_lm_2024 <- lm(swing_and_miss_pct ~ extension, 
+                data = FF_2024_Data) 
+
+summary(extension_swing_miss_lm_2024)
+
+tidy_extension_swing_miss_2024 <- extension_swing_miss_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "extension" = "extension_2024"))
+
+tidy_extension_swing_miss_2024
+```
+
+# Combining all the Extension and Swing & Miss Models For Each Season 
+```{r}
+extension_swing_miss <- tidy_extension_swing_miss_2020 |> 
+  full_join(tidy_extension_swing_miss_2021) |> 
+  full_join(tidy_extension_swing_miss_2022) |> 
+  full_join(tidy_extension_swing_miss_2023) |> 
+  full_join(tidy_extension_swing_miss_2024)
+
+extension_swing_miss
+```
+
+# Intercepts Dataset
+```{r}
+extension_swing_miss_intercept <- extension_swing_miss |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_swing_miss_intercept
+```
+
+# Slope Dataset
+```{r}
+extension_swing_miss_slope <- extension_swing_miss |> 
+  filter(str_detect(term, "extension")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_swing_miss_slope
+```
+
+# Slope Graph 
+```{r}
+extension_swing_miss_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional Foot Strided Has on Swing & Miss Percentage Each Season",
+       x = "Year",
+       y = "Change in Swing & Miss Percentage Per Additional Foot Strided") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 8),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Extension and Whiff Percentage
+
+# Linear Model For Whiff Percentage and Extension (2020)
+```{r}
+extension_whiff_pct_lm_2020 <- lm(whiff_pct ~ extension, 
+                data = FF_2020_Data) 
+
+summary(extension_whiff_pct_lm_2020)
+
+tidy_extension_whiff_pct_2020 <- extension_whiff_pct_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "extension" = "extension_2020"))
+
+tidy_extension_whiff_pct_2020
+```
+
+# Linear Model For Whiff Percentage and Extension (2021)
+```{r}
+extension_whiff_pct_lm_2021 <- lm(whiff_pct ~ extension, 
+                data = FF_2021_Data) 
+
+summary(extension_whiff_pct_lm_2021)
+
+tidy_extension_whiff_pct_2021 <- extension_whiff_pct_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "extension" = "extension_2021"))
+
+tidy_extension_whiff_pct_2021
+```
+
+# Linear Model For Whiff Percentage and Extension (2022)
+```{r}
+extension_whiff_pct_lm_2022 <- lm(whiff_pct ~ extension, 
+                data = FF_2022_Data) 
+
+summary(extension_whiff_pct_lm_2022)
+
+tidy_extension_whiff_pct_2022 <- extension_whiff_pct_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "extension" = "extension_2022"))
+
+tidy_extension_whiff_pct_2022
+```
+
+# Linear Model For Whiff Percentage and Extension (2023)
+```{r}
+extension_whiff_pct_lm_2023 <- lm(whiff_pct ~ extension, 
+                data = FF_2023_Data) 
+
+summary(extension_whiff_pct_lm_2023)
+
+tidy_extension_whiff_pct_2023 <- extension_whiff_pct_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "extension" = "extension_2023"))
+
+tidy_extension_whiff_pct_2023
+```
+
+# Linear Model For Whiff Percentage and Extension (2024)
+```{r}
+extension_whiff_pct_lm_2024 <- lm(whiff_pct ~ extension, 
+                data = FF_2024_Data) 
+
+summary(extension_whiff_pct_lm_2024)
+
+tidy_extension_whiff_pct_2024 <- extension_whiff_pct_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "extension" = "extension_2024"))
+
+tidy_extension_whiff_pct_2024
+```
+
+# Combining all the Extension and Whiff Percentage Models For Each Season 
+```{r}
+extension_whiff_pct <- tidy_extension_whiff_pct_2020 |> 
+  full_join(tidy_extension_whiff_pct_2021) |> 
+  full_join(tidy_extension_whiff_pct_2022) |> 
+  full_join(tidy_extension_whiff_pct_2023) |> 
+  full_join(tidy_extension_whiff_pct_2024)
+
+extension_whiff_pct
+```
+
+# Intercepts Dataset
+```{r}
+extension_whiff_pct_intercept <- extension_whiff_pct |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_whiff_pct_intercept
+```
+
+# Slope Dataset
+```{r}
+extension_whiff_pct_slope <- extension_whiff_pct |> 
+  filter(str_detect(term, "extension")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_whiff_pct_slope
+```
+
+# Slope Graph 
+```{r}
+extension_whiff_pct_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Additional Foot Strided Has on Whiff Percentage Each Season",
+       x = "Year",
+       y = "Change in Whiff Percentage Per Additional Foot Strided") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```
+
+
+### Extension and xWOBA Percentage
+
+# Linear Model For xWOBA and Extension (2020)
+```{r}
+extension_xwOBA_lm_2020 <- lm(xwOBA ~ extension, 
+                data = FF_2020_Data) 
+
+summary(extension_xwOBA_lm_2020)
+
+tidy_extension_xwOBA_2020 <- extension_xwOBA_lm_2020 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2020", "extension" = "extension_2020"))
+
+tidy_extension_xwOBA_2020
+```
+
+# Linear Model For xWOBA and Extension (2021)
+```{r}
+extension_xwOBA_lm_2021 <- lm(xwOBA ~ extension, 
+                data = FF_2021_Data) 
+
+summary(extension_xwOBA_lm_2021)
+
+tidy_extension_xwOBA_2021 <- extension_xwOBA_lm_2021 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2021", "extension" = "extension_2021"))
+
+tidy_extension_xwOBA_2021
+```
+
+# Linear Model For xWOBA and Extension (2022)
+```{r}
+extension_xwOBA_lm_2022 <- lm(xwOBA ~ extension, 
+                data = FF_2022_Data) 
+
+summary(extension_xwOBA_lm_2022)
+
+tidy_extension_xwOBA_2022 <- extension_xwOBA_lm_2022 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2022", "extension" = "extension_2022"))
+
+tidy_extension_xwOBA_2022
+```
+
+# Linear Model For xWOBA and Extension (2023)
+```{r}
+extension_xwOBA_lm_2023 <- lm(xwOBA ~ extension, 
+                data = FF_2023_Data) 
+
+summary(extension_xwOBA_lm_2023)
+
+tidy_extension_xwOBA_2023 <- extension_xwOBA_lm_2023 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2023", "extension" = "extension_2023"))
+
+tidy_extension_xwOBA_2023
+```
+
+# Linear Model For xWOBA and Extension (2024)
+```{r}
+extension_xwOBA_lm_2024 <- lm(xwOBA ~ extension, 
+                data = FF_2024_Data) 
+
+summary(extension_xwOBA_lm_2024)
+
+tidy_extension_xwOBA_2024 <- extension_xwOBA_lm_2024 |> 
+  tidy() |> 
+  mutate(term = recode(term, "(Intercept)" = "(Intercept)_2024", "extension" = "extension_2024"))
+
+tidy_extension_xwOBA_2024
+```
+
+# Combining all the Extension and xwOBA Models For Each Season 
+```{r}
+extension_xwOBA <- tidy_extension_xwOBA_2020 |> 
+  full_join(tidy_extension_xwOBA_2021) |> 
+  full_join(tidy_extension_xwOBA_2022) |> 
+  full_join(tidy_extension_xwOBA_2023) |> 
+  full_join(tidy_extension_xwOBA_2024)
+
+extension_xwOBA
+```
+
+# Intercepts Dataset
+```{r}
+extension_xwOBA_intercept <- extension_xwOBA |> 
+  filter(str_detect(term, "Intercept")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_xwOBA_intercept
+```
+
+# Slope Dataset
+```{r}
+extension_xwOBA_slope <- extension_xwOBA |> 
+  filter(str_detect(term, "extension")) |> 
+  mutate(term = str_extract(term, "\\d{4}"))
+
+extension_xwOBA_slope
+```
+
+# Slope Graph 
+```{r}
+extension_xwOBA_slope |> 
+  ggplot(aes(x = term, y = estimate)) +
+  geom_line(size = 1, group = 1, color = "red") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "Impact Each Foot Strided Has on Expected wOBA Each Season",
+       x = "Year",
+       y = "Change in Expected wOBA Per Foot Strided") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+        axis.title.x = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 9),
+        axis.text.y = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold", size = 10))
+```

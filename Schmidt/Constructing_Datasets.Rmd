@@ -366,3 +366,48 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2,
 Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
 
 ```
+
+### Adding Run Value To Liam's Dataset
+
+```{r}
+MLB_Pitching_Stats <- read.csv("mlb_pitching_stats_2020-24.csv")
+
+```
+
+# Calculating Aggregated Run Value
+```{r}
+
+Aggregated_RV <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_name) |> 
+  summarize(
+    total_delta_run_exp = sum(delta_run_exp, na.rm = TRUE),  # Sum of delta_run_exp for each pitch type
+    count = n(),  # Count of pitches for each pitch type
+   run_value_per100 = -(total_delta_run_exp / count) * 100  # Normalized and scaled by 100 
+                          ) |> 
+  ungroup() |> 
+  select(-total_delta_run_exp, -count)
+
+```
+
+# Calculating Average Velocity
+```{r}
+Avg_Velocity <- Statcast_Combined_Pitches |> 
+  group_by(pitcher, year, pitch_name) |>
+  summarise(velocity = mean(release_speed, na.rm = TRUE)) |> 
+  ungroup()
+```
+
+# Adding Aggregated Run Value To Original Dataset
+```{r}
+MLB_Pitching_Stats <- MLB_Pitching_Stats |> 
+  left_join(Aggregated_RV, by = c("pitcher_id" = "pitcher", "Season" = "year", "pitch_name" = "pitch_name")) |> 
+  left_join(Avg_Velocity, by = c("pitcher_id" = "pitcher", "Season" = "year", "pitch_name" = "pitch_name"))
+```
+
+# Writes the CSV
+```{r}
+#write.csv(MLB_Pitching_Stats, "MLB_Pitching_Stats.csv")
+```
+
+
+

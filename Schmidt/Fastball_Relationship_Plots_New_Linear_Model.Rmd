@@ -21,79 +21,7 @@ library(viridis)
 ### Read Statcast Dataset
 
 ```{r}
-
-# Statcast_Combined_Pitches <- read.csv("StatcastCombinedPitches.csv")
-
-Joined_FanGraphs_Statcast <- read.csv("Joined_FanGraphs_Statcast.csv")
-
-PitchUse <- read.csv("PitchUse.csv")
-
 Joined_FanGraphs_Statcast_FF <- read.csv("Fastball_Data.csv")
-
-```
-
-### The Proportion Each Pitch Type Was Thrown Each Year
-
-```{r}
-# Use of Each Fastpitch Per Year
-fastball_frequency_graph <- PitchUse |> 
-  filter(pitch_name %in% c("4-Seam Fastball", "Cutter", "Sinker")) |> 
-ggplot(aes(x = year, y = prop, fill = year)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~pitch_name) +
-  labs(title = "Use of Each Fastball Type Per Year",
-       x = "Year",
-       y = "Proportion") +
-  theme_bw() +
-  theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5),
-        axis.title = element_text(face = "bold", size = 11),
-        axis.text = element_text(face = "bold"),
-        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
-strip.background = element_rect(fill = "steelblue4", colour = "black"),
-strip.text.x = element_text(color = "white"))
-
-fastball_frequency_graph
-
-# Use of Each Offspeed Per Year
-offspeed_frequency_graph <- PitchUse |> 
-  filter(pitch_name %in% c("Changeup", "Forkball", "Knuckle Curve", "Split-Finger")) |> 
-ggplot(aes(x = year, y = prop, fill = year)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~pitch_name) +
-   labs(title = "Use of Each Offspeed Type Per Year",
-       x = "Year",
-       y = "Proportion") +
-  theme_bw() +
-  theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5),
-        axis.title = element_text(face = "bold", size = 12),
-        axis.text = element_text(face = "bold"),
-        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
-strip.background = element_rect(fill = "steelblue4", colour= "black"),
-strip.text.x = element_text(color = "white"))
-
-offspeed_frequency_graph
-
-# Use of Each Breaking Ball Per Year
-BreakingBall_frequency_graph <- PitchUse |> 
-  filter(pitch_name %in% c("Curveball", "Knuckleball", "Slider")) |> 
-ggplot(aes(x = year, y = prop, fill = year)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~pitch_name) +
-   labs(title = "Use of Each Breaking Ball Type Per Year",
-       x = "Year",
-       y = "Proportion") +
-  theme_bw() +
-  theme(legend.position = "none",
-        plot.title = element_text(face = "bold", hjust = 0.5),
-         axis.title = element_text(face = "bold", size = 12),
-        axis.text = element_text(face = "bold"),
-        strip.text = element_text(face = "bold", size = 12,lineheight = 3.0),
-strip.background = element_rect(fill = "steelblue4", colour = "black"),
-strip.text.x = element_text(color = "white"))
-
-BreakingBall_frequency_graph
 ```
 
 ### Relationship Between A Pitcher's Average Velocity and Outcome Variables For A Fastball
@@ -318,9 +246,9 @@ Joined_FanGraphs_Statcast_FF |>
   ggplot(aes(x = avg_v_break_FF, y = wiff_rate_FF)) +
   geom_point(aes(color = Season), alpha = .3) +
   facet_wrap(~Season) +
-  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Vertical Break And Its Wiff Rate",
+  labs(title = "Relationship Between A Pitcher's Average 4-Seam Fastball Vertical Break And Its Whiff Rate",
        x = "Pitcher's Average Vertical Break",
-       y = "Pitcher's Wiff Rate") +
+       y = "Pitcher's Whiff Rate") +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
   theme_bw() +
   theme(legend.position = "none",

@@ -16,33 +16,309 @@ library(broom)
 ```{r}
 Overall_Stats <- read.csv("mlb_pitching_stats_2020-24.csv")
 
-
 Cleaned_Data <- Overall_Stats |> 
-  filter(pitch_name == "4-Seam Fastball")
-
+  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus)) |> 
+  mutate(season = factor(season, levels = c(2020, 2021, 2022, 2023, 2024)))
 ```
 
-### Linear Model For Stuff Plus and Horizontal Break
-```{r}
+### Horizontal Break and Stuff+ or An Outcome Variable
 
-horizontal_break_lm <- lm(stuff_plus ~ factor(Season) + horizontal_break, 
+# Linear Model For Stuff Plus and Horizontal Break
+```{r}
+horizontal_break_lm <- lm(stuff_plus ~ season * horizontal_break, 
                 data = Cleaned_Data) 
 
 summary(horizontal_break_lm)
 tidy(horizontal_break_lm)
-
 ```
 
-
-### Linear Model For Aggregated Run Value and Horizontal Break
+# Linear Model For Aggregated Run Value and Horizontal Break
 ```{r}
-
-horizontal_break_lm <- lm(stuff_plus ~ factor(Season) + horizontal_break, 
+horizontal_break_rv_lm <- lm(stuff_plus ~ season * horizontal_break, 
                 data = Cleaned_Data) 
 
-summary(horizontal_break_lm)
-tidy(horizontal_break_lm)
+summary(horizontal_break_rv_lm)
+tidy(horizontal_break_rv_lm)
+```
 
+# Linear Model For Swing And Miss Percentage and Horizontal Break
+```{r}
+horizontal_break_swing_miss <- lm(swing_and_miss_pct ~ season * horizontal_break, 
+                data = Cleaned_Data) 
+
+
+summary(horizontal_break_swing_miss)
+tidy_horizontal_break_swing_miss <- tidy(horizontal_break_swing_miss)
+```
+
+# Linear Model For Swing Percentage and Horizontal Break
+```{r}
+horizontal_break_swing_pct <- lm(swing_pct ~ season * horizontal_break, 
+                data = Cleaned_Data) 
+
+
+summary(horizontal_break_swing_pct)
+tidy_horizontal_break_swing_pct <- tidy(horizontal_break_swing_pct)
+```
+
+# Linear Model For Whiff Percentage and Horizontal Break
+```{r}
+horizontal_break_whiff_pct <- lm(whiff_pct ~ season * horizontal_break, 
+                data = Cleaned_Data) 
+
+
+summary(horizontal_break_whiff_pct)
+tidy_horizontal_break_whiff_pct <- tidy(horizontal_break_whiff_pct)
+```
+
+# Linear Model For xwOBA and Horizontal Break
+```{r}
+horizontal_break_xwOBA <- lm(xwOBA ~ season * horizontal_break, 
+                data = Cleaned_Data) 
+
+
+summary(horizontal_break_xwOBA)
+tidy_horizontal_break_xwOBA <- tidy(horizontal_break_xwOBA)
+```
+
+### Vertical Break and Stuff+ and Outcome Variables
+
+# Linear Model For Stuff Plus and Vertical Break
+```{r}
+induced_vertical_break_lm <- lm(stuff_plus ~ season * induced_vertical_break, 
+                data = Cleaned_Data) 
+
+summary(induced_vertical_break_lm)
+tidy(induced_vertical_break_lm)
+```
+
+# Linear Model For Aggregated Run Value and Vertical Break
+```{r}
+induced_vertical_break_lm <- lm(stuff_plus ~ season * induced_vertical_break, 
+                data = Cleaned_Data) 
+
+summary(induced_vertical_break)
+tidy(induced_vertical_break)
+```
+
+# Linear Model For Swing And Miss Percentage and Vertical Break
+```{r}
+induced_vertical_break_swing_miss <- lm(swing_and_miss_pct ~ season * induced_vertical_break, 
+                data = Cleaned_Data) 
+
+
+summary(induced_vertical_break_swing_miss)
+tidy_induced_vertical_break_swing_miss <- tidy(induced_vertical_break_swing_miss)
+```
+
+# Linear Model For Swing Percentage and Vertical Break
+```{r}
+induced_vertical_break_swing_pct <- lm(swing_pct ~ season * induced_vertical_break, 
+                data = Cleaned_Data) 
+
+
+summary(induced_vertical_break_swing_pct)
+tidy_induced_vertical_break_swing_pct <- tidy(induced_vertical_break_swing_pct)
+```
+
+# Linear Model For Whiff Percentage and Vertical Break
+```{r}
+induced_vertical_break_whiff_pct <- lm(whiff_pct ~ season * induced_vertical_break, 
+                data = Cleaned_Data) 
+
+
+summary(induced_vertical_break_whiff_pct)
+tidy_induced_vertical_break_whiff_pct <- tidy(induced_vertical_break_whiff_pct)
+```
+
+# Linear Model For xwOBA and Vertical Break
+```{r}
+induced_vertical_break_xwOBA <- lm(xwOBA ~ season * induced_vertical_break, 
+                data = Cleaned_Data) 
+
+
+summary(induced_vertical_break_xwOBA)
+tidy_induced_vertical_break_xwOBA <- tidy(induced_vertical_break_xwOBA)
+```
+
+### Spin Rate and Stuff+ or Outcome Variables
+
+# Linear Model For Stuff Plus and Spin Rate
+```{r}
+spin_lm <- lm(stuff_plus ~ season * spin, 
+                data = Cleaned_Data) 
+
+summary(spin_lm)
+tidy(spin_lm)
+```
+
+# Linear Model For Aggregated Run Value and Spin
+```{r}
+spin_rv_lm <- lm(stuff_plus ~ season * spin, 
+                data = Cleaned_Data) 
+
+summary(spin_rv_lm)
+tidy(spin_rv_lm)
+```
+
+# Linear Model For Swing And Miss Percentage and Spin 
+```{r}
+spin_swing_miss <- lm(swing_and_miss_pct ~ season * spin, 
+                data = Cleaned_Data) 
+
+
+summary(spin_swing_miss)
+tidy_spin_swing_miss <- tidy(spin_swing_miss)
+```
+
+# Linear Model For Swing Percentage and Spin
+```{r}
+spin_swing_pct <- lm(swing_pct ~ season * spin, 
+                data = Cleaned_Data) 
+
+
+summary(spin_swing_pct)
+tidy_spin_swing_pct <- tidy(spin_swing_pct)
+```
+
+# Linear Model For Whiff Percentage and Spin
+```{r}
+spin_whiff_pct <- lm(whiff_pct ~ season * spin, 
+                data = Cleaned_Data) 
+
+
+summary(spin_whiff_pct)
+tidy_spin_whiff_pct <- tidy(spin_whiff_pct)
+```
+
+# Linear Model For xwOBA and Spin
+```{r}
+spin_xwOBA <- lm(xwOBA ~ season * spin, 
+                data = Cleaned_Data) 
+
+
+summary(spin_xwOBA)
+tidy_spin_xwOBA <- tidy(spin_xwOBA)
 ```
 
 
+### Velocity and Stuff+ or Outcome Variables
+
+# Linear Model For Stuff Plus and Velocity
+```{r}
+velocity_lm <- lm(stuff_plus ~ season * velocity, 
+                data = Cleaned_Data) 
+
+summary(velocity_lm)
+tidy(velocity_lm)
+```
+
+# Linear Model For Aggregated Run Value and Velocity
+```{r}
+velocity_rv_lm <- lm(stuff_plus ~ season * velocity, 
+                data = Cleaned_Data) 
+
+summary(velocity_rv_lm)
+tidy(velocity_rv_lm)
+```
+
+# Linear Model For Swing And Miss Percentage and Velocity
+```{r}
+velocity_swing_miss <- lm(swing_and_miss_pct ~ season * velocity, 
+                data = Cleaned_Data) 
+
+
+summary(velocity_swing_miss)
+tidy_velocity_swing_miss <- tidy(velocity_swing_miss)
+```
+
+# Linear Model For Swing Percentage and Velocity
+```{r}
+velocity_swing_pct <- lm(swing_pct ~ season * velocity, 
+                data = Cleaned_Data) 
+
+
+summary(velocity_swing_pct)
+tidy_velocity_swing_pct <- tidy(velocity_swing_pct)
+```
+
+# Linear Model For Whiff Percentage and Velocity
+```{r}
+velocity_whiff_pct <- lm(whiff_pct ~ season * velocity, 
+                data = Cleaned_Data) 
+
+
+summary(velocity_whiff_pct)
+tidy_velocity_whiff_pct <- tidy(velocity_whiff_pct)
+```
+
+# Linear Model For xwOBA and Velocity
+```{r}
+velocity_xwOBA <- lm(xwOBA ~ season * velocity, 
+                data = Cleaned_Data) 
+
+
+summary(velocity_xwOBA)
+tidy_velocity_xwOBA <- tidy(velocity_xwOBA)
+```
+
+
+### Extension and Stuff+ or Outcome Variables
+
+# Linear Model For Stuff Plus and Extension
+```{r}
+extension_lm <- lm(stuff_plus ~ season * extension, 
+                data = Cleaned_Data) 
+
+summary(extension_lm)
+tidy(extension_lm)
+```
+
+# Linear Model For Aggregated Run Value and Extension
+```{r}
+extension_rv_lm <- lm(stuff_plus ~ season * extension, 
+                data = Cleaned_Data) 
+
+summary(extension_rv_lm)
+tidy(extension_rv_lm)
+```
+
+# Linear Model For Swing And Miss Percentage and Extension
+```{r}
+extension_swing_miss <- lm(swing_and_miss_pct ~ season * extension, 
+                data = Cleaned_Data) 
+
+
+summary(extension_swing_miss)
+tidy_extension_swing_miss <- tidy(extension_swing_miss)
+```
+
+# Linear Model For Swing Percentage and Extension
+```{r}
+extension_swing_pct <- lm(swing_pct ~ season * extension, 
+                data = Cleaned_Data) 
+
+
+summary(extension_swing_pct)
+tidy_extension_swing_pct <- tidy(extension_swing_pct)
+```
+
+# Linear Model For Whiff Percentage and Extension
+```{r}
+extension_whiff_pct <- lm(whiff_pct ~ season * extension, 
+                data = Cleaned_Data) 
+
+
+summary(extension_whiff_pct)
+tidy_extension_whiff_pct <- tidy(extension_whiff_pct)
+```
+
+# Linear Model For xwOBA and Extension
+```{r}
+extension_xwOBA <- lm(xwOBA ~ season * extension, 
+                data = Cleaned_Data) 
+
+
+summary(extension_xwOBA)
+tidy_extension_xwOBA <- tidy(extension_xwOBA)
+```
