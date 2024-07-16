@@ -1,0 +1,40 @@
+---
+title: "Random Forest Models"
+author: "Belle Schmidt"
+date: "2024-07-16"
+output: html_document
+---
+
+# Libraries 
+```{r}
+# install.packages("stacks")
+library(tidyverse)
+theme_set(theme_bw())
+library(stacks)
+library(ranger)
+library(vip)
+```
+
+# Read in the dataset & Clean For Random Forest Model
+```{r}
+Overall_Stats <- read.csv("mlb_pitching_stats_2020-24.csv")
+
+Cleaned_Data <- Overall_Stats |> 
+  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus), season == 2021) |> 
+  select(spin, velocity, extension, induced_vertical_break, horizontal_break, stuff_plus)
+```
+
+# Fitting A Plain Random Forest Model With No Tuning
+```{r}
+
+Stuff_Plus_rf <- ranger(stuff_plus ~ spin + velocity + extension + induced_vertical_break + horizontal_break, 
+                   num.trees = 500, importance = "impurity", data = Cleaned_Data)
+
+Stuff_Plus_rf
+```
+# Variable of Importance Graph
+```{r}
+vip(Stuff_Plus_rf)
+```
+# Partial Dependence Plot
+
