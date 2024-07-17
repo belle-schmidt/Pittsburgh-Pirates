@@ -187,4 +187,7 @@ ff_models |>
   geom_vline(xintercept = 10, linetype = "dashed", color = "firebrick1")
 
 
+### add sqrt(stuff+) to dataset
+ff_models <- ff_models |> 
+  mutate(sqrt_stuff_plus = sqrt(stuff_plus))
 
