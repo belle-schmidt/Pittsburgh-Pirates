@@ -28,7 +28,7 @@ Cleaned_Data <- Overall_Stats |>
 ```{r}
 
 Stuff_Plus_rf <- ranger(stuff_plus ~ spin + velocity + extension + induced_vertical_break + horizontal_break, 
-                   num.trees = 500, importance = "impurity", data = Cleaned_Data)
+                   num.trees = 1000, importance = "impurity", data = Cleaned_Data)
 
 Stuff_Plus_rf
 ```
@@ -36,5 +36,19 @@ Stuff_Plus_rf
 ```{r}
 vip(Stuff_Plus_rf)
 ```
-# Partial Dependence Plot
+
+# Random Standard Error
+```{r}
+Cleaned_Data |> 
+  mutate(pred = Stuff_Plus_rf$predictions) |> 
+  summarize(rmse = sqrt(mean((stuff_plus - pred) ^ 2)))
+```
+
+```{r}
+Cleaned_Data|>
+  mutate(pred = Stuff_Plus_rf$predictions) |>
+  ggplot(aes(stuff_plus, pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red")
+```
 
