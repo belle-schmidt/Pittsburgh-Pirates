@@ -7,6 +7,7 @@ library(vip) # variable importance
 library(pdp) # partial dependence plot
 library(caret) # train random forest model with cross validation
 library(broom) # tidy extract linear summary
+library(ggfortify) # check linear assumptions
 
 ## theme set
 theme_set(theme_bw())
@@ -220,8 +221,7 @@ ff_models |>
 
 
 ## check assumptions
-library(ggfortify)
-autoplot(new_xwoba_lm, ncol = 4)
+autoplot(xwoba_lm, ncol = 4)
 
 
 ## standardized residuals to remove outliers
