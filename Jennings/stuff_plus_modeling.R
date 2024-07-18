@@ -125,6 +125,8 @@ sp_rf_final <- ranger(
 ### model summary
 sp_rf_final
 
+### RMSE
+sqrt(139.6339)
 
 ### apply predictions to the dataset
 ff_models <- ff_models |> 

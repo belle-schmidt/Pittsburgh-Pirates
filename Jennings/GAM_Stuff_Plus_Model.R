@@ -74,3 +74,18 @@ stuff_plus_gam |>
   augment(newdata = test) |> 
   mutate(pred = round(.fitted)) |> 
   summarize(rmse = sqrt(mean((stuff_plus - .fitted)^2)))
+
+
+## Final model
+### Fit model
+stuff_plus_gam <- gam(stuff_plus ~ extension + s(horizontal_break) + 
+                        s(induced_vertical_break) + s(velocity) + s(spin),
+                      family = "gaussian",
+                      method = "REML", 
+                      data = pitching_models)
+
+### RMSE
+stuff_plus_gam |> 
+  augment() |> 
+  mutate(pred = round(.fitted)) |> 
+  summarize(rmse = sqrt(mean((stuff_plus - .fitted)^2)))
