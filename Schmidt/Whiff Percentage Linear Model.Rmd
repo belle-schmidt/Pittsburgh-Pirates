@@ -1,0 +1,258 @@
+---
+title: "Whiff Percentage Modeling"
+author: "Belle Schmidt"
+date: "2024-07-18"
+output: html_document
+---
+
+### Whiff Percentage Modeling
+
+# Libraries
+```{r}
+library(tidyverse)
+library(ranger) # faster implementation of randomforest library
+library(vip) # variable importance
+library(pdp) # partial dependence plot
+library(caret) # train random forest model with cross validation
+library(broom) # tidy extract linear summary
+```
+
+# Setting the Theme
+```{r}
+theme_set(theme_bw())
+```
+
+# Data
+```{r}
+pitching_models <- read.csv("mlb_pitching_stats_2020-24.csv")
+```
+
+
+## Cleaning the Data
+```{r}
+ff_models <- pitching_models |> 
+  filter(
+    pitch_name == "4-Seam Fastball" &
+    !is.na(stuff_plus) & 
+    season == 2021
+      ) |> 
+  mutate(horizontal_break = -horizontal_break) |> 
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
+```
+
+
+## Build Random Forest to Predict Stuff+ for 2021 Season
+```{r}
+### set seed
+set.seed(0829)
+
+### fit model
+sp_rf <- ranger(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 5 / 3,
+  data = ff_models
+)
+
+
+### model summary
+sp_rf
+```
+
+### Variable Importance
+```{r}
+sp_rf |> 
+  vip(
+    aesthetics = list(color = "black", 
+                      fill = "steelblue4")
+  )
+```
+
+# Random Forest with 5-fold CV
+### fit model
+```{r}
+sp_rf_cv <- train(
+  stuff_plus ~ . - xwOBA - whiff_pct,
+  tuneLength = 3,
+  data = ff_models,
+  method = "ranger",
+  trControl = trainControl(
+    method = "cv",
+    number = 5,
+    verboseIter = TRUE
+  )
+)
+
+### plot model
+plot(sp_rf_cv)
+
+
+### try tuneGrid
+tuneGrid <- data.frame(
+  .mtry = c(2, 3, 4, 5),
+  .splitrule = "variance",
+  .min.node.size = 5
+)
+
+### fit model again
+sp_rf_cv <- train(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  tuneGrid = tuneGrid,
+  data = ff_models,
+  method = "ranger",
+  trControl = trainControl(
+    method = "cv",
+    number = 5,
+    verboseIter = TRUE
+  )
+)
+
+### model summary
+sp_rf_cv
+
+
+### plot model
+plot(sp_rf_cv)
+```
+
+# Final Model
+```{r}
+### set seed
+set.seed(0829)
+
+### fit model
+sp_rf_final <- ranger(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models
+)
+
+### model summary
+sp_rf_final
+```
+
+# Apply Predictions to the Dataset
+```{r}
+ff_models <- ff_models |> 
+  mutate(pred = sp_rf_final$predictions)
+```
+
+# Plot Predictions vs. Original Observed Values
+```{r}
+ff_models |> 
+  ggplot(aes(stuff_plus, pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "firebrick1")
+```
+
+### Linear Regression to Predict Whiff Percentage
+```{r}
+### plot whiff percentage by predicted stuff+
+ff_models |> 
+  ggplot(aes(pred, whiff_pct))+
+  geom_point(alpha = 0.5) +
+  geom_vline(xintercept = 100, linetype = "dashed", color = "firebrick1")
+
+### plot whiff percentage by stuff+
+ff_models |> 
+  ggplot(aes(stuff_plus, whiff_pct)) +
+  geom_point(alpha = 0.5) +
+  geom_vline(xintercept = 100, linetype = "dashed", color = "firebrick1")
+```
+
+# Fit Model 
+```{r}
+whiff_lm <- lm(whiff_pct ~ stuff_plus, data = ff_models)
+```
+
+# Model Summary
+```{r}
+whiff_lm |> 
+  tidy()
+
+whiff_lm |> 
+  glance()
+```
+
+# Normality Check
+```{r}
+# bin width
+bw <-  2 * IQR(ff_models$stuff_plus) / length(ff_models$stuff_plus) ^ (1/3)
+
+# plot
+ff_models |> 
+  ggplot(aes(stuff_plus)) +
+  geom_histogram(fill = "dodgerblue2", color = "grey50", binwidth = bw)
+
+
+# whiff percentage normality
+# bin width
+bw <-  2 * IQR(ff_models$whiff_pct) / length(ff_models$whiff_pct) ^ (1/3)
+
+# plot
+ff_models |> 
+  ggplot(aes(whiff_pct)) +
+  geom_histogram(fill = "dodgerblue2", color = "grey50", binwidth = bw)
+```
+
+
+# Plotting Residuals Against Predicted Values
+```{r}
+ whiff_lm |>
+  augment() |>
+  ggplot(aes(.fitted, .resid)) +
+  geom_point(color = "gray", alpha = 0.75) +
+  geom_hline(yintercept = 0, color = "red",
+  linetype = "dashed", linewidth = 1.5) +
+  geom_smooth(se = FALSE)
+```
+
+# Check Assumptions
+```{r}
+library(ggfortify)
+autoplot(whiff_lm, ncol = 4)
+```
+
+## Standardized Residuals to Remove Outliers
+```{r}
+outliers <- whiff_lm |> 
+  augment() |> 
+  filter(abs(.std.resid) >= 2.6)
+```
+
+# Remove points that are outliers, high leverage points, and influential points
+```{r}
+resid_analysis <- whiff_lm |> 
+  augment() |> 
+  # remove outliers
+  filter(abs(.std.resid) <= 2.6) 
+  # remove high leverage points
+  # filter(.hat <= 3*(1 + 1) / nrow(ff_models))
+```
+
+# Fit model again
+```{r}
+new_whiff_lm <- lm(whiff_pct ~ stuff_plus, data = resid_analysis)
+```
+
+# Model Summary
+```{r}
+new_whiff_lm |> 
+  glance()
+```
+
+# Plot
+```{r}
+resid_analysis |> 
+  ggplot(aes(stuff_plus, whiff_pct)) +
+  geom_point(alpha = 0.5) +
+  geom_vline(xintercept = 100, linetype = "dashed", color = "firebrick1") +
+  #geom_smooth(method = "loess") +
+  geom_smooth(method = "lm")
+```
+
