@@ -1,0 +1,52 @@
+---
+title: "Random Forest"
+author: "Belle Schmidt"
+date: "2024-07-17"
+output: html_document
+---
+
+```{r}
+## libraries
+library(tidyverse)
+library(ranger) # faster implementation of randomforest library
+library(vip) # variable importance
+library(pdp) # partial dependence plot
+library(caret) # train random forest model with cross validation
+library(broom) # tidy extract linear summary
+library(ggResidpanel) 
+
+## theme set
+theme_set(theme_bw())
+
+## data
+pitching_models <- read.csv("mlb_pitching_stats_2020-24.csv")
+
+## filter
+ff_models <- pitching_models |> 
+  filter(
+    pitch_name == "4-Seam Fastball" &
+    !is.na(stuff_plus) & 
+    season == 2021
+      ) |> 
+  mutate(horizontal_break = -horizontal_break) |> 
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA)
+
+```
+
+
+```{r}
+### add sqrt(stuff+) to dataset
+ff_models <- ff_models |> 
+  mutate(sqrt_stuff_plus = sqrt(stuff_plus))
+```
+
+```{r}
+### fit model
+xwoba_lm <- lm(xwOBA ~ sqrt_stuff_plus, data = ff_models)
+```
+
+```{r}
+resid_panel(xwoba_lm)
+
+```
+
