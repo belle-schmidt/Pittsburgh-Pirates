@@ -1,9 +1,9 @@
 ---
 title: "Title"
 author:
+  - Liam Jennings
   - Tiger Teng
   - Belle Schmidt
-  - Liam Jennings
 date: "July 26, 2024"
 toc: true
 format:
