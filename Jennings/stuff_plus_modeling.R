@@ -22,7 +22,7 @@ ff_models <- pitching_models |>
     season == 2021
       ) |> 
   mutate(horizontal_break = -horizontal_break) |> 
-  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA)
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
 
 ## build random forest to predict stuff+ for 2021 season
 ### set seed
@@ -30,7 +30,7 @@ set.seed(0829)
 
 ### fit model
 sp_rf <- ranger(
-  stuff_plus ~  . - xwOBA,
+  stuff_plus ~  . - xwOBA - whiff_pct,
   num.trees = 1000,
   importance = "impurity",
   mtry = 5 / 3,
@@ -63,7 +63,7 @@ sp_rf |>
 ## random forest with 5-fold CV
 ### fit model
 sp_rf_cv <- train(
-  stuff_plus ~ . - xwOBA,
+  stuff_plus ~ . - xwOBA - whiff_pct,
   tuneLength = 3,
   data = ff_models,
   method = "ranger",
@@ -87,7 +87,7 @@ tuneGrid <- data.frame(
 
 ### fit model again
 sp_rf_cv <- train(
-  stuff_plus ~  . - xwOBA,
+  stuff_plus ~  . - xwOBA - whiff_pct,
   tuneGrid = tuneGrid,
   data = ff_models,
   method = "ranger",
@@ -112,7 +112,7 @@ set.seed(0829)
 
 ### fit model
 sp_rf_final <- ranger(
-  stuff_plus ~  . - xwOBA,
+  stuff_plus ~  . - xwOBA - whiff_pct,
   num.trees = 1000,
   importance = "impurity",
   mtry = 2,
@@ -170,24 +170,93 @@ ff_models |>
   ggplot(aes(stuff_plus)) +
   geom_histogram(fill = "dodgerblue2", color = "grey50", binwidth = bw)
 
-#### sqrt bin width
-sqrt_bw <-  2 * IQR(sqrt(ff_models$stuff_plus)) / length(sqrt(ff_models$stuff_plus)) ^ (1/3)
+# #### sqrt bin width
+# sqrt_bw <-  2 * IQR(sqrt(ff_models$stuff_plus)) / length(sqrt(ff_models$stuff_plus)) ^ (1/3)
+# 
+# #### plot
+# ff_models |> 
+#   ggplot(aes(sqrt(stuff_plus))) +
+#   geom_histogram(fill = "dodgerblue2", color = "grey50", binwidth = sqrt_bw)
+
+
+
+### xwOBA normality
+#### bin width
+bw <-  2 * IQR(ff_models$xwOBA) / length(ff_models$xwOBA) ^ (1/3)
 
 #### plot
 ff_models |> 
-  ggplot(aes(sqrt(stuff_plus))) +
-  geom_histogram(fill = "dodgerblue2", color = "grey50", binwidth = sqrt_bw)
+  ggplot(aes(xwOBA)) +
+  geom_histogram(fill = "dodgerblue2", color = "grey50", binwidth = bw)
 
 
 ### sqrt transformation
-### plot xwOBA by sqrt(stuff+)
-ff_models |> 
-  ggplot(aes(sqrt(stuff_plus), xwOBA)) +
+# ### plot xwOBA by sqrt(stuff+)
+# ff_models |> 
+#   ggplot(aes(sqrt(stuff_plus), sqrt(xwOBA))) +
+#   geom_point(alpha = 0.5) +
+#   geom_vline(xintercept = 10, linetype = "dashed", color = "firebrick1")
+# 
+# 
+# 
+# ## add sqrt(stuff+) to dataset
+# ff_models <- ff_models |> 
+#   mutate(sqrt_stuff_plus = sqrt(stuff_plus),
+#          sqrt_xwOBA = sqrt(xwOBA))
+
+# 
+# ## fit model
+# xwoba_lm <- lm(xwOBA ~ stuff_plus, data = ff_models)
+# 
+# 
+# ## plot residuals against predicted values
+# xwoba_lm |> 
+#   augment() |> 
+#   ggplot(aes(.fitted, .resid)) +
+#   geom_point(color = "gray", alpha = 0.75) +
+#   geom_hline(yintercept = 0, color = "red",
+#              linetype = "dashed", linewidth = 1.5) +
+#   geom_smooth(se = FALSE)
+
+
+## check assumptions
+library(ggfortify)
+autoplot(new_xwoba_lm, ncol = 4)
+
+
+## standardized residuals to remove outliers
+outliers <- xwoba_lm |> 
+  augment() |> 
+  filter(abs(.std.resid) >= 2.6)
+
+## high leverage points 
+# hl <- xwoba_lm_sqrt |> 
+#   augment() |> 
+#   filter(.hat >= 3*(1 + 1) / nrow(ff_models))
+
+## there were no high influential points by cook's distance
+
+
+## remove points that are outliers, high leverage points, and influential points
+resid_analysis <- xwoba_lm |> 
+  augment() |> 
+  # remove outliers
+  filter(abs(.std.resid) <= 2.6) 
+  # remove high leverage points
+  # filter(.hat <= 3*(1 + 1) / nrow(ff_models))
+
+## fit model again
+new_xwoba_lm <- lm(xwOBA ~ stuff_plus, data = resid_analysis)
+
+## model summary
+new_xwoba_lm |> 
+  glance()
+
+## plot
+resid_analysis |> 
+  ggplot(aes(stuff_plus, xwOBA)) +
   geom_point(alpha = 0.5) +
-  geom_vline(xintercept = 10, linetype = "dashed", color = "firebrick1")
-
-
-### add sqrt(stuff+) to dataset
-ff_models <- ff_models |> 
-  mutate(sqrt_stuff_plus = sqrt(stuff_plus))
+  geom_vline(xintercept = 100, linetype = "dashed", color = "firebrick1") +
+  #geom_smooth(method = "loess") +
+  geom_smooth(method = "lm")
 
