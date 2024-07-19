@@ -128,6 +128,11 @@ sp_rf_final
 ### RMSE
 sqrt(139.6339)
 
+### variable importance
+sp_rf_final |> 
+  vip()
+
+
 ### apply predictions to the dataset
 ff_models <- ff_models |> 
   mutate(pred = sp_rf_final$predictions)
