@@ -66,6 +66,8 @@ horizontal_break_lm <- lm(stuff_plus ~ season * horizontal_break,
 summary(horizontal_break_lm)
 tidy_horizontal_break_lm <-tidy(horizontal_break_lm)
 
+tidy_horizontal_break_lm
+
 #horizontal_break_std_error(tidy_horizontal_break_lm)
 
 h_break_stuff_plus_slope <- horizontal_break_slope(tidy_horizontal_break_lm)

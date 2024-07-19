@@ -20,11 +20,15 @@ Overall_Stats <- read.csv("MLB_Pitching_Stats.csv")
 
 FF_2020_Data <- Overall_Stats |> 
   filter(pitch_name == "4-Seam Fastball",
-         Season == 2020)
+         season == 2020, 
+         !is.na(stuff_plus)) |> 
+  mutate(season = factor(season, levels = c(2020, 2021, 2022, 2023, 2024)))
 
 FF_2021_Data <- Overall_Stats |> 
   filter(pitch_name == "4-Seam Fastball",
-         Season == 2021)
+         season == 2021, 
+         !is.na(stuff_plus)) |> 
+  mutate(season = factor(season, levels = c(2020, 2021, 2022, 2023, 2024)))
 
 FF_2022_Data <- Overall_Stats |> 
   filter(pitch_name == "4-Seam Fastball",
