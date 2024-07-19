@@ -295,11 +295,12 @@ pitching_models |>
 ### whiff%
 pitching_models |> 
   filter(pitch_name == "Slider") |> 
+  mutate(horizontal_break = -horizontal_break) |> 
   ggplot() + 
   # geom_point(aes(x = plate_x, y = plate_z, color = factor(miss)), alpha = 0.75) + 
   stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
                        z = whiff_pct), 
-                   binwidth = c(2, 2), fun = mean,
+                   binwidth = c(3, 3), fun = mean,
                    color = "black") +
   scale_fill_gradient2(low = "dodgerblue2",
                        mid = "white",
@@ -367,6 +368,7 @@ pitching_models |>
 ### Stuff+
 pitching_models |> 
   filter(pitch_name == "Slider") |> 
+  mutate(horizontal_break = -horizontal_break) |> 
   ggplot() + 
   # geom_point(aes(x = plate_x, y = plate_z, color = factor(miss)), alpha = 0.75) + 
   stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
