@@ -10,7 +10,8 @@ pitching_models <- read.csv("mlb_pitching_stats_2020-24.csv")
 ## Only use 2021-2023 (full seasons)
 pitching_models <- pitching_models |> 
   filter(season %in% c(2021, 2022, 2023)) |> 
-  mutate(season = factor(season))
+  mutate(season = factor(season),
+         horizontal_break = -horizontal_break)
 
 ## set theme
 theme_set(theme_bw())
@@ -20,8 +21,8 @@ movement_theme <- function(){
   theme(
     strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
     strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
-    plot.title = element_text(size = 24, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 18, face = "bold", hjust = 0.5),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
     plot.caption = element_text(size = 10),
     axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
     axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
@@ -68,8 +69,9 @@ pitching_models |>
   # geom_plate() +
   coord_fixed() +
   labs(#title = "Avg. Velo of 4-Seam Fastballs by Movement",
-       subtitle = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       title = "All Pitchers With 100 or More Fastballs Thrown in a Year",
+       subtitle = "POV: RHP facing home plate",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Avg. Velocity") +
@@ -103,8 +105,8 @@ pitching_models |>
   # geom_plate() +
   coord_fixed() +
   labs(#title = "Spin Rate of 4-Seam Fastballs by Movement",
-       subtitle = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+      title = "All Pitchers With 100 or More Fastballs Thrown in a Year",
+      subtitle = "POV: RHP facing home plate",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Spin (RPM)") +
@@ -140,7 +142,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "Whiff% of 4-Seam Fastballs by Movement",
        subtitle = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Whiff%") +
@@ -176,7 +178,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "xwOBA of 4-Seam Fastballs by Movement",
        subtitle = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "xwOBA") +
@@ -213,7 +215,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "Stuff+ of 4-Seam Fastballs by Movement",
        subtitle = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Stuff+") +
@@ -255,7 +257,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "Avg. Velo of Sliders by Movement",
        subtitle = "All Pitchers With 100 or More Sliders Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Avg. Velocity") +
@@ -291,7 +293,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "Spin Rate of Sliders by Movement",
     subtitle = "All Pitchers With 100 or More Sliders Thrown in a Year",
-    caption = "Data courtesy of MLBAM",
+    caption = "Data courtesy of Baseball Savant",
     x = "Horizontal Movement (in)",
     y = "Vertical Movement (in)", 
     fill = "Spin (RPM)") +
@@ -330,7 +332,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "xwOBA of Sliders by Movement",
        subtitle = "All Pitchers With 100 or More Sliders Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "xwOBA") +
@@ -366,7 +368,7 @@ pitching_models |>
   coord_fixed() +
   labs(#title = "Whiff% of Sliders by Movement",
        subtitle = "All Pitchers With 100 or More Sliders Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Whiff%") +
@@ -402,7 +404,7 @@ pitching_models |>
   coord_fixed() +
   labs(title = "Stuff+ of Sliders by Movement",
        subtitle = "All Pitchers With 100 or More Sliders Thrown in a Year",
-       caption = "Data courtesy of MLBAM",
+       caption = "Data courtesy of Baseball Savant",
        x = "Horizontal Movement (in)",
        y = "Vertical Movement (in)", 
        fill = "Stuff+") +
