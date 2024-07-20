@@ -1,0 +1,173 @@
+---
+title: "Title"
+author:
+  - Tiger Teng
+  - Liam Jennings
+  - Isabelle Schmidt
+date: "July 26, 2024"
+toc: true
+format:
+  html:
+    theme: cosmo
+    html-math-method: katex
+    self-contained: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+---
+
+## Introduction 
+Over the last couple of years, Stuff+ has become increasingly popular in the game of baseball. It is a pitching metric that evaluates a pitch's effectiveness based on its physical characteristics such as velocity, vertical movement, horizontal movement, release point, and spin rate. Essentially, it is used to measure the nastiness of a pitch. The way it is measured is that a Stuff+ score of 100 represents a pitch that is considered league average for pitches thrown in that pitch-type and anything above or below 100 is considered above or below average respectively. For example, a pitcher that throws a 4-Seam Fastball with a Stuff+ of 125 would be 25% above league average for fastballs. 
+
+With Stuff+ becoming a common metric used to evaluate pitchers, we wanted to assess how accurately the model was actually predicting a pitcher's success. We were curious if there were any variables that the model was over or under predicting in terms of their importance in a pitcher's success. We also wanted to know if there were certain times the model tended to over or under predict success, telling us it was not accounting for variables that played a role in a pitcher's effectiveness. 
+
+By answering these questions, we hope to provide valuable information to help build a better Stuff+ model so that it becomes a more reliable metric for people involved in player acquisition. We also believe that getting a better understanding of which physical pitch characteristics play a larger role in success can help pitchers develop their own pitches in a way that allows them to be more successful. 
+
+## Data
+For our analysis, we used FanGraphs and Statcast data from 2020 to 2024. We downloaded the FanGraphs data from ______ and the Statcast data from Baseball Savant. The FanGraphs data provides each pitcher's Stuff+ for each pitch they throw in each season. Note that unless specified otherwise, when we say pitch throughout this paper, we are referring to pitch name and not an individual pitch. Statcast's data, however, is pitch-by-pitch data that gives information about all the individual pitches thrown. Since FanGraphs only has Stuff+ data from 2020 to 2024, we only included Statcast data from 2020 until ____ in the 2024 season. 
+
+From the Statcast data we focused primarily on the pitch physical characteristics used to measure Stuff+, in addition to, run value, expected weighted on-base average (xwOBA), and outcome description. For each pitch physical characteristic individually, xwOBA, and run value per 100 pitches, we grouped the data by season, pitcher, and pitch name to calculate each pitcher's average for each pitch in each season. Using the same grouping and the outcome description, we also calculated each pitcher's whiff percentage, swing and miss percentage, and swing percentage for each pitch in each season. We also calculated the number of times each pitcher threw each pitch in each season. Once all these values were calculated, we combined the FanGraphs Dataset to the Statcast Dataset so that we could evaluate all these metrics simultaneously. It is also important to note that in our actual analysis, we only included pitchers that threw that given pitch 100 or more times to limit bias in our results. 
+
+
+Steps we want to mention:
+- Focused on 4-Seam Fastball First
+- Looked at how the stuff+ model changed for each characteristic (told us that the model was changing year by year)
+- Looked at how each characteristic changed the outcome, saw some made more impact than others 
+- Found it was hard to eyeball so created the slope plots to quantify the difference
+- Liam did his analysis on the hex plot to see how some of the physical characteristics worked together. 
+- 
+
+EDA we want to include/ mention:
+- The relationship plots 
+- The slope plots 
+- Liam's hex plots 
+- If we include sweeper then show how that pitch is more popular
+
+
+
+Notes on data part:
+2. Note if the data was lacking anything 
+3. Maybe give an example
+4. Give information about how many observations were in the data and how many we took out
+5. Mention what filters we put on, so only looked at pitchers that threw 100+ pitches of the given pitch 
+
+
+Describe the data you’re using in detail, where you accessed it, along with relevant exploratory data analysis (EDA). You should also include descriptions of any major data pre-processing/cleaning steps.
+
+## Methods
+
+Describe the modeling techniques you chose, their assumptions, justifications for why they are appropriate for the problem, and your plan for comparison/evaluation approaches.
+
+## Results
+
+Describe your results. This can include tables and plots showing your results, as well as text describing how your models worked and the appropriate interpretations of the relevant output. (Note: Don’t just write out the textbook interpretations of all model coefficients! Instead, interpret the output that is relevant for your question of interest that is framed in the introduction)
+
+## Discussion
+
+Give your conclusions and summarize what you have learned with regards to your question of interest. Are there any limitations with the approaches you used? What do you think are the next steps to follow-up your project?
+
+## Appendix: A quick tutorial
+
+**(Feel free to remove this section when you submit)**
+
+This a Quarto document. 
+To learn more about Quarto see <https://quarto.org>.
+You can use the Render button to see what it looks like in HTML.
+
+### Text formatting
+
+Text can be bolded with **double asterisks** and italicized with *single asterisks*. 
+Monospace text, such as for short code snippets, uses `backticks`.
+(Note these are different from quotation marks or apostrophes.) Links are
+written [like this](http://example.com/).
+
+Bulleted lists can be written with asterisks:
+
+* Each item starts on a new line with an asterisk.
+* Items should start on the beginning of the line.
+* Leave blank lines after the end of the list so the list does not continue.
+
+Mathematics can be written with LaTeX syntax using dollar signs. 
+For instance, using single dollar signs we can write inline math: $(-b \pm \sqrt{b^2 - 4ac})/2a$.
+
+To write math in "display style", i.e. displayed on its own line centered on the
+page, we use double dollar signs:
+$$
+x^2 + y^2 = 1
+$$
+
+
+### Code blocks
+
+Code blocks are evaluated sequentially when you hit Render. 
+As the code runs, `R` prints out which block is running, so naming blocks is useful if you want to know which one takes a long time. 
+After the block name, you can specify [chunk options](https://yihui.org/knitr/options/). 
+For example, `echo` controls whether the code is printed in the document. 
+By default, output is printed in the document in monospace:
+
+```{r, echo = FALSE}
+head(mtcars)
+```
+
+Chunk options can also be written inside the code block, which is helpful for really long options, as we'll see soon.
+
+```{r}
+#| echo: false
+head(mtcars)
+```
+
+### Figures
+
+If a code block produces a plot or figure, this figure will automatically be inserted inline in the report. That is, it will be inserted exactly where the code block is.
+
+```{r}
+#| fig-width: 5
+#| fig-height: 3.5
+#| fig-cap: "This is a caption. It should explain what's in the figure and what's interesting about it. For instance: There is a negative, strong linear correlation between miles per gallon and horsepower for US cars in the 1970s."
+
+library(tidyverse)
+mtcars |> 
+  ggplot(aes(x = mpg, y = hp)) +
+  geom_point() +
+  labs(x = "Miles per gallon",
+       y = "Horsepower")
+```
+
+Notice the use of `fig-width` and `fig-height` to control the figure's size (in inches). 
+These control the sizes given to `R` when it generates the plot, so `R` proportionally adjusts the font sizes to be large enough.
+
+### Tables
+
+Use the `knitr::kable()` function to print tables as HTML:
+
+```{r}
+mtcars |> 
+  slice(1:5) |> 
+  knitr::kable()
+```
+
+We can summarize model results with a table. 
+For instance, suppose we fit a linear regression model:
+
+```{r}
+#| echo: true
+model1 <- lm(mpg ~ disp + hp + drat, data = mtcars)
+```
+
+It is *not* appropriate to simply print `summary(model1)` into the report. 
+If we want the reader to understand what models we have fit and what their results are, we should provide a nicely formatted table. 
+A simple option is to use the `tidy()` function from the `broom` package to get a data frame of the model fit, and simply report that as a table.
+
+```{r }
+#| results: "asis"
+#| tbl-cap: "Predicting fuel economy using vehicle features."
+
+library(broom)
+model1 |> 
+  tidy() |>
+  knitr::kable(digits = 2,
+               col.names = c("Term", "Estimate", "SE", "t", "p"))
+```

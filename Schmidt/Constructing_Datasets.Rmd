@@ -396,3 +396,14 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2,
 Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
 
 ```
+
+### Calculating xwOBA on contact
+```{r}
+glimpse(statcast)
+
+statcast |> 
+  filter(description == "hit_into_play", pitch_name == "4-Seam Fastball") |> 
+  group_by(pitcher, pitch_name, year) |> 
+  summarise(xwOBA_on_contact = mean(xwoba_value, na.rm = TRUE))
+```
+
