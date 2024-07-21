@@ -31,6 +31,19 @@ For our analysis, we used FanGraphs and Statcast data from 2020 to 2024. We down
 
 From the Statcast data we focused primarily on the pitch physical characteristics used to measure Stuff+, in addition to, run value, expected weighted on-base average (xwOBA), and outcome description. For each pitch physical characteristic individually, xwOBA, and run value per 100 pitches, we grouped the data by season, pitcher, and pitch name to calculate each pitcher's average for each pitch in each season. Using the same grouping and the outcome description, we also calculated each pitcher's whiff percentage, swing and miss percentage, and swing percentage for each pitch in each season. We also calculated the number of times each pitcher threw each pitch in each season. Once all these values were calculated, we combined the FanGraphs Dataset to the Statcast Dataset so that we could evaluate all these metrics simultaneously. It is also important to note that in our actual analysis, we only included pitchers that threw that given pitch 100 or more times to limit bias in our results. 
 
+In our initial analysis, we decided to focus on the 4-Seam Fastball, often known as the rising fastball, since from the 2020 to 2024 seasons, it was by far the most commonly used pitch in the MLB. ** Ask Liam about Dodgers bringing it back in 2017?** 
+
+From there, the first thing we wanted to find out was whether or not the Stuff+ model changed from year-to-year. To figure this out we made a handful of scatter plots with smooth lines like shown by Figure 1. Each graph had a pitcher's average of a single pitch physical characteristic on the x-axis and Stuff+ on the y-axis. The plots were also all faceted by year so that we could see how the relationship between the given pitch physical characteristic and Stuff+ has changed each year. After analyzing the graphs, it became clear that the Stuff+ model was changing at least a little bit each year.  
+
+* In particular, for how it accounted for velocity and horizontal break. Induced vertical break was a little more consistent but still saw some variation.* - Don't know if I want to say this because it really changed for all but that was just what we focused on 
+
+Seeing that the Stuff+ model was in fact changing each year made us wonder how well the model was adjusting, assuming that it needed to be adjusted at all. To first get a basic understanding of whether or not outcomes were also changing based on the pitch physical characteristics each year, we made the same plots mentioned above but with an outcome variable on the y-axis instead of Stuff+. Outcome variables being whiff percentage, swing and miss percentage, swing percentage, expected weighted on-base average, and run value per 100 pitches. Figure 2 is an example where ____ is on x-axis and ____ is on the y-axis. Our group decided to focus primarily on whiff percentage and expected weighted on-base average. We liked that whiff percentage gave us an idea of whether people were making contact with the pitch or not while expected weighted on-base average gave us an idea of (a) whether or not people were able to get on base and (b) how well people were making contact with the pitch. We found that the impact each additional unit of a pitch physical characteristic had on an outcome variable was indeed changing each year, indicating that it was good that the Stuff+ model was changing. 
+
+To make it easier to evaluate whether or not the Stuff+ model was changing effectively, we made linear models that ** Talk to Quang or Ron about linear models! 
+From the linear models we 
+
+
+
 
 Steps we want to mention:
 - Focused on 4-Seam Fastball First
@@ -38,7 +51,14 @@ Steps we want to mention:
 - Looked at how each characteristic changed the outcome, saw some made more impact than others 
 - Found it was hard to eyeball so created the slope plots to quantify the difference
 - Liam did his analysis on the hex plot to see how some of the physical characteristics worked together. 
-- 
+
+Goes into methods: 
+- From these graphs we only continued to see that there were some characteristics that appeared to be undervalued and others that appeared to be overvalued. We thought of xwOBA and whiff percentage the most important for evaluating a pitcher's success so we compared how the stuff+ model valued those in each year compared to how much it mattered for whiff percentage and xwOBA in each year. 
+
+_ If have time then say we wanted to see if similar trends were happening with slider/ sweepers since those were becoming more popular. 
+
+
+- Since sweepers are becoming increasingly popular we also wanted to look at those. 
 
 EDA we want to include/ mention:
 - The relationship plots 
