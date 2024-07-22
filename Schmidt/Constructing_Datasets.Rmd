@@ -74,11 +74,41 @@ PitchUse <- left_join(TotalPitches_Year, PitchUse_Year) |>
 ```
 
 ### Turn the dataset into a CSV
+
 ```{r}
 
 # write.csv(PitchUse, "PitchUse.csv")
 
 ```
+
+### Sweeper Use Dataset
+
+```{r}
+statcast <- read.csv("Statcast.csv")
+
+pitch_type_use <- statcast |> 
+  group_by(pitch_name, year) |> 
+  summarise(times_thrown_in_year = n()) 
+
+
+total_pitches <- statcast |> 
+  group_by(year) |> 
+  summarise(pitches_thrown_in_year = n()) 
+
+
+sweeper_use <- left_join(total_pitches, pitch_type_use) |> 
+  mutate(prop = times_thrown_in_year / pitches_thrown_in_year) |> 
+  select(-times_thrown_in_year, -pitches_thrown_in_year) |> 
+  filter(pitch_name == "Sweeper") |>
+  mutate(year = factor(year, levels = c(2020, 2021, 2022, 2023, 2024)))
+```
+
+### Turn the dataset into a CSV
+
+```{r}
+write.csv(sweeper_use, "Sweeper_Use.csv")
+```
+
 
 ### Four Seam Fastball Dataset 
 
@@ -366,3 +396,14 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2,
 Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
 
 ```
+
+### Calculating xwOBA on contact
+```{r}
+glimpse(statcast)
+
+statcast |> 
+  filter(description == "hit_into_play", pitch_name == "4-Seam Fastball") |> 
+  group_by(pitcher, pitch_name, year) |> 
+  summarise(xwOBA_on_contact = mean(xwoba_value, na.rm = TRUE))
+```
+
