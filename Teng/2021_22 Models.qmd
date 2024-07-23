@@ -1,0 +1,252 @@
+---
+title: "2021-2022 Model"
+format: html
+editor: visual
+---
+
+## Library
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ranger) # faster implementation of randomforest library
+library(vip) # variable importance
+library(pdp) # partial dependence plot
+library(caret) # train random forest model with cross validation
+library(broom) # tidy extract linear summary
+```
+
+##Loading Data
+
+```{r}
+mlb_pitching_stats_2020_24 <- read.csv("C:/Users/Tiger/Downloads/mlb_pitching_stats_2020-24 (1).csv")
+```
+
+## Random Forest
+
+```{r}
+ff_models <- pitching_models |> 
+  filter(
+    pitch_name == "4-Seam Fastball" &
+    !is.na(stuff_plus) & 
+    season == 2021
+      ) |> 
+  mutate(horizontal_break = -horizontal_break) |> 
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
+set.seed(0829)
+```
+
+```{r}
+sp_rf_final <- ranger(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models
+)
+```
+
+## LM Stuff+ xwOBA
+
+```{r}
+xwoba_lm <- lm(xwOBA ~ stuff_plus, data = ff_models)
+resid_analysis <- xwoba_lm |> 
+  augment() |> 
+  # remove outliers
+  filter(abs(.std.resid) <= 2.6) 
+  # remove high leverage points
+  # filter(.hat <= 3*(1 + 1) / nrow(ff_models))
+
+## fit model again
+new_xwoba_lm <- lm(xwOBA ~ stuff_plus, data = resid_analysis)
+```
+
+## Predict 2022 Stuff plus
+
+```{r}
+ff_models_2022 <- pitching_models %>%
+  filter(
+    pitch_name == "4-Seam Fastball" &
+    !is.na(stuff_plus) &  # Assuming you need to filter non-missing stuff_plus even for predictions
+    season == 2022
+  ) %>%
+  mutate(horizontal_break = -horizontal_break) %>%
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
+
+# Set seed for reproducibility if you're doing any random operation in prediction
+set.seed(0829)
+predictions_2022 <- predict(sp_rf_final, data = ff_models_2022, type = "response")
+
+# Add predictions to the 2022 data frame
+ff_models_2022$predicted_stuff_plus <- predictions_2022$predictions
+```
+
+## plot actual & predicted stuff Plus in 2022
+
+```{r}
+predictions_2021 <- predict(sp_rf_final, data = ff_models, type = "response")
+
+# Add predictions to the 2022 data frame
+ff_models$predicted_stuff_plus <- predictions_2021$predictions
+ggplot(ff_models, aes(x = stuff_plus, y = predicted_stuff_plus)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue", se = TRUE) + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Actual vs Predicted Stuff+ for 2021",
+       x = "Actual Stuff+",
+       y = "Predicted Stuff+") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(ff_models_2022, aes(x = stuff_plus, y = predicted_stuff_plus)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue", se = TRUE) + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Actual vs Predicted Stuff+ for 2022",
+       x = "Actual Stuff+",
+       y = "Predicted Stuff+") +
+  theme_minimal()
+```
+
+## Predict xwOBA using Stuff Plus
+
+```{r}
+ff_models_2022$predicted_xwOBA <- predict(new_xwoba_lm, newdata = ff_models_2022)
+```
+
+```{r}
+range_all <- range(c(ff_models_2022$xwOBA, ff_models_2022$predicted_xwOBA), na.rm = TRUE)
+ggplot(ff_models_2022, aes(x = xwOBA, y = predicted_xwOBA)) +
+    geom_point() +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+    labs(title = "Actual vs Predicted xwOBA for 2022 Using Stuff+",
+         x = "Actual xwOBA",
+         y = "Predicted xwOBA") + 
+    theme_minimal()+
+  xlim(range_all) + ylim(range_all) 
+```
+
+```{r}
+ggplot(ff_models_2022, aes(x = predicted_stuff_plus, y = predicted_xwOBA)) +
+    geom_point() +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+    labs(title = "Actual vs Predicted xwOBA for 2022 Using Stuff+",
+         x = "Actual xwOBA",
+         y = "Predicted xwOBA") +
+    theme_minimal()
+```
+
+```{r}
+# Predict xwOBA using the linear model
+resid_analysis$predicted_xwOBA <- predict(new_xwoba_lm, newdata = resid_analysis)
+library(ggplot2)
+
+range_all <- range(c(ff_models$xwOBA, ff_models$predicted_xwOBA), na.rm = TRUE)
+
+# Scatter plot of actual vs. predicted xwOBA
+ggplot(resid_analysis, aes(x = xwOBA, y = predicted_xwOBA)) +
+  geom_point() +  # Add points
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +  # Line y = x for perfect predictions
+  labs(title = "Actual vs Predicted xwOBA for 2021",
+       x = "Actual xwOBA",
+       y = "Predicted xwOBA") +
+  theme_minimal() +
+  xlim(range_all) + ylim(range_all)  
+
+```
+
+```{r}
+# Assuming resid_analysis has actual and predicted xwOBA for 2021
+rmse_2021 <- sqrt(mean((resid_analysis$xwOBA - resid_analysis$predicted_xwOBA)^2, na.rm = TRUE))
+
+# Print RMSE for 2021
+print(paste("RMSE for 2021 xwOBA:", rmse_2021))
+# Assuming ff_models_2022 has actual and predicted xwOBA for 2022
+rmse_2022 <- sqrt(mean((ff_models_2022$xwOBA - ff_models_2022$predicted_xwOBA)^2, na.rm = TRUE))
+
+# Print RMSE for 2022
+print(paste("RMSE for 2022 xwOBA:", rmse_2022))
+
+```
+
+```{r}
+ff_models_2022$original_stuff_plus <- ff_models_2022$stuff_plus
+
+# Now replace stuff_plus with predicted_stuff_plus for use in the prediction
+ff_models_2022$stuff_plus <- ff_models_2022$predicted_stuff_plus
+
+
+```
+
+## Whiff Rate
+
+```{r}
+whiff_lm <- lm(whiff_pct ~ stuff_plus, data = ff_models)
+resid_analysis <- whiff_lm |> 
+  augment() |> 
+  # remove outliers
+  filter(abs(.std.resid) <= 2.6) 
+  # remove high leverage points
+  # filter(.hat <= 3*(1 + 1) / nrow(ff_models))
+new_whiff_lm <- lm(whiff_pct ~ stuff_plus, data = resid_analysis)
+```
+
+##2021
+
+```{r}
+resid_analysis$predicted_whiff_pct <- predict(new_whiff_lm, newdata = resid_analysis)
+library(ggplot2)
+
+range_all <- range(c(resid_analysis$whiff_pct, resid_analysis$predicted_whiff_pct), na.rm = TRUE)
+
+# Scatter plot of actual vs. predicted xwOBA
+ggplot(resid_analysis, aes(x = whiff_pct, y = predicted_whiff_pct)) +
+  geom_point() +  # Add points
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +  # Line y = x for perfect predictions
+  labs(title = "Actual vs Predicted Whiff Pct for 2021",
+       x = "Actual Whiff",
+       y = "Predicted Whiff") +
+  theme_minimal() +
+  xlim(range_all) + ylim(range_all)  
+```
+
+## 2022
+
+```{r}
+ff_models_2022$predicted_whiff_pct <- predict(new_whiff_lm, newdata = ff_models_2022)
+library(ggplot2)
+
+range_all <- range(c(ff_models_2022$whiff_pct, ff_models_2022$predicted_whiff_pct), na.rm = TRUE)
+
+# Scatter plot of actual vs. predicted xwOBA
+ggplot(resid_analysis, aes(x = whiff_pct, y = predicted_whiff_pct)) +
+  geom_point() +  # Add points
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +  # Line y = x for perfect predictions
+  labs(title = "Actual vs Predicted Whiff Pct for 2022",
+       x = "Actual Whiff",
+       y = "Predicted Whiff") +
+  theme_minimal() +
+  xlim(range_all) + ylim(range_all) 
+```
+
+```{r}
+# Assuming resid_analysis has actual and predicted xwOBA for 2021
+rmse_2021 <- sqrt(mean((resid_analysis$whiff_pct - resid_analysis$predicted_whiff_pct)^2, na.rm = TRUE))
+
+# Print RMSE for 2021
+print(paste("RMSE for 2021 Whiff Pct:", rmse_2021))
+# Assuming ff_models_2022 has actual and predicted xwOBA for 2022
+rmse_2022 <- sqrt(mean((ff_models_2022$whiff_pct - ff_models_2022$predicted_whiff_pct)^2, na.rm = TRUE))
+
+# Print RMSE for 2022
+print(paste("RMSE for 2022 Whiff Pct:", rmse_2022))
+```
+
+# Plot actual vs. predicted
+
+ggplot(ff_models_2022, aes(x = xwOBA, y = predicted_xwOBA)) + geom_point() + geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + labs(title = "Actual vs Predicted xwOBA for 2022", x = "Actual xwOBA", y = "Predicted xwOBA") + theme_minimal()
+
+ggplot(ff_models_2022, aes(x = sqrt_stuff_plus, y = xwOBA)) + geom_point() + geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + labs(title = "Predicted Stuff Plus vs xwOBA for 2022", x = "Actual xwOBA", y = "Predicted Stuff Plus") + theme_minimal()
