@@ -1,0 +1,69 @@
+---
+title: 'Quarto Test Document'
+title-block-banner: false
+description: 'A Quarto Document for Test Purposes'
+abstract: 'This title block is `body` aligned' 
+date: today
+date-format: 'DD.MM.YYYY'
+toc: true
+toc-title: Table of Contents (`body` aligned)
+toc-expand: true
+toc-location: body
+number-sections: true
+format: 
+    html:
+        theme: default
+        title-block-style: default
+        embed-resources: true
+        page-layout: article
+        smooth-scroll: true
+        include-in-header: add-class.html
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+
+## First Section
+
+This section is `page-left` aligned. Its layous differs from the title block.
+
+```{python}
+#| label: tbl-test_table
+#| tbl-cap: 'This table is `page-left` aligned'
+import pandas as pd
+from IPython.display import Markdown
+
+data_dict = {'a': range(0,5), 'b': range(5,10)}
+df = pd.DataFrame(data_dict)
+
+Markdown(df.to_markdown())
+```
+
+## References (the reference list is `page-left` aligned)
+
+::: {#refs}
+
+:::
+```{r}
+# statcast <- read.csv("Statcast.csv")
+# 
+# fangraphs <- read.csv("Fangraphs_Pitching_Models_2020-24.csv")
+```
+
+```{r}
+library(tidyverse)
+
+# statcast_condensed <- statcast |> 
+#   slice_head(n = 5) 
+
+statcast_condensed <- read.csv("statcast_condensed.csv")
+
+selected_columns <- statcast_condensed |> 
+  select(pitcher, pitch_name, year, release_speed, pfx_x, pfx_z, release_spin_rate, release_extension, description)
+
+
+selected_columns|> 
+  knitr::kable()
+```
