@@ -7,6 +7,7 @@ library(vip) # variable importance
 library(pdp) # partial dependence plot
 library(caret) # train random forest model with cross validation
 library(broom) # tidy extract linear summary
+library(cowplot) # join graphs together
 
 ## theme set
 theme_set(theme_bw())
@@ -874,14 +875,33 @@ rf_importance <- tibble(
   season = c(rep(2021, 5), rep(2022, 5), rep(2023, 5)),
   variable = rep(names(sp_rf_final_21$variable.importance), 3),
   sp_importance = c(
-    as.vector(unlist(sp_rf_final_21$variable.importance)),
-    as.vector(unlist(sp_rf_final_22$variable.importance)),
-    as.vector(unlist(sp_rf_final_23$variable.importance))
+    (
+      (as.vector(unlist(sp_rf_final_21$variable.importance)) - min(as.vector(unlist(sp_rf_final_21$variable.importance)))) /
+        (max(as.vector(unlist(sp_rf_final_21$variable.importance))) - min(as.vector(unlist(sp_rf_final_21$variable.importance))))
+     ),
+    (
+      (as.vector(unlist(sp_rf_final_22$variable.importance)) - min(as.vector(unlist(sp_rf_final_22$variable.importance)))) /
+        (max(as.vector(unlist(sp_rf_final_22$variable.importance))) - min(as.vector(unlist(sp_rf_final_22$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(sp_rf_final_23$variable.importance)) - min(as.vector(unlist(sp_rf_final_23$variable.importance)))) /
+        (max(as.vector(unlist(sp_rf_final_23$variable.importance))) - min(as.vector(unlist(sp_rf_final_23$variable.importance))))
+    )
     ),
   xwOBA_importance = c(
-    as.vector(unlist(xwOBA_rf_final_21$variable.importance)),
-    as.vector(unlist(xwOBA_rf_final_22$variable.importance)),
-    as.vector(unlist(xwOBA_rf_final_23$variable.importance))),
+    (
+      (as.vector(unlist(xwOBA_rf_final_21$variable.importance)) - min(as.vector(unlist(xwOBA_rf_final_21$variable.importance)))) /
+        (max(as.vector(unlist(xwOBA_rf_final_21$variable.importance))) - min(as.vector(unlist(xwOBA_rf_final_21$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(xwOBA_rf_final_22$variable.importance)) - min(as.vector(unlist(xwOBA_rf_final_22$variable.importance)))) /
+        (max(as.vector(unlist(xwOBA_rf_final_22$variable.importance))) - min(as.vector(unlist(xwOBA_rf_final_22$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(xwOBA_rf_final_23$variable.importance)) - min(as.vector(unlist(xwOBA_rf_final_23$variable.importance)))) /
+        (max(as.vector(unlist(xwOBA_rf_final_23$variable.importance))) - min(as.vector(unlist(xwOBA_rf_final_23$variable.importance))))
+    )
+    ),
   whiff_importance = c(
     as.vector(unlist(whiff_pct_rf_final_21$variable.importance)),
     as.vector(unlist(whiff_pct_rf_final_22$variable.importance)),
@@ -900,8 +920,9 @@ rf_importance <- tibble(
   )
 
 
-# plot
-rf_importance |> 
+## plots
+### Stuff+
+sp_imp_plot <- rf_importance |> 
   ggplot(aes(season, sp_importance, group = variable, color = variable)) +
   geom_point(alpha = 0.75) +
   geom_line(
@@ -911,14 +932,26 @@ rf_importance |>
   labs(
     x = "Season",
     y = "Importance",
-    color = "Characteristic"
+    color = "Characteristic",
+    title = "Stuff+ Variable Importance"
   ) +
   theme(
-    legend.position = "bottom"
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "none",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12),
   )
 
 ### xwOBA
-rf_importance |> 
+xwOBA_imp_plot <- rf_importance |> 
   ggplot(aes(season, xwOBA_importance, group = variable, color = variable)) +
   geom_point(alpha = 0.75) +
   geom_line(
@@ -928,11 +961,27 @@ rf_importance |>
   labs(
     x = "Season",
     y = "Importance",
-    color = "Characteristic"
+    color = "Characteristic",
+    title = "xwOBA Variable Importance"
   ) +
   theme(
-    legend.position = "bottom"
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "right",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12)
   )
+
+### combine Stuff+ and xwOBA
+plot_grid(sp_imp_plot, xwOBA_imp_plot)
 
 ### whiff%
 rf_importance |> 
@@ -971,3 +1020,4 @@ cor(ff_models_22$stuff_plus, ff_models_22$whiff_pct)
 
 ### 2023
 cor(ff_models_23$stuff_plus, ff_models_23$whiff_pct)
+
