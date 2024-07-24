@@ -201,7 +201,8 @@ pitching_models |>
   # geom_plate() +
   coord_fixed() +
   labs(
-    title = "POV: Right-Handed Pitcher Facing Home Plate",
+    title = "4-Seam Fastball xwOBA by Movement",
+    subtitle = "POV: Right-Handed Pitcher Facing Home Plate",
     caption = "All pitchers with 100 or more fastballs thrown in a year",
     x = "Horizontal Movement (in)",
     y = "Vertical Movement (in)", 
@@ -256,7 +257,8 @@ pitching_models |>
   coord_fixed() +
   # labels
   labs(
-    title = "POV: Right-Handed Pitcher Facing Home Plate",
+    title = "4-Seam Fastball Stuff+ by Movement",
+    subtitle = "POV: Right-Handed Pitcher Facing Home Plate",
     caption = "All pitchers with 100 or more fastballs thrown in a year",
     x = "Horizontal Movement (in)",
     y = "Vertical Movement (in)", 
