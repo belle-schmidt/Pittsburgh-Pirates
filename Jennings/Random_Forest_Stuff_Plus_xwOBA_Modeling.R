@@ -1034,7 +1034,7 @@ rf_importance |>
     plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
     plot.caption = element_text(size = 10),
     axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
-    axis.title.y = element_blank(),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
     axis.text.x = element_text(size = 12, hjust = 0.5),
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
