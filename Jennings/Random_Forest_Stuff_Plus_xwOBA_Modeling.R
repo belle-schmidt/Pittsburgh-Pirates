@@ -983,6 +983,68 @@ xwOBA_imp_plot <- rf_importance |>
 ### combine Stuff+ and xwOBA
 plot_grid(sp_imp_plot, xwOBA_imp_plot)
 
+
+
+### PLOT BY THEMSELVES
+### Stuff+
+rf_importance |> 
+  ggplot(aes(season, sp_importance, group = variable, color = variable)) +
+  geom_point(alpha = 0.75) +
+  geom_line(
+    linewidth = 1.25
+  ) +
+  ggthemes::scale_color_pander() +
+  labs(
+    x = "Season",
+    y = "Importance",
+    color = "Characteristic",
+    title = "Stuff+ Variable Importance"
+  ) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12),
+  )
+
+### xwOBA
+rf_importance |> 
+  ggplot(aes(season, xwOBA_importance, group = variable, color = variable)) +
+  geom_point(alpha = 0.75) +
+  geom_line(
+    linewidth = 1.25
+  ) +
+  ggthemes::scale_color_pander() +
+  labs(
+    x = "Season",
+    y = "Importance",
+    color = "Characteristic",
+    title = "xwOBA Variable Importance"
+  ) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12)
+  )
+
 ### whiff%
 rf_importance |> 
   ggplot(aes(season, whiff_importance, group = variable, color = variable)) +
@@ -994,10 +1056,23 @@ rf_importance |>
   labs(
     x = "Season",
     y = "Importance",
-    color = "Characteristic"
+    color = "Characteristic",
+    title = "Whiff% Variable Importance"
   ) +
   theme(
-    legend.position = "bottom"
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12)
   )
 
 ## correlations
