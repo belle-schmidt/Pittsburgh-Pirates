@@ -1,0 +1,14 @@
+```{r}
+set.seed(1277)
+Data_Example <- mlb_pitching_stats_2020_24 %>%
+  filter(pitch_name == "4-Seam Fastball") %>% 
+  select(velocity, extension, induced_vertical_break, horizontal_break, spin, stuff_plus, whiff_pct, xwOBA)%>%
+  mutate(across(c(velocity, extension, induced_vertical_break, horizontal_break, spin, whiff_pct, stuff_plus), round, digits = 1)) %>%
+  mutate(across(xwOBA, round, digits = 3)) %>%
+  rename_with(~ gsub("_", " ", .)) %>%
+  sample_n(4)%>%
+  gt()%>% 
+ gt_theme_espn()
+Data_Example
+```
+
