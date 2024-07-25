@@ -23,9 +23,13 @@ format:
         color: white;
         }
         h2 {
-        color: #FDB827;
+        color: #27251F;
         }
         </style>
+    style: |
+      h1, h2, h3, h4, h5, h6 {
+        text-align: center;
+      }
 execute:
   echo: false
   warning: false
@@ -41,15 +45,19 @@ library(broom)
 library(plotly)
 library(gapminder)
 library(gridExtra)
+library(baseballr)
+library(ggthemes)
+library(hexbin)
 
-color_scale <- scale_fill_manual(values = c("darkred","orange2", "darkslategray","darkgoldenrod3", "violetred4")) 
+## set theme
+theme_set(theme_bw())
 
 # Customizes a color scale for the scatterplots
 color_scale2 <- scale_colour_manual(values = c("darkred","orange2", "darkslategray","darkgoldenrod3", "violetred4"))
 
+
 # Creates a custom theme for all the plots
-theme <- theme_bw() +
-  theme(legend.position = "none",
+theme <- theme(legend.position = "none",
         plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
         axis.title = element_text(face = "bold", size = 12),
         axis.text = element_text(face = "bold"),
@@ -57,37 +65,60 @@ theme <- theme_bw() +
         strip.background = element_rect(fill = "steelblue4", colour = "black"),
         strip.text.x = element_text(color = "white"))
 
+## create own theme for hexbin graphs
+movement_theme <- function(){
+  theme(
+    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
+    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12),
+    panel.spacing = unit(1, "lines")
+  )
+}
+
 # Reads in combined Baseball Savant and Statcast data
 pitching_stats <- read.csv("mlb_pitching_stats_2020-24.csv")
 
 # Filters data to only include fastballs and converts season to categorical
 fastball_data <- pitching_stats |> 
-  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus), season %in% c(2021, 2022, 2023)) |>   mutate(season = factor(season, levels = c(2021, 2022, 2023)))
+  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus), season %in% c(2021, 2022, 2023)) |>   mutate(season = factor(season))
+
+## Changed horizontal break to different viewpoint for hexplots
+hexplot_models <- fastball_data |> 
+  mutate(horizontal_break = -horizontal_break)
 ```
 
 ## Executive Summary
 
 ## Introduction 
-In the fast-paced environment of Major League Baseball, Stuff+ serves as a vital metric for evaluating the 'nastiness' of a pitch. The pitching metric analyzes physical characteristics of a pitch including velocity, spin, extension, and movement to evaluate its effectiveness.  It is measured so that a Stuff+ score of 100 represents a pitch that is considered league average for pitches thrown in that pitch-type and anything above or below 100 is considered above or below average respectively. For example, a pitcher that throws a 4-Seam Fastball with a Stuff+ of 125 would be 25% above league average for fastballs. 
+In the fast-paced environment of Major League Baseball, Stuff+ serves as a vital metric for evaluating the 'nastiness' of a pitch. The pitching metric analyzes physical characteristics of a pitch including velocity, spin, extension, and movement to evaluate its effectiveness. It is measured so that a Stuff+ score of 100 represents a pitch that is considered league average for pitches thrown in that pitch-type and anything above or below 100 is considered above or below average respectively. 
 
-With Stuff+ becoming a common metric used to evaluate pitchers, we wanted to assess how accurately the model was actually predicting a pitcher's success and how appropriately it was weighing the factors that go into it. We also were curious to know if there were commonalities between the pitches that Stuff+ tended to over or under value,  telling us it was not accounting for variables that played a role in a pitcher's effectiveness. 
-
+With Stuff+ becoming a common metric used to evaluate pitchers, we wanted to assess how accurately the model was actually predicting a pitcher's success and how appropriately it was weighing the factors that go into it. We also were curious to know if there were commonalities between the pitches that Stuff+ tended to over or under value, telling us it was not accounting for variables that played a role in a pitcher's effectiveness. 
 
 By answering these questions, we hope to provide valuable information to help build a better Stuff+ model so that it becomes a more reliable metric for people involved in player acquisition. We also believe that getting a better understanding of which physical pitch characteristics play a larger role in success can help pitchers develop their own pitches in a way that allows them to be more successful. 
 
 Our analysis is concentrated on the 4-seam fastball, with plans to extend this research to other types of pitches in future studies.
 
-
 ## Data
-For our analysis, we used FanGraphs and Statcast data from 2020 to 2024. We downloaded the FanGraphs data from ______ and the Statcast data from Baseball Savant. 
+For our analysis, we used FanGraphs and Statcast data from 2021 to 2023. Although FanGraphs does have Stuff+ data for the 2020 and 2024 seasons as well, we decided not to include them because we wanted to limit bias. In both 2020 and 2024 there is minimal data due to Covid-19 or an incomplete season respectively. We downloaded the FanGraphs data by web scraping using the baseballr library and the Statcast data from Baseball Savant. 
 
 #### **FanGraphs Data:**
 
-The FanGraphs data provides each pitcher's Stuff+ for each pitch they throw in each season. Note that unless specified otherwise, when we say pitch throughout this paper, we are referring to pitch name and not an individual pitch. This data was originally formatted so that each row provided information about a pitcher in a given year. However, we used pivot longer to make each row represent a pitcher in a given year for a specific pitch. For example, instead of one row having information about all of Paul Skenes' pitches from the 2024 season, it became that one row had information about Paul Skene's sinker in the 2024 season and another had information about his 4-Seam Fastball in the 2024 season. 
+The FanGraphs data provides each pitcher's Stuff+ for each pitch they throw in each season. Note that unless specified otherwise, when we say pitch throughout this paper, we are referring to pitch name and not an individual pitch. This data was originally formatted so that each row provided information about a pitcher in a given year. However, we used pivot longer to make each row represent a pitcher in a given year for a specific pitch. For example, instead of one row having information about all of Paul Skenes' pitches from the 2024 season, it became that one row had information about Paul Skenes' sinker in the 2024 season and another had information about his 4-seam fastball in the 2024 season. 
 
 ##### **Statcast Data:**
 
-Statcast's data, on the other hand, is pitch-by-pitch data that gives information about all the individual pitches thrown. Since FanGraphs only has Stuff+ data from 2020 to 2024, we only included Statcast data from 2020 until ____ in the 2024 season. From the Statcast data we focused primarily on the pitch physical characteristics used to measure Stuff+, as well as, run value, expected weighted on-base average (xwOBA), and outcome description. For each pitch physical characteristic individually, xwOBA, and run value per 100 pitches, we grouped the data by season, pitcher, and pitch name to calculate each pitcher's average for each pitch in each season. Using the same grouping and the outcome description, we calculated each pitcher's whiff percentage, swing and miss percentage, and swing percentage for each pitch in each season. We also calculated the number of times each pitcher threw each pitch in each season. 
+Statcast's data, on the other hand, is pitch-by-pitch data that gives information about all the individual pitches thrown. From the Statcast data, we initially looked at the pitch physical characteristics used to measure Stuff+, as well as, run value and outcome description. For each pitch physical characteristic individually and run value per 100 pitches, we grouped the data by season, pitcher, and pitch name to calculate each pitcher's average for each pitch in each season. Using the same grouping and the outcome description, we calculated each pitcher's whiff percentage, expected wOBA (xwOBA), swing and miss percentage, and swing percentage for each pitch in each season. We also calculated the number of times each pitcher threw each pitch in each season. 
 
 ```{r}
 statcast_condensed <- read.csv("statcast_condensed.csv")
@@ -102,7 +133,7 @@ selected_columns|>
 
 **Combining the Data:**
 
-Once all these values were calculated, we combined the FanGraphs Dataset to the Statcast Dataset to evaluate all these metrics simultaneously. It is also important to note that in our analysis, we only included pitchers that threw that given pitch 100 or more times to limit bias in our results. 
+Once all these values were calculated, we combined the FanGraphs Dataset to the Statcast Dataset to evaluate all these metrics simultaneously. It is also important to note that in our analysis, we only included pitchers that threw the given pitch 100 or more times to limit bias in our results. 
 
 ```{r}
 pitching_stats |> 
@@ -112,9 +143,11 @@ pitching_stats |>
 ```
 
 ## Exploratory Data Analysis (EDA)
-In our initial analysis, we decided to focus on the 4-Seam Fastball, often known as the rising fastball. In all of the seasons we analyzed, it was by far the most commonly used pitch. In addition... ** Ask Liam about Dodgers bringing it back in 2017?** 
+In our initial analysis, we decided to focus on the 4-seam fastball, often known as the rising fastball. In all of the seasons we analyzed, it was by far the most commonly used pitch. In addition... ** Ask Liam about Dodgers bringing it back in 2017?** 
 
-With the 4-Seam Fastball on the rise, we wanted to know how the effectiveness of the pitch was changing from year-to-year. Intuitively it would make sense for the pitch to become less effective with time because batters are seeing it more frequently and adjusting. To see if this was true, we looked at the relationship between each pitch physical characteristic individually and an outcome variable. Our group decided to focus primarily on whiff percentage and expected weighted on-base average for our outcome variables. We liked that whiff percentage gave us an idea of whether people were making contact with the pitch or not while expected weighted on-base average gave us an idea of (a) whether or not people were able to get on base and (b) how well people were making contact with the pitch.
+With the 4-seam fastball on the rise, we wanted to know how the effectiveness of the pitch was changing from year-to-year. Intuitively it would make sense for the pitch to become less effective with time because batters are seeing it more frequently and adjusting. To see if this was true, we looked at the relationship between each pitch physical characteristic individually and an outcome variable. 
+
+Our group decided to focus primarily on whiff percentage and expected weighted on-base average for our outcome variables because we felt like the combination gave us a lot of insight. We liked that whiff percentage gave us an idea of whether or not people were making contact with the pitch while expected weighted on-base average gave us an idea of (a) whether or not people were able to get on base and (b) how well people were making contact with the pitch.
 
 ::: {.panel-tabset}
 
@@ -254,9 +287,140 @@ fastball_data |>
 **Figure 6 Key Takeaways:**
 
 :::
+
+## Spin Rate   
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| out-width: 100%
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball spin rate and average xwOBA value
+fastball_data|> 
+  ggplot(aes(x = spin, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Spin And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Spin Rate",
+       y = "Pitcher's Average xwOBA") +
+  color_scale2 +
+  theme 
+```
+
+**Figure 7 Key Takeaways:**
+
+## Whiff Percentage 
+
+```{r}
+#| out-width: 100%
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball spin rate and whiff percentage
+fastball_data |> 
+  ggplot(aes(x = spin, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Spin And Whiff Percentage For A 4-Seam Fastball",
+       x = "Pitcher's Average Spin Rate",
+       y = "Pitcher's Whiff Percentage") +
+  theme +
+  color_scale2 +
+  theme(plot.title = element_text(size = 11))
+```
+
+**Figure 8 Key Takeaways:**
+
 :::
 
-Seeing that the effectiveness of the 4-Seam Fastball was in fact changing year-by-year made us wonder if the Stuff+ model was adjusting as well. For this, we observed the relationship between each pitch physical characteristic individually and Stuff+. 
+## Extension   
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| out-width: 100%
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball release extension and average xwOBA value
+fastball_data |> 
+  ggplot(aes(x = extension, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Extension And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Extension",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+**Figure 9 Key Takeaways:**
+
+## Whiff Percentage 
+
+```{r}
+#| out-width: 100%
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball release extension and whiff percentage
+fastball_data |> 
+  ggplot(aes(x = extension, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Extension And Whiff Percentage For A 4-Seam Fastball",
+       x = "Pitcher's Average Extension",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme +
+  theme(plot.title = element_text(size = 10)) 
+```
+
+**Figure 10 Key Takeaways:**
+
+:::
+:::
+
+Given the hype around the rising fastball, we expected that induced vertical break would play a large role in both whiff percentage and expected wOBA. To our surprise, the change in whiff percentage and expected wOBA per inch of induced vertical movement was much less than expected. We also found that the change in both of those outcome variables per inch of horizontal movement was more than we expected. This peaked our interest into farther analyzing how movement related to both outcome and pitch physical characteristic variables and how this change varied from year-to-year. With the hopes to further our understanding, we made plots that looked at how vertical and horizontal movement combined impacted these variables. 
+
+::: {.panel-tabset}
+
+## Movement & Velocity
+
+```{r}
+#| out-width: 100%
+```
+
+**Figure 11 Key Takeaways:**
+
+## Movement & Spin Rate
+
+```{r}
+#| out-width: 100%
+```
+
+**Figure 12 Key Takeaways:**
+
+## Movement & xwOBA
+
+```{r}
+#| out-width: 100%
+```
+
+**Figure 13 Key Takeaways:**
+
+## Movement & Whiff Percentage
+
+```{r}
+#| out-width: 100%
+```
+
+**Figure 14 Key Takeaways:**
+:::
+
+Seeing that the effectiveness of the 4-seam fastball was in fact changing year-by-year made us wonder if the Stuff+ model was adjusting as well. For this, we observed the relationship between each pitch physical characteristic individually and Stuff+. 
 
 ::: {.panel-tabset}
 
@@ -265,7 +429,6 @@ Seeing that the effectiveness of the 4-Seam Fastball was in fact changing year-b
 ```{r}
 #| out-width: 100%
 # Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and its average stuff+
-
 fastball_data |> 
   ggplot(aes(x = velocity, y = stuff_plus)) +
   geom_point(aes(color = season), alpha = .3) +
@@ -278,14 +441,14 @@ fastball_data |>
    theme
 ```
 
-**Figure 7 Key Takeaways:**
+**Figure 15 Key Takeaways:**
 
 ## Vertical Break 
 
 ```{r}
 #| out-width: 100%
-# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and its average stuff+
 
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and its average stuff+
 fastball_data |> 
   ggplot(aes(x = induced_vertical_break, y = stuff_plus)) +
   geom_point(aes(color = season), alpha = .3) +
@@ -298,7 +461,7 @@ fastball_data |>
   theme
 ```
 
-**Figure 8 Key Takeaways:**
+**Figure 16 Key Takeaways:**
 
 ## Horizontal Break  
 
@@ -318,18 +481,9 @@ fastball_data |>
   theme
 ```
 
-**Figure 9 Key Takeaways:**
+**Figure 17 Key Takeaways:**
 
 :::
-
-
-
-
-Steps we want to mention:
-- Focused on 4-Seam Fastball First
-- Looked at how each characteristic changed the outcome, saw some made more impact than others 
-- Looked at how the stuff+ model changed for each characteristic (told us that the model was changing year by year)
-- Liam did his analysis on the hex plot to see how some of the physical characteristics worked together. 
 
 Goes into methods: 
 - Found it was hard to eyeball so created the slope plots to quantify the difference - used linear models with season as the interaction variable
@@ -343,8 +497,6 @@ _ If have time then say we wanted to see if similar trends were happening with s
 
 
 Notes on data part:
-2. Note if the data was lacking anything 
-3. Maybe give an example
 4. Give information about how many observations were in the data and how many we took out
 
 Describe the data you’re using in detail, where you accessed it, along with relevant exploratory data analysis (EDA). You should also include descriptions of any major data pre-processing/cleaning steps.
