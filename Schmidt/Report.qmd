@@ -91,7 +91,8 @@ pitching_stats <- read.csv("mlb_pitching_stats_2020-24.csv")
 
 # Filters data to only include fastballs and converts season to categorical
 fastball_data <- pitching_stats |> 
-  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus), season %in% c(2021, 2022, 2023)) |>   mutate(season = factor(season))
+  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus), season %in% c(2021, 2022, 2023)) |>   
+  mutate(season = factor(season))
 
 ## Changed horizontal break to different viewpoint for hexplots
 hexplot_models <- fastball_data |> 
@@ -159,6 +160,7 @@ Our group decided to focus primarily on whiff percentage and expected weighted o
 
 ```{r}
 #| out-width: 100%
+#| 
 # Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and average xwOBA value
 fastball_data |> 
   ggplot(aes(x = velocity, y = xwOBA)) +
@@ -178,8 +180,8 @@ fastball_data |>
 
 ```{r}
 #| out-width: 100%
+#| 
 # Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and whiff percentage
-
 fastball_data |> 
   ggplot(aes(x = velocity, y = whiff_pct)) +
   geom_point(aes(color = season), alpha = .3) +
@@ -391,6 +393,65 @@ Given the hype around the rising fastball, we expected that induced vertical bre
 
 ```{r}
 #| out-width: 100%
+### velocity
+hexplot_models |> 
+  # plot
+  ggplot() + 
+  # create the bins by stuff+
+  stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
+                       z = velocity), 
+                   binwidth = c(3, 3), fun = mean,
+                   color = "black") +
+  # create color gradient with avg velocity as the middle color
+  scale_fill_gradient2(low = "dodgerblue2",
+                       mid = "white",
+                       high = "firebrick2",
+                       # average velocity
+                       midpoint = mean(fastball_data$velocity),
+                       breaks = seq(85, 100, 5),
+                       labels = c(85, 90, 95, 100),
+                       limits = c(85, 100)) +
+  # 0 inches of horizontal movement
+  geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
+  # 0 inches of vertical movement
+  geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
+  # average horizontal break
+  geom_vline(aes(xintercept = mean(horizontal_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  # average induced vertical break
+  geom_hline(aes(yintercept = mean(induced_vertical_break)), 
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  # hand side label
+  geom_label(label = "HAND SIDE", x = 16.7, y = 0,
+             label.padding = unit(0.35, "lines"),
+             label.r = unit(0.25, "lines"),
+             label.size = 1,
+             size.unit = "mm") +
+  # glove side label
+  geom_label(label = "GLOVE SIDE", x = -1.2, y = 0,
+             label.padding = unit(0.35, "lines"),
+             label.r = unit(0.25, "lines"),
+             label.size = 1,
+             size.unit = "mm") +
+  # create breaks and add inches format to y axis
+  scale_y_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  # create breaks and add inches format to x axis
+  scale_x_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  coord_fixed() +
+  # labels
+  labs(
+    title = "4-Seam Fastball Velocity by Pitch Movement",
+    subtitle = "POV: Right-Handed Pitcher Facing Home Plate",
+    caption = "All pitchers with 100 or more fastballs thrown in a year",
+    x = "Horizontal Movement (in)",
+    y = "Vertical Movement (in)", 
+    fill = "Velocity (MPH)") +
+  # add theme function created above
+  movement_theme() +
+  # facet by each season
+  facet_wrap(~ season)
 ```
 
 **Figure 11 Key Takeaways:**
@@ -420,7 +481,7 @@ Given the hype around the rising fastball, we expected that induced vertical bre
 **Figure 14 Key Takeaways:**
 :::
 
-Seeing that the effectiveness of the 4-seam fastball was in fact changing year-by-year made us wonder if the Stuff+ model was adjusting as well. For this, we observed the relationship between each pitch physical characteristic individually and Stuff+. 
+Through the relationship and hex plots we were able to see that the importance of each pitch physical characteristic for determining the effectiveness of a 4-seam fastball was in fact changing year-by-year. This made us wonder if the Stuff+ model was adjusting as well. For this, we observed the relationship between each pitch physical characteristic individually and Stuff+. Again, we initially looked at each pitch physical characteristic individually and after observed vertical and horizontal movement simultaneously. 
 
 ::: {.panel-tabset}
 
