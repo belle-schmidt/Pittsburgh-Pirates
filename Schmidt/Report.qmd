@@ -87,7 +87,7 @@ movement_theme <- function(){
 }
 
 # Reads in combined Baseball Savant and Statcast data
-pitching_stats <- read.csv("mlb_pitching_stats_2020-24.csv")
+pitching_stats <- read.csv("C:/Users/Tiger/Downloads/mlb_pitching_stats_2020-24 (1).csv")
 
 # Filters data to only include fastballs and converts season to categorical
 fastball_data <- pitching_stats |> 
@@ -121,27 +121,12 @@ The FanGraphs data provides each pitcher's Stuff+ for each pitch they throw in e
 
 Statcast's data, on the other hand, is pitch-by-pitch data that gives information about all the individual pitches thrown. From the Statcast data, we initially looked at the pitch physical characteristics used to measure Stuff+, as well as, run value and outcome description. For each pitch physical characteristic individually and run value per 100 pitches, we grouped the data by season, pitcher, and pitch name to calculate each pitcher's average for each pitch in each season. Using the same grouping and the outcome description, we calculated each pitcher's whiff percentage, expected wOBA (xwOBA), swing and miss percentage, and swing percentage for each pitch in each season. We also calculated the number of times each pitcher threw each pitch in each season. 
 
-```{r}
-statcast_condensed <- read.csv("statcast_condensed.csv")
 
-selected_columns <- statcast_condensed |> 
-  select(pitcher, pitch_name, year, release_speed, pfx_x, pfx_z, release_spin_rate, release_extension, description)
-
-
-selected_columns|> 
-  knitr::kable()
-```
 
 **Combining the Data:**
 
 Once all these values were calculated, we combined the FanGraphs Dataset to the Statcast Dataset to evaluate all these metrics simultaneously. It is also important to note that in our analysis, we only included pitchers that threw the given pitch 100 or more times to limit bias in our results. 
 
-```{r}
-pitching_stats |> 
-  slice(1:5) |> 
-  select(-X, -n_pitches, - swing_strikes, -n_swings, -n_miss, -role, -p_throws) |> 
-  knitr::kable()
-```
 
 ## Exploratory Data Analysis (EDA)
 In our initial analysis, we decided to focus on the 4-seam fastball, often known as the rising fastball. In all of the seasons we analyzed, it was by far the most commonly used pitch. In addition... ** Ask Liam about Dodgers bringing it back in 2017?** 
