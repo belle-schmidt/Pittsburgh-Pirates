@@ -65,3 +65,8 @@ Player_Example <- Four_Seam %>%
 Player_Example
 
 ```
+
+```{r}
+gtsave(Player_Example, "Player_Example.png")
+```
+
