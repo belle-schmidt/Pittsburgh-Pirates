@@ -1,0 +1,67 @@
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(gt)
+library(scales)
+```
+
+```{r}
+mlb_pitching_stats_2020_24 <- read.csv("C:/Users/Tiger/Downloads/mlb_pitching_stats_2020-24 (1).csv")
+Four_Seam <- mlb_pitching_stats_2020_24 %>%
+  filter(pitch_name == "4-Seam Fastball")%>%
+  filter(season %in% c(2021, 2022, 2023))
+```
+
+
+```{r}
+stuff_plus_min <- min(Four_Seam$stuff_plus, na.rm = TRUE)
+stuff_plus_max <- max(Four_Seam$stuff_plus, na.rm = TRUE)
+
+# Create the table with quantile-based color scales
+Player_Example <- Four_Seam %>%
+  filter(player_name %in% c("Andrew Heaney", "Julian Merryweather")) %>%
+  select(player_name, season, velocity, extension, induced_vertical_break, horizontal_break, spin, stuff_plus, whiff_pct, xwOBA) %>%
+  
+  mutate(across(c( season, velocity, extension, induced_vertical_break, horizontal_break, spin, whiff_pct, stuff_plus), round, digits = 1)) %>%
+  mutate(across(xwOBA, round, digits = 3)) %>%
+  rename_with(~ gsub("_", " ", .)) %>%
+  gt() %>% 
+  data_color(
+    columns = vars("stuff plus"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain =  c(stuff_plus_min, 100, stuff_plus_max), n=120)
+    )%>%
+  data_color(
+    columns = vars("whiff pct"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$whiff_pct, n=120)
+  ) %>%
+  data_color(
+    columns = vars("xwOBA"),
+    colors = scales::col_quantile(palette = c("tomato1", "white", "steelblue1"), domain = Four_Seam$xwOBA, n=120)
+  ) %>%
+  data_color(
+    columns = vars("velocity"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$velocity, n=120)
+  ) %>%
+  data_color(
+    columns = vars("extension"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$extension,  n=120)
+  ) %>%
+  data_color(
+    columns = vars("induced vertical break"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$induced_vertical_break, n =120)
+  ) %>%
+  data_color(
+    columns = vars("horizontal break"),
+    colors = scales::col_quantile(palette = c("tomato1", "white", "steelblue1"), domain = Four_Seam$horizontal_break, n=120)
+  ) %>%
+  data_color(
+    columns = vars("spin"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$spin, n=120)
+  ) %>%
+  gt_theme_espn() %>%
+  tab_header(title = "Andrew Heaney & Julian Merryweather 4-Seam Fastball")
+
+Player_Example
+
+```
