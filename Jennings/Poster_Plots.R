@@ -607,60 +607,60 @@ pitching_models |>
 
 #### THESE DIMENSIONS LOOK BEST IN FULL ZOOM
 ### Stuff+
-# pitching_models |> 
-#   # filter for 4-Seam Fastball
-#   filter(pitch_name == "4-Seam Fastball") |> 
-#   # plot
-#   ggplot() + 
-#   # create the bins by stuff+
-#   stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
-#                        z = stuff_plus), 
-#                    binwidth = c(3, 3), fun = mean,
-#                    color = "black") +
-#   # create color gradient with 100 being the average
-#   scale_fill_gradient2(low = "dodgerblue2",
-#                        mid = "white",
-#                        high = "firebrick2",
-#                        # average spin rate
-#                        midpoint = 100) +
-#   # 0 inches of horizontal movement
-#   geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
-#   # 0 inches of vertical movement
-#   geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
-#   # average horizontal break
-#   geom_vline(aes(xintercept = mean(horizontal_break)),
-#              color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
-#   # average induced vertical break
-#   geom_hline(aes(yintercept = mean(induced_vertical_break)), 
-#              color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
-#   # hand side label
-#   geom_label(label = "HAND SIDE", x = 18.15, y = -0.3,
-#              label.padding = unit(0.35, "lines"),
-#              label.r = unit(0.25, "lines"),
-#              label.size = 1,
-#              size.unit = "mm") +
-#   # glove side label
-#   geom_label(label = "GLOVE SIDE", x = -2.9, y = -0.3,
-#              label.padding = unit(0.35, "lines"),
-#              label.r = unit(0.25, "lines"),
-#              label.size = 1,
-#              size.unit = "mm") +
-#   # create breaks and add inches format to y axis
-#   scale_y_continuous(breaks = seq(-20, 20, 5),
-#                      labels = scales::number_format(suffix = "\"")) +
-#   # create breaks and add inches format to x axis
-#   scale_x_continuous(breaks = seq(-20, 20, 5),
-#                      labels = scales::number_format(suffix = "\"")) +
-#   coord_fixed() +
-#   # labels
-#   labs(
-#     title = "4-Seam Fastball Stuff+ by Movement",
-#     subtitle = "POV: Right-Handed Pitcher Facing Home Plate",
-#     caption = "All pitchers with 100 or more fastballs thrown in a year",
-#     x = "Horizontal Movement (in)",
-#     y = "Vertical Movement (in)", 
-#     fill = "Stuff+") +
-#   # add theme function created above
-#   movement_theme() +
-#   # facet by each season
-#   facet_wrap(~ season)
+pitching_models |>
+  # filter for 4-Seam Fastball
+  filter(pitch_name == "4-Seam Fastball") |>
+  # plot
+  ggplot() +
+  # create the bins by stuff+
+  stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
+                       z = stuff_plus),
+                   binwidth = c(3, 3), fun = mean,
+                   color = "black") +
+  # create color gradient with 100 being the average
+  scale_fill_gradient2(low = "dodgerblue2",
+                       mid = "white",
+                       high = "firebrick2",
+                       # average spin rate
+                       midpoint = 100) +
+  # 0 inches of horizontal movement
+  geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
+  # 0 inches of vertical movement
+  geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
+  # average horizontal break
+  geom_vline(aes(xintercept = mean(horizontal_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  # average induced vertical break
+  geom_hline(aes(yintercept = mean(induced_vertical_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  # hand side label
+  geom_label(label = "HAND SIDE", x = 18.15, y = -0.3,
+             label.padding = unit(0.35, "lines"),
+             label.r = unit(0.25, "lines"),
+             label.size = 1,
+             size.unit = "mm") +
+  # glove side label
+  geom_label(label = "GLOVE SIDE", x = -2.9, y = -0.3,
+             label.padding = unit(0.35, "lines"),
+             label.r = unit(0.25, "lines"),
+             label.size = 1,
+             size.unit = "mm") +
+  # create breaks and add inches format to y axis
+  scale_y_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  # create breaks and add inches format to x axis
+  scale_x_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  coord_fixed() +
+  # labels
+  labs(
+    title = "4-Seam Fastball Stuff+ by Movement",
+    subtitle = "POV: Right-Handed Pitcher Facing Home Plate",
+    caption = "All pitchers with 100 or more fastballs thrown in a year",
+    x = "Horizontal Movement (in)",
+    y = "Vertical Movement (in)",
+    fill = "Stuff+") +
+  # add theme function created above
+  movement_theme() +
+  # facet by each season
+  facet_wrap(~ season)
