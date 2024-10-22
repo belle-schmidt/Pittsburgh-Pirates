@@ -12,15 +12,20 @@ theme_set(theme_bw())
 
 ## Data 
 statcast <- read.csv("Statcast.csv")
-fangraphs <- read.csv("Fangraphs_Pitching_Models_2020-24.csv")
+updated_statcast <- read.csv("statcast_2024.csv")
+fangraphs <- read.csv("Fangraphs_Pitching_Models_2021-24.csv")
 
 ## glimpse
 glimpse(statcast)
+glimpse(updated_statcast)
 glimpse(fangraphs)
 
 ## remove unnecessary columns from statcast
 statcast_filter <- statcast |> 
-  select(-c(X.1, X, spin_dir:break_length_deprecated, tfs_deprecated, tfs_zulu_deprecated,
+  select(-1) |> 
+  rbind(updated_statcast) |> 
+  filter(game_year != 2020) |> 
+  select(-c(X, spin_dir:break_length_deprecated, tfs_deprecated, tfs_zulu_deprecated,
          umpire, sv_id, fielder_2, pitcher.1:fielder_9, home_score:delta_home_win_exp, bat_speed, swing_length)) |> 
   rename(pitcher_id = pitcher)
 
@@ -145,5 +150,5 @@ pitching_models <- statcast_pitch_summary_stats |>
 ### UPDATED NOTE: Joined Sweepers with sliders and slurves with curveballs in previous dataset so NAs are gone
 
 ### Write to .csv
-#write.csv(pitching_models, "mlb_pitching_stats_2020-24.csv")
+write.csv(pitching_models, "mlb_pitching_stats_2021-24.csv")
 
