@@ -1,5 +1,5 @@
 ## Load in data
-pitching_models <- read.csv("mlb_pitching_stats_2020-24.csv")
+pitching_models <- read.csv("mlb_pitching_stats_2021-24.csv")
 
 ## Libraries
 library(tidyverse)

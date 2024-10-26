@@ -5,7 +5,7 @@ library(ggthemes)
 library(hexbin)
 
 ## Load in data
-pitching_models <- read.csv("mlb_pitching_stats_2020-24.csv")
+pitching_models <- read.csv("mlb_pitching_stats_2021-24.csv")
 
 ## Only use 2021-2023 (full seasons)
 pitching_models <- pitching_models |> 
