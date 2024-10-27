@@ -29,6 +29,9 @@ statcast_filter <- statcast |>
          umpire, sv_id, fielder_2, pitcher.1:fielder_9, home_score:of_fielding_alignment, bat_speed, swing_length)) |> 
   rename(pitcher_id = pitcher)
 
+## write filtered csv
+#write.csv(statcast_filter, "statcast_2021-24.csv")
+
 ## remove unnecessary columns from FanGraphs
 fangraphs_filter <- fangraphs |> 
   select(Season:xMLBAMID, Role, stuff_plus_stuff_CH:stuff_plus_stuff_FS, stuff_plus_stuff_FO)
@@ -234,9 +237,9 @@ pitching_models_1 <- pitching_models |>
   ) |> 
   # calculate velo and movement difference between primary fastball and secondary pitches
   mutate(
-    diff_velocity = primary_FB_velocity - velocity,
-    diff_horizontal_break = primary_FB_horizontal_break - horizontal_break,
-    diff_induced_vertical_break = primary_FB_induced_vertical_break - induced_vertical_break
+    diff_velocity = velocity - primary_FB_velocity,
+    diff_horizontal_break = horizontal_break - primary_FB_horizontal_break,
+    diff_induced_vertical_break = induced_vertical_break - primary_FB_induced_vertical_break
   ) |> 
   # selecy everything but the primary Fastball statistics
   select(
@@ -246,6 +249,6 @@ pitching_models_1 <- pitching_models |>
 
 
 
-### Write to .csv
+### write to .csv
 write.csv(pitching_models_1, "mlb_pitching_stats_2021-24.csv")
 
