@@ -171,8 +171,6 @@ pitching_models <- statcast_pitch_summary_stats |>
   relocate(role, .after = p_throws) |> 
   # move run value variables next to each other
   relocate(run_value, .before = run_value_per100) |> 
-  # remove pitcher_id since we have names
-  select(-pitcher_id) |> 
   mutate(
     role = factor(role, levels = c("SP", "RP"))
   ) |> 
