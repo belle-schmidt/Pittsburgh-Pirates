@@ -7,9 +7,8 @@ library(hexbin)
 ## Load in data
 pitching_models <- read.csv("mlb_pitching_stats_2021-24.csv")
 
-## Only use 2021-2023 (full seasons)
+## Only use full seasons
 pitching_models <- pitching_models |> 
-  filter(season %in% c(2021, 2022, 2023)) |> 
   mutate(season = factor(season),
          horizontal_break = -horizontal_break)
 
@@ -37,82 +36,82 @@ movement_theme <- function(){
   )
 }
 
-# AGGREGATED PITCHING MODELS HEX GRAPHS -----------------------------------
+# AGGREGATED PITCHING MODELS 4-SEAM FASTBALL HEX GRAPHS -----------------------------------
 ## "Qualified" 4-Seam Fastball pitchers
 ff_qualified <- pitching_models |> 
   filter(pitch_name == "4-Seam Fastball")
 
 ## 4-Seam Fastballs
 # ### Velocity
-# pitching_models |> 
-#   filter(pitch_name == "4-Seam Fastball") |> 
-#   ggplot() + 
-#   # geom_point(aes(x = plate_x, y = plate_z, color = factor(miss)), alpha = 0.75) + 
-#   stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
-#                        z = velocity), 
-#                    binwidth = c(2.5, 2.5), fun = mean,
-#                    color = "black") +
-#   scale_fill_gradient2(low = "dodgerblue2",
-#                        mid = "white",
-#                        high = "firebrick2",
-#                        midpoint = mean(ff_qualified$velocity)) +
-#   geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
-#   geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
-#   geom_vline(aes(xintercept = mean(horizontal_break)),
-#              color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
-#   geom_hline(aes(yintercept = mean(induced_vertical_break)), 
-#              color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
-#   scale_y_continuous(breaks = seq(-20, 20, 5),
-#                      labels = scales::number_format(suffix = "\"")) +
-#   scale_x_continuous(breaks = seq(-20, 20, 5),
-#                      labels = scales::number_format(suffix = "\"")) +
-#   # geom_zone(linecolor = "black") +
-#   # geom_plate() +
-#   coord_fixed() +
-#   labs(#title = "Avg. Velo of 4-Seam Fastballs by Movement",
-#     title = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-#     subtitle = "POV: RHP facing home plate",
-#     caption = "Data courtesy of Baseball Savant",
-#     x = "Horizontal Movement (in)",
-#     y = "Vertical Movement (in)", 
-#     fill = "Avg. Velocity") +
-#   movement_theme() +
-#   facet_wrap(~ season)
-# 
-# ### spin rate
-# pitching_models |> 
-#   filter(pitch_name == "4-Seam Fastball") |> 
-#   ggplot() + 
-#   # geom_point(aes(x = plate_x, y = plate_z, color = factor(miss)), alpha = 0.75) + 
-#   stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
-#                        z = spin), 
-#                    binwidth = c(2.5, 2.5), fun = mean,
-#                    color = "black") +
-#   scale_fill_gradient2(low = "dodgerblue2",
-#                        mid = "white",
-#                        high = "firebrick2",
-#                        midpoint = mean(ff_qualified$spin)) +
-#   geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
-#   geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
-#   geom_vline(aes(xintercept = mean(horizontal_break)),
-#              color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
-#   geom_hline(aes(yintercept = mean(induced_vertical_break)), 
-#              color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
-#   scale_y_continuous(breaks = seq(-20, 20, 5),
-#                      labels = scales::number_format(suffix = "\"")) +
-#   scale_x_continuous(breaks = seq(-20, 20, 5),
-#                      labels = scales::number_format(suffix = "\"")) +
-#   # geom_zone(linecolor = "black") +
-#   # geom_plate() +
-#   coord_fixed() +
-#   labs(#title = "Spin Rate of 4-Seam Fastballs by Movement",
-#     title = "All Pitchers With 100 or More Fastballs Thrown in a Year",
-#     subtitle = "POV: RHP facing home plate",
-#     x = "Horizontal Movement (in)",
-#     y = "Vertical Movement (in)", 
-#     fill = "Spin (RPM)") +
-#   movement_theme() +
-#   facet_wrap(~ season)
+pitching_models |>
+  filter(pitch_name == "4-Seam Fastball") |>
+  ggplot() +
+  # geom_point(aes(x = plate_x, y = plate_z, color = factor(miss)), alpha = 0.75) +
+  stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
+                       z = velocity),
+                   binwidth = c(3, 3), fun = mean,
+                   color = "black") +
+  scale_fill_gradient2(low = "dodgerblue2",
+                       mid = "white",
+                       high = "firebrick2",
+                       midpoint = mean(ff_qualified$velocity)) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
+  geom_vline(aes(xintercept = mean(horizontal_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  geom_hline(aes(yintercept = mean(induced_vertical_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  scale_y_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  scale_x_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  # geom_zone(linecolor = "black") +
+  # geom_plate() +
+  coord_fixed() +
+  labs(#title = "Avg. Velo of 4-Seam Fastballs by Movement",
+    title = "All Pitchers With 100 or More Fastballs Thrown in a Year",
+    subtitle = "POV: RHP facing home plate",
+    caption = "Data courtesy of Baseball Savant",
+    x = "Horizontal Movement (in)",
+    y = "Vertical Movement (in)",
+    fill = "Avg. Velocity") +
+  movement_theme() +
+  facet_wrap(~ season)
+
+### spin rate
+pitching_models |>
+  filter(pitch_name == "4-Seam Fastball") |>
+  ggplot() +
+  # geom_point(aes(x = plate_x, y = plate_z, color = factor(miss)), alpha = 0.75) +
+  stat_summary_hex(aes(x = horizontal_break, y = induced_vertical_break,
+                       z = spin),
+                   binwidth = c(3, 3), fun = mean,
+                   color = "black") +
+  scale_fill_gradient2(low = "dodgerblue2",
+                       mid = "white",
+                       high = "firebrick2",
+                       midpoint = mean(ff_qualified$spin)) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 1.25) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 1.25) +
+  geom_vline(aes(xintercept = mean(horizontal_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  geom_hline(aes(yintercept = mean(induced_vertical_break)),
+             color = "firebrick1", linewidth = 1.25, linetype = "dashed") +
+  scale_y_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  scale_x_continuous(breaks = seq(-20, 20, 5),
+                     labels = scales::number_format(suffix = "\"")) +
+  # geom_zone(linecolor = "black") +
+  # geom_plate() +
+  coord_fixed() +
+  labs(#title = "Spin Rate of 4-Seam Fastballs by Movement",
+    title = "All Pitchers With 100 or More Fastballs Thrown in a Year",
+    subtitle = "POV: RHP facing home plate",
+    x = "Horizontal Movement (in)",
+    y = "Vertical Movement (in)",
+    fill = "Spin (RPM)") +
+  movement_theme() +
+  facet_wrap(~ season)
 
 
 ### whiff%
