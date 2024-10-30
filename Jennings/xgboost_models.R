@@ -1,12 +1,8 @@
-## XGBoost Stuff+, xwOBA, and whiff rate models
+## XGBoost Stuff+, xwOBA, and Whiff Rate models
 
 ## libraries
 library(tidyverse)
-library(ranger) # faster implementation of randomforest library
 library(vip) # variable importance
-library(pdp) # partial dependence plot
-library(caret) # train random forest model with cross validation
-library(broom) # tidy extract linear summary
 #library(cowplot) # join graphs together
 library(xgboost) # xgboost models
 library(caret)
@@ -1054,33 +1050,3 @@ xg_fit_whiff_rate |>
 
 
 
-
-## random forest
-
-### fit model
-sp_rf <- ranger(
-  run_value ~ velocity + spin + extension + induced_vertical_break + horizontal_break + 
-  horizontal_release_point + vertical_release_point + spin_axis +
-  diff_velocity + diff_horizontal_break + diff_induced_vertical_break,
-  num.trees = 1000,
-  importance = "impurity",
-  mtry = 11 / 3,
-  data = stuff_plus_21 |> drop_na(diff_velocity)
-)
-
-
-### model summary
-sp_rf
-
-### variable importance
-sp_rf |> 
-  vip(
-    aesthetics = list(color = "black", 
-                      fill = "dodgerblue4")
-  )
-
-
-stuff_plus_22 |> 
-  drop_na(diff_velocity) |> 
-  mutate(pred = round(predict(sp_rf, data = features_22_na)$predictions, 4)) |> 
-  summarize(MSE = mean((run_value - pred) ^ 2))
