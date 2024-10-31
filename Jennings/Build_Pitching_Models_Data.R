@@ -29,9 +29,6 @@ statcast_filter <- statcast |>
          umpire, sv_id, fielder_2, pitcher.1:fielder_9, home_score:of_fielding_alignment, bat_speed, swing_length)) |> 
   rename(pitcher_id = pitcher)
 
-## write filtered csv
-#write.csv(statcast_filter, "statcast_2021-24.csv")
-
 ## remove unnecessary columns from FanGraphs
 fangraphs_filter <- fangraphs |> 
   select(Season:xMLBAMID, Role, stuff_plus_stuff_CH:stuff_plus_stuff_FS, stuff_plus_stuff_FO)
@@ -77,12 +74,16 @@ statcast_filter <- statcast_filter %>%
     release_point_x_in = ifelse(p_throws == "L", -release_pos_x * 12, release_pos_x * 12),
     # convert to inches
     release_point_z_in = release_pos_z * 12,
-    
+
     # combine some pitchers together because of Stuff+ (can comment out when necessary)
     pitch_name = recode(pitch_name,
                         "Sweeper" = "Slider",
                         "Slow Curve" = "Curveball",
-                        "Slurve" = "Curveball"))
+                        "Slurve" = "Curveball")
+  )
+
+## write filtered csv
+#write.csv(statcast_filter, "statcast_2021-24_copy.csv")
  
 
 statcast_pitch_summary_stats <- statcast_filter |>  
