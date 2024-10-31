@@ -51,6 +51,10 @@ xgboost_var_importance |>
       ) |> 
       pull(variable) |> unique()
     ) +
+  scale_y_continuous(
+    breaks = seq(0, 1, 0.25),
+    limits = c(0, 1)
+  ) +
   labs(
     x = "Season",
     y = "Importance",
@@ -96,6 +100,10 @@ xgboost_var_importance |>
       ) |> 
       pull(variable) |> unique()
   ) +
+  scale_y_continuous(
+    breaks = seq(0, 1, 0.25),
+    limits = c(0, 1)
+  ) +
   labs(
     x = "Season",
     y = "Importance",
@@ -118,7 +126,7 @@ xgboost_var_importance |>
   )
 
 
-### xwOBA
+### Whiff%
 xgboost_var_importance |> 
   group_by(season) |> 
   top_n(
@@ -141,11 +149,15 @@ xgboost_var_importance |>
       ) |> 
       pull(variable) |> unique()
   ) +
+  scale_y_continuous(
+    breaks = seq(0, 1, 0.25),
+    limits = c(0, 1)
+  ) +
   labs(
     x = "Season",
     y = "Importance",
     color = "Characteristic",
-    title = "xwOBA Variable Importance"
+    title = "Whiff% Variable Importance"
   ) +
   theme(
     plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
