@@ -1,0 +1,838 @@
+---
+title: "Sinkers Relationship Graphs"
+author: "Belle Schmidt"
+date: "2024-10-27"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(dslabs)
+library(broom)
+library(plotly)
+library(gapminder)
+library(gridExtra)
+library(baseballr)
+library(ggthemes)
+library(hexbin)
+library(gt)
+library(gtExtras)
+library(ranger) # faster implementation of randomforest library
+library(vip) # variable importance
+library(scales)
+
+## set theme
+theme_set(theme_bw())
+
+# Customizes a color scale for the scatterplots
+color_scale2 <- scale_colour_manual(values = c("darkred","orange2", "darkslategray","darkgoldenrod3", "violetred4"))
+
+
+# Creates a custom theme for all the plots
+theme <- theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 19),
+        axis.title = element_text(face = "bold", size = 14),
+        axis.text = element_text(face = "bold", size = 13),
+        strip.text = element_text(face = "bold", size = 15),
+        strip.background = element_rect(fill = "steelblue4", colour = "black", linewidth = 1.0),
+        strip.text.x = element_text(color = "white"))
+```
+
+```{r}
+# Reads in combined Baseball Savant and Statcast data
+pitching_stats <- read.csv("mlb_pitching_stats_2021-24_UPDATED.csv")
+
+# Filters data to only include fastballs and converts season to categorical
+sinker_data <- pitching_stats |> 
+  filter(pitch_name == "Sinker", !is.na(stuff_plus), season %in% c(2021, 2022, 2023, 2024)) |>   
+  mutate(season = factor(season))
+```
+
+
+## Velocity
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+# Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and average xwOBA value
+sinker_data |> 
+  ggplot(aes(x = velocity, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Velocity And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and whiff percentage
+sinker_data |> 
+  ggplot(aes(x = velocity, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Velocity And Whiff% For A 4-Seam Fastball",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme
+```
+
+## Velocity
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and its average stuff+
+sinker_data |> 
+  ggplot(aes(x = velocity, y = stuff_plus)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Velocity And Stuff+ For 4-Seam Fastballs",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average Stuff+") +
+   color_scale2 +
+   theme
+```
+
+:::
+
+
+## Vertical Break 
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and average xwOBA value
+
+sinker_data |> 
+  ggplot(aes(x = induced_vertical_break, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Vertical Break And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Induced Vertical Break",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and whiff percentage
+
+sinker_data |> 
+  ggplot(aes(x = induced_vertical_break, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Vertical Break And Whiff% For A 4-Seam Fastball",
+       x = "Pitcher's Average Induced Vertical Break",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme
+```
+
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and its average stuff+
+sinker_data |> 
+  ggplot(aes(x = induced_vertical_break, y = stuff_plus)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Vertical Break And Stuff+ For 4-Seam Fastballs",
+       x = "Pitcher's Average Induced Vertical Break",
+       y = "Pitcher's Average Stuff+") +
+  color_scale2 +
+  theme
+```
+
+:::
+
+## Horizontal Break  
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball horizontal break and average xwOBA value
+
+sinker_data|> 
+  ggplot(aes(x = horizontal_break, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+    geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Horizontal Break And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Horizontal Break",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball horizontal break and whiff percentage 
+sinker_data |> 
+  ggplot(aes(x = horizontal_break, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Horizontal Break And Whiff% For A 4-Seam Fastball",
+       x = "Pitcher's Average Horizontal Break",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball horizontal break and its average stuff+
+
+sinker_data |> 
+  ggplot(aes(x = horizontal_break, y = stuff_plus)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Horizontal Break And Stuff+ For 4-Seam Fastballs",
+       x = "Pitcher's Average Horizontal Break",
+       y = "Pitcher's Average Stuff+") +
+  color_scale2 +
+  theme
+```
+
+
+:::
+
+## Spin Rate   
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball spin rate and average xwOBA value
+sinker_data|> 
+  ggplot(aes(x = spin, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Spin And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Spin Rate",
+       y = "Pitcher's Average xwOBA") +
+  color_scale2 +
+  theme 
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball spin rate and whiff percentage
+sinker_data |> 
+  ggplot(aes(x = spin, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Spin And Whiff Percentage For A 4-Seam Fastball",
+       x = "Pitcher's Average Spin Rate",
+       y = "Pitcher's Whiff Percentage") +
+  theme +
+  color_scale2
+```
+
+
+:::
+
+## Extension   
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball release extension and average xwOBA value
+sinker_data |> 
+  ggplot(aes(x = extension, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Extension And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Extension",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball release extension and whiff percentage
+sinker_data |> 
+  ggplot(aes(x = extension, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Extension And Whiff Percentage For A 4-Seam Fastball",
+       x = "Pitcher's Average Extension",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme 
+```
+
+:::
+:::
+
+
+```{r}
+velocity_slope <- function(tidy_dataset){
+
+  # Calculates the slope of the line for each year
+  slope <- tidy_dataset |> 
+    select(term, estimate) |> 
+  mutate(term = recode(term, "velocity" = "velocity_2021")) |> 
+  pivot_wider(names_from = term, values_from = estimate) |> 
+  select(velocity_2021:`season2024:velocity`) |> 
+  mutate(slope2022 = velocity_2021 + `season2022:velocity`, 
+         slope2023 = velocity_2021 + `season2023:velocity`,
+         slope2024 = velocity_2021 + `season2024:velocity`) |> 
+  select(velocity_2021, slope2022, slope2023, slope2024) |> 
+  pivot_longer(cols = c(velocity_2021, slope2022:slope2024), names_to = "season", values_to = "slope") |> 
+  mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Extracts the std_error for each year
+  std_error <- tidy_dataset |> 
+  mutate(term = recode(term, "velocity" = "velocity_2021")) |>
+  select(term, std.error) |> 
+  filter(term == c("velocity_2021", "season2022:velocity", "season2023:velocity", "season2024:velocity"))|> 
+    rename(season = term) |> 
+    mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Joins the slope and std_erros into one dataset
+  full_join(slope, std_error)  
+}
+```
+
+```{r}
+# Linear Model For Stuff Plus and Velocity
+# Linear model for velocity and stuff+
+velocity_lm <- lm(stuff_plus ~ season * velocity, 
+                data = sinker_data) 
+
+summary(velocity_lm)
+tidy_velocity_lm <-tidy(velocity_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+velocity_stuff_plus_slope <- velocity_slope(tidy_velocity_lm)
+```
+
+```{r}
+# Linear model for velocity predicting whiff percentage
+velocity_whiff_lm <- lm(whiff_pct ~ season * velocity, 
+                data = sinker_data) 
+
+summary(velocity_whiff_lm)
+tidy_velocity_whiff_lm <-tidy(velocity_whiff_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+velocity_whiff_slope <- velocity_slope(tidy_velocity_whiff_lm)
+```
+
+```{r}
+# Linear Model For xwOBA and Velocity
+velocity_xwOBA <- lm(xwOBA ~ season * velocity, 
+                data = sinker_data) 
+
+
+summary(velocity_xwOBA)
+tidy_velocity_xwOBA <- tidy(velocity_xwOBA)
+
+# Calls the function above that calculates the slope of the linear model for each year
+velocity_xwOBA_slope <- velocity_slope(tidy_velocity_xwOBA)
+```
+
+# ```{r}
+# # Linear Model For xwOBAcon and Velocity
+# velocity_wOBAcon <- lm(wOBA_on_contact ~ season * velocity, 
+#                 data = sinker_data) 
+# 
+# summary(velocity_wOBAcon)
+# tidy_velocity_wOBAcon <- tidy(velocity_wOBAcon)
+# 
+# # Calls the function above that calculates the slope of the linear model for each year
+# velocity_wOBAcon_slope <- velocity_slope(tidy_velocity_wOBAcon)
+# ```
+
+## Velocity
+
+::: {.panel-tabset}
+
+## Stuff+ And wxOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Velocity and Stuff+ Linear Model
+stuff_plus <- velocity_stuff_plus_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |> 
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Velocity's Impact on Stuff+",
+       x = "Year",
+       y = "Change in Stuff+ Per MPH of Velocity") +
+  theme + 
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+
+# Graph of Slope For Each Year's Velocity and xwOBA Linear Model
+xwOBA <- velocity_xwOBA_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Velocity's Impact on xwOBA",
+       x = "Year",
+       y = "Change in xwOBA Per MPH of Velocity") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus, xwOBA, ncol=2)
+
+```
+
+<!-- ## Stuff+ And wOBAcon -->
+
+<!-- ```{r} -->
+<!-- #| fig-width: 12 -->
+<!-- #| fig-height: 5 -->
+<!-- #| fig.align: 'center' -->
+
+<!-- # Graph of Slope For Each Year's Velocity and Stuff+ Linear Model -->
+<!-- stuff_plus <- velocity_stuff_plus_slope |> -->
+<!--   mutate(ymin = slope - std.error, ymax = slope + std.error) |> -->
+<!--   ggplot() + -->
+<!--   geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") + -->
+<!--   geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) + -->
+<!--   geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) + -->
+<!--   labs(title = "Velocity's Impact on Stuff+", -->
+<!--        x = "Year", -->
+<!--        y = "Change in Stuff+ Per MPH of Velocity") + -->
+<!--   theme + -->
+<!--   theme(axis.title.y = element_text(size = 10), -->
+<!--         axis.text.x = element_text(size = 10)) -->
+
+
+<!-- # Graph of Slope For Each Year's Velocity and xwOBA Linear Model -->
+<!-- wOBAcon <- velocity_wOBAcon_slope |> -->
+<!--   mutate(ymin = slope - std.error, ymax = slope + std.error) |> -->
+<!--   ggplot() + -->
+<!--   geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") + -->
+<!--   geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) + -->
+<!--   geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) + -->
+<!--   labs(title = "Velocity's Impact on wOBAcon", -->
+<!--        x = "Year", -->
+<!--        y = "Change in wOBAcon Per MPH of Velocity") + -->
+<!--   theme + -->
+<!--   theme(axis.title.y = element_text(size = 10), -->
+<!--         axis.text.x = element_text(size = 10)) -->
+
+<!-- grid.arrange(stuff_plus, wOBAcon, ncol=2) -->
+
+<!-- ``` -->
+
+## Stuff+ And Whiff Percentage
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Velocity and Whiff Percentage Linear Model
+velocity_whiff <- velocity_whiff_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Velocity's Impact on Whiff%",
+       x = "Year",
+       y = "Change in Whiff% Per  MPH of Velocity") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus, velocity_whiff, ncol=2)
+```
+
+:::
+
+## Vertical Movement
+```{r}
+### Linear Models For Vertical Break and Stuff+ or An Outcome Variable
+
+# Function That Calculates The Slope of The Linear Model For Each Year 
+induced_vertical_break_slope <- function(tidy_dataset){
+
+  # Calculates the slope of the line for each year
+  slope <- tidy_dataset |> 
+    select(term, estimate) |> 
+  mutate(term = recode(term, "induced_vertical_break" = "induced_vertical_break_2021")) |> 
+  pivot_wider(names_from = term, values_from = estimate) |> 
+  select(induced_vertical_break_2021:`season2024:induced_vertical_break`) |> 
+  mutate(slope2022 = induced_vertical_break_2021 + `season2022:induced_vertical_break`, 
+         slope2023 = induced_vertical_break_2021 + `season2023:induced_vertical_break`,
+         slope2024 = induced_vertical_break_2021 + `season2024:induced_vertical_break`) |> 
+  select(induced_vertical_break_2021, slope2022, slope2023, slope2024) |> 
+  pivot_longer(cols = c(induced_vertical_break_2021, slope2022, slope2023, slope2024), names_to = "season", values_to = "slope") |> 
+  mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Extracts the std_error for each year
+  std_error <- tidy_dataset |> 
+  mutate(term = recode(term, "induced_vertical_break" = "induced_vertical_break_2021")) |>
+  select(term, std.error) |> 
+  filter(term == c("induced_vertical_break_2021", "season2022:induced_vertical_break", "season2023:induced_vertical_break", "season2024:induced_vertical_break"))|> 
+    rename(season = term) |> 
+    mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Joins the slope and std_errors into one dataset
+  full_join(slope, std_error)
+}
+```
+
+```{r}
+# Linear model for induced_vertical break and stuff+
+induced_vertical_break_lm <- lm(stuff_plus ~ season * induced_vertical_break, 
+                data = sinker_data) 
+
+tidy_induced_vertical_break_lm <-tidy(induced_vertical_break_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+v_break_stuff_plus_slope <- induced_vertical_break_slope(tidy_induced_vertical_break_lm)
+
+
+# Linear model for Induced Vertical break predicting whiff percentage
+induced_vertical_break_whiff_lm <- lm(whiff_pct ~ season * induced_vertical_break, 
+                data = sinker_data) 
+
+tidy_induced_vertical_break_whiff_lm <-tidy(induced_vertical_break_whiff_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+v_break_whiff_slope <- induced_vertical_break_slope(tidy_induced_vertical_break_whiff_lm)
+
+# Linear Model For xwOBA and Induced Vertical Break
+induced_vertical_break_xwOBA <- lm(xwOBA ~ season * induced_vertical_break, 
+                data = sinker_data) 
+
+
+tidy_induced_vertical_break_xwOBA <- tidy(induced_vertical_break_xwOBA)
+
+# Calls the function above that calculates the slope of the linear model for each year
+v_break_xwOBA_slope <- induced_vertical_break_slope(tidy_induced_vertical_break_xwOBA)
+```
+
+::: {.panel-tabset}
+
+## Stuff+ And xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Induced Vertical Break and Stuff+ Linear Model
+stuff_plus_vertical <- v_break_stuff_plus_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Vertical Break's Impact on Stuff+",
+      x = "Year",
+      y = "Change in Stuff+ Per Inch of Induced Vertical Break") +
+  theme + 
+  theme(axis.title.y = element_text(size = 9.5),
+        axis.text.x = element_text(size = 10))
+ 
+xwOBA_vertical <- v_break_xwOBA_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |> 
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Vertical Break's Impact on xwOBA",
+       x = "Year",
+       y = "Change in xwOBA Per Inch of Induced Vertical Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 9.5),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_vertical, xwOBA_vertical, ncol=2)
+```
+
+
+## Stuff+ And Whiff Percentage
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Induced Vertical Break and Whiff Percentage Linear Model
+whiff_vertical <- v_break_whiff_slope |>
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Vertical Break's Impact on Whiff%",
+       x = "Year",
+       y = "Change in Whiff% Per Inch of Induced Vertical Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 9.5),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_vertical, whiff_vertical, ncol=2)
+```
+
+:::
+
+## Horizontal Movement
+
+::: {.panel-tabset}
+
+```{r}
+# Function That Calculates The Slope of The Linear Model For Each Year 
+horizontal_break_slope <- function(tidy_dataset){
+
+  # Calculates the slope of the line for each year
+  slope <- tidy_dataset |> 
+    select(term, estimate) |> 
+  mutate(term = recode(term, "horizontal_break" = "horizontal_break_2021")) |> 
+  pivot_wider(names_from = term, values_from = estimate) |> 
+  select(horizontal_break_2021:`season2024:horizontal_break`) |> 
+  mutate(slope2022 = horizontal_break_2021 + `season2022:horizontal_break`,
+         slope2023 = horizontal_break_2021 + `season2023:horizontal_break`,
+         slope2024 = horizontal_break_2021 + `season2024:horizontal_break`) |> 
+  select(horizontal_break_2021, slope2022:slope2024) |> 
+  pivot_longer(cols = c(horizontal_break_2021, slope2022, slope2023, slope2024), names_to = "season", values_to = "slope") |> 
+  mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Extracts the std_error for each year
+  std_error <- tidy_dataset |> 
+  mutate(term = recode(term, "horizontal_break" = "horizontal_break_2021")) |>
+  select(term, std.error) |> 
+  filter(term == c("horizontal_break_2021", "season2022:horizontal_break", "season2023:horizontal_break", "season2024:horizontal_break"))|> 
+    rename(season = term) |> 
+    mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Joins the slope and std_erros into one dataset
+  full_join(slope, std_error)  
+}
+
+# Linear model for horizontal break and stuff+
+horizontal_break_lm <- lm(stuff_plus ~ season * horizontal_break, 
+                data = sinker_data) 
+
+tidy_horizontal_break_lm <-tidy(horizontal_break_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+h_break_stuff_plus_slope <- horizontal_break_slope(tidy_horizontal_break_lm)
+
+# Linear model for horizontal break predicting whiff percentage
+horizontal_break_whiff_lm <- lm(whiff_pct ~ season * horizontal_break, 
+                data = sinker_data) 
+
+tidy_horizontal_break_whiff_lm <-tidy(horizontal_break_whiff_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+h_break_whiff_slope <- horizontal_break_slope(tidy_horizontal_break_whiff_lm)
+
+horizontal_break_xwOBA <- lm(xwOBA ~ season * horizontal_break, 
+                data = sinker_data) 
+
+
+tidy_horizontal_break_xwOBA <- tidy(horizontal_break_xwOBA)
+
+# Calls the function above that calculates the slope of the linear model for each year
+h_break_xwOBA_slope <- horizontal_break_slope(tidy_horizontal_break_xwOBA)
+
+
+# horizontal_break_wOBAcon <- lm(wOBA_on_contact ~ season * horizontal_break, 
+#                 data = sinker_data) 
+# 
+# 
+# tidy_horizontal_break_wOBAcon <- tidy(horizontal_break_wOBAcon)
+# 
+# # Calls the function above that calculates the slope of the linear model for each year
+# h_break_wOBAcon_slope <- horizontal_break_slope(tidy_horizontal_break_wOBAcon)
+```
+
+## Stuff+ And xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Horizontal Break and Stuff+ Linear Model
+stuff_plus_horizontal <- h_break_stuff_plus_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Horizontal Break's Impact on Stuff+",
+       x = "Year",
+       y = "Change in Stuff+ Per Inch of Horizontal Break") +
+  theme + 
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+# Graph of Slope For Each Year's Horizontal Break and xwOBA Linear Model
+xwOBA_horizontal <- h_break_xwOBA_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Horizontal Break's Impact on xwOBA",
+       x = "Year",
+       y = "Change in xwOBA Per Inch of Horizontal Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_horizontal, xwOBA_horizontal, ncol=2)
+```
+
+<!-- ## Stuff+ And xwOBAcon -->
+
+<!-- ```{r} -->
+<!-- #| fig-width: 12 -->
+<!-- #| fig-height: 5 -->
+<!-- #| fig.align: 'center' -->
+
+<!-- # Graph of Slope For Each Year's Horizontal Break and Stuff+ Linear Model -->
+<!-- stuff_plus_horizontal <- h_break_stuff_plus_slope |>  -->
+<!--   mutate(ymin = slope - std.error, ymax = slope + std.error) |> -->
+<!--   ggplot() + -->
+<!--   geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") + -->
+<!--   geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) + -->
+<!--   geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) + -->
+<!--   labs(title = "Horizontal Break's Impact on Stuff+", -->
+<!--        x = "Year", -->
+<!--        y = "Change in Stuff+ Per Inch of Horizontal Break") + -->
+<!--   theme +  -->
+<!--   theme(axis.title.y = element_text(size = 10), -->
+<!--         axis.text.x = element_text(size = 10)) -->
+
+<!-- # Graph of Slope For Each Year's Horizontal Break and xwOBA Linear Model -->
+<!-- xwOBAcon_horizontal <- h_break_wOBAcon_slope |>  -->
+<!--   mutate(ymin = slope - std.error, ymax = slope + std.error) |> -->
+<!--   ggplot() + -->
+<!--   geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") + -->
+<!--   geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) + -->
+<!--   geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) + -->
+<!--   labs(title = "Horizontal Break's Impact on wOBAcon", -->
+<!--        x = "Year", -->
+<!--        y = "Change in wOBAcon Per Inch of Horizontal Break") + -->
+<!--   theme + -->
+<!--   theme(axis.title.y = element_text(size = 10), -->
+<!--         axis.text.x = element_text(size = 10)) -->
+
+<!-- grid.arrange(stuff_plus_horizontal, xwOBAcon_horizontal, ncol=2) -->
+<!-- ``` -->
+
+## Stuff+ And Whiff Percentage 
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Horizontal Break and Whiff Percentage Linear Model
+whiff_horizontal <- h_break_whiff_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Horizontal Break's Impact on Whiff%",
+       x = "Year",
+       y = "Change in Whiff% Per Inch of Horizontal Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_horizontal, whiff_horizontal, ncol=2)
+```
+

@@ -56,17 +56,18 @@ FanGraphs <- read.csv("C:/Users/isabe/OneDrive/Carnegie Mellon Sports Analytics/
 ### PitchUse Dataset
 
 ```{r}
+# calculates how many times each pitch type was thrown each year
 PitchUse_Year <- Statcast_Combined_Pitches |> 
   group_by(pitch_name, year) |> 
   summarise(times_thrown_in_year = n()) 
 
 
-
+# calculates how many many pitches total were thrown that year
 TotalPitches_Year <- Statcast_Combined_Pitches |> 
   group_by(year) |> 
   summarise(pitches_thrown_in_year = n()) 
 
-
+# calculates the proportion of times each pitch type was thrown in each year
 PitchUse <- left_join(TotalPitches_Year, PitchUse_Year) |> 
   mutate(prop = times_thrown_in_year / pitches_thrown_in_year) |> 
   select(-times_thrown_in_year, -pitches_thrown_in_year)
@@ -77,7 +78,7 @@ PitchUse <- left_join(TotalPitches_Year, PitchUse_Year) |>
 
 ```{r}
 
-# write.csv(PitchUse, "PitchUse.csv")
+# write.csv(PitchUse, "pitch_use.csv")
 
 ```
 
@@ -106,7 +107,7 @@ sweeper_use <- left_join(total_pitches, pitch_type_use) |>
 ### Turn the dataset into a CSV
 
 ```{r}
-write.csv(sweeper_use, "Sweeper_Use.csv")
+#write.csv(sweeper_use, "sweeper_use.csv")
 ```
 
 
@@ -324,7 +325,7 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Swing_and_Miss
 
 ```
 
-### Wiff Rate of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
+### Whiff Rate of Each Pitcher For Each Pitch Type in Each Year Between 2020-2024
 
 ```{r}
 
@@ -334,19 +335,19 @@ Times_Swung <- Statcast_Combined_Pitches |>
   summarise(num_times_swung = n()) 
 
 
-Wiff_Rate <- left_join(Times_Swung, Times_Missed, by = c("pitcher" = "pitcher", "pitch_type" = "pitch_type", "year" = "year")) |> 
+Whiff_Rate <- left_join(Times_Swung, Times_Missed, by = c("pitcher" = "pitcher", "pitch_type" = "pitch_type", "year" = "year")) |> 
   mutate(num_missed = ifelse(is.na(num_missed), 0, num_missed),
-         wiff_rate = num_missed / num_times_swung) |> 
+         whiff_rate = num_missed / num_times_swung) |> 
   select(-num_missed, -num_times_swung)|> 
   ungroup() |> 
-  pivot_wider(names_from = pitch_type, names_glue = "wiff_rate_{pitch_type}", values_from = wiff_rate)
+  pivot_wider(names_from = pitch_type, names_glue = "whiff_rate_{pitch_type}", values_from = whiff_rate)
 
 ```
 
 ```{r}
 # Adding Misses Per Swing to FanGraphs Dataset
 
-Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Wiff_Rate, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
+Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Whiff_Rate, by = c("xMLBAMID" = "pitcher", "Season" = "year"))
 
 ```
 
@@ -387,23 +388,11 @@ Joined_FanGraphs_Statcast <- left_join(Joined_FanGraphs_Statcast, Times_Thrown2,
 
 ```
 
-### Turn the dataset into a CSV
+### Turn the dataset into a CSV  
 
 ```{r}
 
 # write.csv(Joined_FanGraphs_Statcast, "Joined_FanGraphs_Statcast.csv")
 
-Joined_FanGraphs_Statcast <- read.csv( "Joined_FanGraphs_Statcast.csv")
-
-```
-
-### Calculating xwOBA on contact
-```{r}
-glimpse(statcast)
-
-statcast |> 
-  filter(description == "hit_into_play", pitch_name == "4-Seam Fastball") |> 
-  group_by(pitcher, pitch_name, year) |> 
-  summarise(xwOBA_on_contact = mean(xwoba_value, na.rm = TRUE))
 ```
 

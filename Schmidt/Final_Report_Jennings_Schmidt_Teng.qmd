@@ -1,0 +1,1521 @@
+---
+title: "The Wrong Stuff"
+author:
+  - Isabelle Schmidt
+  - Liam Jennings
+  - Tiger Teng
+date: "July 26, 2024"
+format:
+  html:
+    toc: true
+    toc-title: Summary
+    page-layout: full
+    mainfont: "Arial"
+    fontcolor: "black"
+    theme: cosmo
+    html-math-method: katex
+    self-contained: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+---
+
+
+```{r}
+library(tidyverse)
+library(dslabs)
+library(broom)
+library(plotly)
+library(gapminder)
+library(gridExtra)
+library(baseballr)
+library(ggthemes)
+library(hexbin)
+library(gt)
+library(gtExtras)
+library(ranger) # faster implementation of randomforest library
+library(vip) # variable importance
+library(scales)
+
+## set theme
+theme_set(theme_bw())
+
+# Customizes a color scale for the scatterplots
+color_scale2 <- scale_colour_manual(values = c("darkred","orange2", "darkslategray","darkgoldenrod3", "violetred4"))
+
+
+# Creates a custom theme for all the plots
+theme <- theme(legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 19),
+        axis.title = element_text(face = "bold", size = 14),
+        axis.text = element_text(face = "bold", size = 13),
+        strip.text = element_text(face = "bold", size = 15),
+        strip.background = element_rect(fill = "steelblue4", colour = "black", linewidth = 1.0),
+        strip.text.x = element_text(color = "white"))
+
+## create own theme for hexbin graphs
+movement_theme <- function(){
+  theme(
+    strip.text = element_text(face = "bold", size = rel(1.5), color = "white"),
+    strip.background = element_rect(fill = "navy", color = "black", linewidth = 1),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12),
+    panel.spacing = unit(1, "lines")
+  )
+}
+
+# Reads in combined Baseball Savant and Statcast data
+pitching_stats <- read.csv("mlb_pitching_stats_2020-24.csv")
+
+# Filters data to only include fastballs and converts season to categorical
+fastball_data <- pitching_stats |> 
+  filter(pitch_name == "4-Seam Fastball", !is.na(stuff_plus), season %in% c(2021, 2022, 2023)) |>   
+  mutate(season = factor(season))
+
+## Changed horizontal break to different viewpoint for hexplots
+hexplot_models <- fastball_data |> 
+  mutate(horizontal_break = -horizontal_break)
+
+# sample of 4 rows from the stacast data (selected specific columns)
+statcast <- read.csv("statcast_condensed.csv")
+
+# fangraphs original data
+fangraphs <- read.csv("Fangraphs_Pitching_Models_2020-24.csv")
+
+# Combined Data without season as a factor
+Four_Seam <- pitching_stats %>%
+  filter(pitch_name == "4-Seam Fastball") %>%
+  filter(season %in% c(2021, 2022, 2023))
+```
+
+## Introduction 
+In the fast-paced environment of Major League Baseball, Stuff+ serves as a vital metric for evaluating the 'nastiness' of a pitch. The metric analyzes the physical characteristics of a pitch including velocity, spin, extension, and movement. A Stuff+ value of 100 means a pitch is considered league average; anything above or below 100 is considered above or below average respectively. 
+
+With the emergence of Stuff+ as a common metric used in pitcher evaluation, we wanted to evaluate how accurately the model predicted a pitcher's success and how appropriately it weighed the factors that go into it. We were curious to know if there were commonalities between the pitches that Stuff+ tended to over or undervalue, telling us it was not accounting for variables that played a role in a pitcher's effectiveness. 
+
+Our goal is to provide insights to improve the Stuff+ model so it becomes a more reliable metric for player evaluation. Additionally, we can help pitchers develop effective pitches by understanding which physical pitch characteristics indicate successful outcomes. 
+
+Our initial analysis is concentrated on the four-seam fastball, with plans to extend this research to other types of pitches in future studies.
+
+## Data
+The data we used were from FanGraphs and Statcast from 2021 to 2023. Although FanGraphs has Stuff+ data for the 2020 and 2024 seasons, we decided not to include them because we wanted to limit bias. In 2020 and 2024, there is minimal data due to COVID-19 or an incomplete season respectively. We web-scraped the FanGraphs data using the baseballr library and utilized a web-scraping function to gather data from Baseball Savant. 
+
+##### **FanGraphs Data:**
+
+The FanGraphs data provides each MLB pitcher's Stuff+ for each pitch they throw in a given season. Note: throughout this paper, pitch refers to a pitch name (e.g., curveball, slider) unless specified otherwise. FanGraphs data was originally formatted with each row providing information about a pitcher in a given year. We transformed it, however, to make each row represent a pitcher in a given year for a specific pitch. For example, instead of one row having information about all of Paul Skenes' pitches from the 2024 season, it became that one row had information about Paul Skenes' sinker in the 2024 season and another had information about his four-seam fastball in the 2024 season. 
+
+```{r}
+# Set seed for reproducibility
+set.seed(1300)
+
+# Filter, select, mutate, rename, and sample the data
+fangraphs_data <- fangraphs |> 
+  filter(Season %in% c(2021, 2022, 2023)) |> 
+  select(PlayerName, Season, stuff_plus_stuff_CH, stuff_plus_stuff_FF, stuff_plus_stuff_FC, stuff_plus_stuff_SL, stuff_plus_stuff_CU, stuff_plus_stuff_SI) |>
+  mutate(across(c(stuff_plus_stuff_CH, stuff_plus_stuff_FF, stuff_plus_stuff_FC, stuff_plus_stuff_SL, stuff_plus_stuff_CU, stuff_plus_stuff_SI), round, digits = 2)) |> 
+  rename(Player_name = PlayerName, stuff_plus_change_up = stuff_plus_stuff_CH, stuff_plus_four_seam_fastball = stuff_plus_stuff_FF, stuff_plus_cutter = stuff_plus_stuff_FC, stuff_plus_slider = stuff_plus_stuff_SL, stuff_plus_curveball = stuff_plus_stuff_CU, stuff_plus_sinker = stuff_plus_stuff_SI) |> 
+  rename_with(~ gsub("_", " ", .)) |> 
+  sample_n(4) |>
+  gt() |>  
+  gt_theme_espn()
+
+# Print the resulting gt table
+fangraphs_data
+
+```
+
+
+##### **Statcast Data:**
+
+Statcast data is pitch-by-pitch data that gives information about all the individual pitches thrown. Initially, we created individual swing and miss indicators for each pitch (e.g., if attempted swing but missed, swing = 1 and miss = 1). Also, we combined certain pitches because Stuff+ does not have a model for each pitch type (e.g., FanGraphs treats sliders and sweepers as the same). From there, we grouped by season, pitcher, and pitch type to summarize the number of pitches, swings, misses, and total run value and calculate the mean of each physical characteristic and xwOBA. We applied the summarized values to compute whiff percentage, swing percentage, swing-and-miss percentage, and run value per 100 pitches. 
+
+```{r}
+statcast_data <- statcast |> 
+  select(pitcher, pitch_name, year, release_speed, pfx_x, pfx_z, release_spin_rate, release_extension, description) |>
+  rename(season = year, velocity = release_speed, horizontal_break = pfx_x, induced_vertical_break = pfx_z, spin = release_spin_rate, extension = release_extension, outcome_description = description) |> 
+  rename_with(~ gsub("_", " ", .)) |> 
+  gt() |>  
+  gt_theme_espn()
+
+statcast_data
+```
+
+##### **Combining the Data:**
+
+Once all these values were calculated, we joined the FanGraphs dataset with the Statcast dataset to evaluate these metrics simultaneously. To mitigate bias, we only included pitchers who threw the given pitch at least 100 times.  
+
+```{r}
+set.seed(1277)
+Data_Example <- pitching_stats |> 
+  filter(pitch_name == "4-Seam Fastball") |>  
+  select(player_name, pitch_name, season, velocity, extension, induced_vertical_break, horizontal_break, spin, stuff_plus, whiff_pct, xwOBA) |> 
+  mutate(across(c(velocity, extension, induced_vertical_break, horizontal_break, spin, whiff_pct, stuff_plus), round, digits = 1)) |> 
+  mutate(across(xwOBA, round, digits = 3)) |> 
+  rename_with(~ gsub("_", " ", .)) |> 
+  sample_n(4) |> 
+  gt() |> 
+ gt_theme_espn()
+
+Data_Example
+```
+
+##### **Player Examples:**
+
+The two players we are going to examine are starting pitcher Andrew Heaney and relief pitcher Julian Merryweather. Andrew Heaney played for the Los Angeles Angels, New York Yankees, Los Angeles Dodgers, and Texas Rangers since 2021. Despite being an above-average pitcher (by ERA+ standards) over the last two years, he generates flyballs at an above-average rate. Andrew Heaney doesn’t fit the mold of the fireballing, high fastball hurler. He has below-average velocity, extension, and induced vertical break but above-average horizontal break and spin rate. His whiff percentage and xwOBA are better than average despite having an average Stuff+. We believe Andrew Heaney’s four-seam fastball should have above-average Stuff+ based on the whiff percentage and xwOBA.
+
+Julian Merryweather has pitched for the Toronto Blue Jays and Chicago Cubs since 2021. His only above-average year (in terms of ERA+) was 2023. However, he has better than average velocity, extension, induced vertical break, and spin. The only below-average pitch physical characteristic is the horizontal break. His physical characteristics generate below-par whiff percentages and xwOBA but a well above-average Stuff+ (almost 30% above an average pitch). 
+
+We believe these two pitchers are misrepresented by Stuff+. 
+
+
+```{r}
+stuff_plus_min <- min(Four_Seam$stuff_plus, na.rm = TRUE)
+stuff_plus_max <- max(Four_Seam$stuff_plus, na.rm = TRUE)
+
+# Create the table with quantile-based color scales
+Player_Example <- Four_Seam %>%
+  filter(player_name %in% c("Andrew Heaney", "Julian Merryweather")) %>%
+  select(player_name, season, velocity, extension, induced_vertical_break, horizontal_break, spin, stuff_plus, whiff_pct, xwOBA) %>%
+  
+  mutate(across(c( season, velocity, extension, induced_vertical_break, horizontal_break, spin, whiff_pct, stuff_plus), round, digits = 1)) %>%
+  mutate(across(xwOBA, round, digits = 3)) %>%
+  rename_with(~ gsub("_", " ", .)) %>%
+  gt() %>% 
+  data_color(
+    columns = vars("stuff plus"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain =  c(stuff_plus_min, 100, stuff_plus_max), n=120)
+    )%>%
+  data_color(
+    columns = vars("whiff pct"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$whiff_pct, n=120)
+  ) %>%
+  data_color(
+    columns = vars("xwOBA"),
+    colors = scales::col_quantile(palette = c("tomato1", "white", "steelblue1"), domain = Four_Seam$xwOBA, n=120)
+  ) %>%
+  data_color(
+    columns = vars("velocity"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$velocity, n=120)
+  ) %>%
+  data_color(
+    columns = vars("extension"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$extension,  n=120)
+  ) %>%
+  data_color(
+    columns = vars("induced vertical break"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$induced_vertical_break, n =120)
+  ) %>%
+  data_color(
+    columns = vars("horizontal break"),
+    colors = scales::col_quantile(palette = c("tomato1", "white", "steelblue1"), domain = Four_Seam$horizontal_break, n=120)
+  ) %>%
+  data_color(
+    columns = vars("spin"),
+    colors = scales::col_quantile(palette = c("steelblue1", "white", "tomato1"), domain = Four_Seam$spin, n=120)
+  ) %>%
+  gt_theme_espn() %>%
+  tab_header(title = "Andrew Heaney & Julian Merryweather 4-Seam Fastball")
+
+Player_Example
+
+```
+
+## Exploratory Data Analysis (EDA)
+In the initial analysis, we focused on the four-seam fastball because it is the most common pitch in baseball. Additionally, its increased usage during the pitch-tracking years is noticeable. Before Statcast, savvy teams (such as the Pittsburgh Pirates) generated strong results with the low sinker. Batters were routinely grounding out to shifted infields. However, the emergence of advanced pitch-tracking technology led more teams to flock to fastballs with high spin, up in the zone. These pitches generated high whiff rates and limited hard contact, which made sinkers look obsolete. 
+
+With the continued frequency of the high four-seam fastball, we wanted to know how the pitch effectiveness was changing from year to year. Intuitively, it would make sense for the pitch to become less effective with time because batters see it more frequently and adjust. To see if this was true, we looked at the relationship between each pitch physical characteristic individually against an outcome variable. 
+
+Our group decided to focus primarily on whiff percentage and xwOBA as our outcome variables because they had the highest correlation with Stuff+. We liked that whiff percentage gave us an idea of whether or not batters were making contact with the pitch while xwOBA gave us an idea of (a) batters’ ability to get on base against the pitch and (b) how well batters were making contact with the pitch.
+
+
+::: {.panel-tabset}
+
+## Velocity
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+# Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and average xwOBA value
+fastball_data |> 
+  ggplot(aes(x = velocity, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Velocity And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and whiff percentage
+fastball_data |> 
+  ggplot(aes(x = velocity, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Velocity And Whiff% For A 4-Seam Fastball",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme
+```
+
+
+:::
+
+
+## Vertical Break 
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and average xwOBA value
+
+fastball_data |> 
+  ggplot(aes(x = induced_vertical_break, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Vertical Break And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Induced Vertical Break",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and whiff percentage
+
+fastball_data |> 
+  ggplot(aes(x = induced_vertical_break, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Vertical Break And Whiff% For A 4-Seam Fastball",
+       x = "Pitcher's Average Induced Vertical Break",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme
+```
+
+
+:::
+
+## Horizontal Break  
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball horizontal break and average xwOBA value
+
+fastball_data|> 
+  ggplot(aes(x = horizontal_break, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+    geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Horizontal Break And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Horizontal Break",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball horizontal break and whiff percentage 
+fastball_data |> 
+  ggplot(aes(x = horizontal_break, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Horizontal Break And Whiff% For A 4-Seam Fastball",
+       x = "Pitcher's Average Horizontal Break",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme
+```
+
+
+:::
+
+## Spin Rate   
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball spin rate and average xwOBA value
+fastball_data|> 
+  ggplot(aes(x = spin, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Spin And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Spin Rate",
+       y = "Pitcher's Average xwOBA") +
+  color_scale2 +
+  theme 
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball spin rate and whiff percentage
+fastball_data |> 
+  ggplot(aes(x = spin, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Spin And Whiff Percentage For A 4-Seam Fastball",
+       x = "Pitcher's Average Spin Rate",
+       y = "Pitcher's Whiff Percentage") +
+  theme +
+  color_scale2
+```
+
+
+:::
+
+## Extension   
+
+::: {.panel-tabset}
+
+## xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball release extension and average xwOBA value
+fastball_data |> 
+  ggplot(aes(x = extension, y = xwOBA)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Extension And xwOBA For A 4-Seam Fastball",
+       x = "Pitcher's Average Extension",
+       y = "Pitcher's Average xwOBA Value") +
+  color_scale2 +
+  theme
+```
+
+
+## Whiff Percentage 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball release extension and whiff percentage
+fastball_data |> 
+  ggplot(aes(x = extension, y = whiff_pct)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Extension And Whiff Percentage For A 4-Seam Fastball",
+       x = "Pitcher's Average Extension",
+       y = "Pitcher's Whiff Percentage") +
+  color_scale2 +
+  theme 
+```
+
+:::
+:::
+
+##### **Key Takeaways:** 
+Given the hype around the rising fastball, we expected that induced vertical break would play a large role in whiff percentage and xwOBA. To our surprise, the change in whiff percentage and xwOBA per inch of induced vertical movement was much less than expected. We also found that the change in both outcome variables per inch of horizontal movement was more than we expected. 
+
+##### **Further Analysis:** 
+This piqued our interest in further analyzing how movement related to both outcome and pitch physical characteristic variables, and how this change varied from year to year. To further our understanding, we made plots looking at how vertical and horizontal movement combined impacted these variables. 
+
+The y-axis, vertical movement, is the induced vertical break. The induced vertical break is the vertical movement based on spin and velocity without gravity impacting it. A pitch cannot defy gravity and rise; however, some four-seam fastballs’ combination of spin and velocity generates enough vertical movement to create the optical illusion of rising. Two indicators show the pitch movement based on horizontal break (e.g., glove side or hand side). The point of view of the plot is from a right-handed pitcher facing home plate. Horizontal movement is different in this plot compared to other plots we created because of the different point of view. The thick black lines represent 0 inches of movement for each axis. 0 inches of movement is a pitch that is thrown directly straight. The dashed red line on the plots represents the average movement over the three seasons. The vertical dashed line represents the average horizontal break and the horizontal line is the average induced vertical break. 
+
+::: {.panel-tabset}
+
+## Movement & Velocity
+
+```{r}
+#| echo: false
+#| fig.align: 'center'
+#| out-width: 100%
+knitr::include_graphics("hexbin_velo_plot.png")
+```
+
+**Hexbin Plots' Key Takeaways:**
+
+Before making these visualizations, we expected that most, if not all, pitches with above-average vertical movement would excel in whiff percentage, xwOBA, and Stuff+. However, pitches with above-average horizontal movement have generated better-than-average whiff rates and xwOBA each year. Specifically, the fourth quadrant (the bottom right of above-average horizontal movement and below-average vertical movement) generates the best results of the four quadrants.
+
+## Movement & Spin Rate
+
+
+```{r}
+#| echo: false
+#| fig.align: 'center'
+#| out-width: 100%
+knitr::include_graphics("hexbin_spin.png")
+```
+
+**Hexbin Plots' Key Takeaways:**
+
+Before making these visualizations, we expected that most, if not all, pitches with above-average vertical movement would excel in whiff percentage, xwOBA, and Stuff+. However, pitches with above-average horizontal movement have generated better-than-average whiff rates and xwOBA each year. Specifically, the fourth quadrant (the bottom right of above-average horizontal movement and below-average vertical movement) generates the best results of the four quadrants. 
+
+## Movement & Extension
+
+
+```{r}
+#| echo: false
+#| fig.align: 'center'
+#| out-width: 100%
+knitr::include_graphics("hexbin_extension.png")
+```
+
+**Hexbin Plots' Key Takeaways:**
+
+Before making these visualizations, we expected that most, if not all, pitches with above-average vertical movement would excel in whiff percentage, xwOBA, and Stuff+. However, pitches with above-average horizontal movement have generated better-than-average whiff rates and xwOBA each year. Specifically, the fourth quadrant (the bottom right of above-average horizontal movement and below-average vertical movement) generates the best results of the four quadrants.
+
+## Movement & xwOBA
+
+```{r}
+#| echo: false
+#| fig.align: 'center'
+#| out-width: 100%
+knitr::include_graphics("hexbin_xwoba.png")
+```
+
+**Hexbin Plots' Key Takeaways:**
+
+Before making these visualizations, we expected that most, if not all, pitches with above-average vertical movement would excel in whiff percentage, xwOBA, and Stuff+. However, pitches with above-average horizontal movement have generated better-than-average whiff rates and xwOBA each year. Specifically, the fourth quadrant (the bottom right of above-average horizontal movement and below-average vertical movement) generates the best results of the four quadrants.
+
+## Movement & Whiff%
+
+```{r}
+#| echo: false
+#| fig.align: 'center'
+#| out-width: 100%
+knitr::include_graphics("hexbin_whiff_pct.png")
+```
+
+
+**Hex Plots' Key Takeaways:**
+
+Before making these visualizations, we expected that most, if not all, pitches with above-average vertical movement would excel in whiff percentage, xwOBA, and Stuff+. However, pitches with above-average horizontal movement have generated better-than-average whiff rates and xwOBA each year. Specifically, the fourth quadrant (the bottom right of above-average horizontal movement and below-average vertical movement) generates the best results of the four quadrants.
+
+:::
+
+Through the relationship and hexbin plots, we saw that the importance of each physical characteristic for determining the effectiveness of a four-seam fastball was changing year to year. This made us wonder if the Stuff+ model was adjusting as well. For this, we observed the relationship between each pitch physical characteristic individually and Stuff+. Like the outcome variables, we initially looked at each pitch physical characteristic individually and then observed vertical and horizontal movement simultaneously. 
+
+
+::: {.panel-tabset}
+
+## Velocity
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball velocity and its average stuff+
+fastball_data |> 
+  ggplot(aes(x = velocity, y = stuff_plus)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Velocity And Stuff+ For 4-Seam Fastballs",
+       x = "Pitcher's Average Velocity",
+       y = "Pitcher's Average Stuff+") +
+   color_scale2 +
+   theme
+```
+
+**Key Takeaways:** 
+
+Stuff+ accounts for the various physical characteristics of a pitch differently each year, particularly velocity. The change from year-to-year, however, appears to be less for Stuff+ than for whiff percentage and expected on-base percentage. This indicates that there is some bias in the way Stuff+ is measured. 
+
+## Vertical Break 
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball induced vertical break and its average stuff+
+fastball_data |> 
+  ggplot(aes(x = induced_vertical_break, y = stuff_plus)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Vertical Break And Stuff+ For 4-Seam Fastballs",
+       x = "Pitcher's Average Induced Vertical Break",
+       y = "Pitcher's Average Stuff+") +
+  color_scale2 +
+  theme
+```
+
+**Key Takeaways:**
+
+Stuff+ accounts for the various physical characteristics of a pitch differently each year, particularly velocity. The change from year-to-year, however, appears to be less for Stuff+ than for whiff percentage and expected on-base percentage. This indicates that there is some bias in the way Stuff+ is measured. 
+
+## Horizontal Break  
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of the relationship between a pitcher's average 4-Seam Fastball horizontal break and its average stuff+
+
+fastball_data |> 
+  ggplot(aes(x = horizontal_break, y = stuff_plus)) +
+  geom_point(aes(color = season), alpha = .3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~season) +
+  labs(title = "Relationship Between Horizontal Break And Stuff+ For 4-Seam Fastballs",
+       x = "Pitcher's Average Horizontal Break",
+       y = "Pitcher's Average Stuff+") +
+  color_scale2 +
+  theme
+```
+
+**Key Takeaways:** 
+
+Stuff+ accounts for the various physical characteristics of a pitch differently each year, particularly velocity. The change from year-to-year, however, appears to be less for Stuff+ than for whiff percentage and expected on-base percentage. This indicates that there is some bias in the way Stuff+ is measured. 
+:::
+
+### Movement & Stuff+
+
+```{r}
+#| echo: false
+#| fig.align: 'center'
+#| out-width: 100%
+knitr::include_graphics("hexbin_stuff_plus.png")
+```
+
+**Key Takeaways:** 
+
+Despite our previous observations that pitches with above-average horizontal movement have generated better-than-average whiff rates and xwOBA each year, Stuff+ still ranks the “best” fastballs as the pitches with excellent vertical movement and the fourth quadrant is mostly average or below-average. Visually, there appears to be some bias in Stuff+.
+
+
+### Important Question
+
+From both types of plots, we concluded that the Stuff+ model was adjusting how it valued each physical characteristic of a pitch year-to-year. The question then became, “How well is the model adjusting?”.
+
+## Methods
+
+### Linear Models
+
+We addressed the question by fitting linear models for each outcome variable: Stuff+, whiff percentage, and xwOBA. Specifically, we modeled each outcome as a function of the season and each physical characteristic, including an interaction term between the season and the physical characteristic. For example, our models took the form of lm(Stuff+ ~ season + horizontal_break + season * horizontal_break), and similarly for other physical characteristics and outcome variables.
+
+This approach allowed us to understand how changes in pitch characteristics influenced Stuff+, whiff percentage, and xwOBA over different seasons. Including the interaction term was crucial, as it provided insights into how the relationship between pitch characteristics and the outcomes varied year-to-year, rather than just showing overall trends.
+
+Once our linear models were fitted, we plotted the coefficients of the various pitch physical characteristics in 2021, 2022, and 2023 to evaluate how each additional unit of the characteristic impacted Stuff+ compared to whiff percentage and expected weighted on-base average.  
+
+::: {.panel-tabset}
+
+```{r}
+velocity_slope <- function(tidy_dataset){
+
+  # Calculates the slope of the line for each year
+  slope <- tidy_dataset |> 
+    select(term, estimate) |> 
+  mutate(term = recode(term, "velocity" = "velocity_2021")) |> 
+  pivot_wider(names_from = term, values_from = estimate) |> 
+  select(velocity_2021:`season2023:velocity`) |> 
+  mutate(slope2022 = velocity_2021 + `season2022:velocity`, 
+         slope2023 = velocity_2021 + `season2023:velocity`) |> 
+  select(velocity_2021, slope2022, slope2023) |> 
+  pivot_longer(cols = c(velocity_2021, slope2022:slope2023), names_to = "season", values_to = "slope") |> 
+  mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Extracts the std_error for each year
+  std_error <- tidy_dataset |> 
+  mutate(term = recode(term, "velocity" = "velocity_2021")) |>
+  select(term, std.error) |> 
+  filter(term == c("velocity_2021", "season2022:velocity", "season2023:velocity"))|> 
+    rename(season = term) |> 
+    mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Joins the slope and std_erros into one dataset
+  full_join(slope, std_error)  
+}
+```
+
+```{r}
+# Linear Model For Stuff Plus and Velocity
+# Linear model for velocity and stuff+
+velocity_lm <- lm(stuff_plus ~ season * velocity, 
+                data = fastball_data) 
+
+summary(velocity_lm)
+tidy_velocity_lm <-tidy(velocity_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+velocity_stuff_plus_slope <- velocity_slope(tidy_velocity_lm)
+```
+
+```{r}
+# Linear model for velocity predicting whiff percentage
+velocity_whiff_lm <- lm(whiff_pct ~ season * velocity, 
+                data = fastball_data) 
+
+summary(velocity_whiff_lm)
+tidy_velocity_whiff_lm <-tidy(velocity_whiff_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+velocity_whiff_slope <- velocity_slope(tidy_velocity_whiff_lm)
+```
+
+```{r}
+# Linear Model For xwOBA and Velocity
+velocity_xwOBA <- lm(xwOBA ~ season * velocity, 
+                data = fastball_data) 
+
+
+summary(velocity_xwOBA)
+tidy_velocity_xwOBA <- tidy(velocity_xwOBA)
+
+# Calls the function above that calculates the slope of the linear model for each year
+velocity_xwOBA_slope <- velocity_slope(tidy_velocity_xwOBA)
+```
+
+## Velocity
+
+::: {.panel-tabset}
+
+## Stuff+ And wxOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Velocity and Stuff+ Linear Model
+stuff_plus <- velocity_stuff_plus_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |> 
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Velocity's Impact on Stuff+",
+       x = "Year",
+       y = "Change in Stuff+ Per MPH of Velocity") +
+  theme + 
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+
+# Graph of Slope For Each Year's Velocity and xwOBA Linear Model
+xwOBA <- velocity_xwOBA_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Velocity's Impact on xwOBA",
+       x = "Year",
+       y = "Change in xwOBA Per MPH of Velocity") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus, xwOBA, ncol=2)
+
+```
+
+
+**Coefficient Plot Key Takeaways:**
+
+The plots that provided us with the most valuable information were the vertical break plots. From them we learned that Stuff+ started valuing vertical break less in 2023. We also learned that in 2021 and 2022, as induced vertical break increased, expected wOBA increased. With this information and the knowledge that a lower expected weighted on-base average is better for pitchers, we were able to assume that having more induced vertical break is not necessarily good. This was only reiterated when observing that in all three years, the whiff percentage also went down as induced vertical break increased.
+
+## Stuff+ And Whiff Percentage
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Velocity and Whiff Percentage Linear Model
+velocity_whiff <- velocity_whiff_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Velocity's Impact on Whiff%",
+       x = "Year",
+       y = "Change in Whiff% Per  MPH of Velocity") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus, velocity_whiff, ncol=2)
+```
+
+**Coefficient Plot Key Takeaways:**
+
+The plots that provided us with the most valuable information were the vertical break plots. From them we learned that Stuff+ started valuing vertical break less in 2023. We also learned that in 2021 and 2022, as induced vertical break increased, expected wOBA increased. With this information and the knowledge that a lower expected weighted on-base average is better for pitchers, we were able to assume that having more induced vertical break is not necessarily good. This was only reiterated when observing that in all three years, the whiff percentage also went down as induced vertical break increased.
+
+:::
+
+## Vertical Movement
+```{r}
+### Linear Models For Vertical Break and Stuff+ or An Outcome Variable
+
+# Function That Calculates The Slope of The Linear Model For Each Year 
+induced_vertical_break_slope <- function(tidy_dataset){
+
+  # Calculates the slope of the line for each year
+  slope <- tidy_dataset |> 
+    select(term, estimate) |> 
+  mutate(term = recode(term, "induced_vertical_break" = "induced_vertical_break_2021")) |> 
+  pivot_wider(names_from = term, values_from = estimate) |> 
+  select(induced_vertical_break_2021:`season2023:induced_vertical_break`) |> 
+  mutate(slope2022 = induced_vertical_break_2021 + `season2022:induced_vertical_break`, 
+         slope2023 = induced_vertical_break_2021 + `season2023:induced_vertical_break`) |> 
+  select(induced_vertical_break_2021, slope2022, slope2023) |> 
+  pivot_longer(cols = c(induced_vertical_break_2021, slope2022, slope2023), names_to = "season", values_to = "slope") |> 
+  mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Extracts the std_error for each year
+  std_error <- tidy_dataset |> 
+  mutate(term = recode(term, "induced_vertical_break" = "induced_vertical_break_2021")) |>
+  select(term, std.error) |> 
+  filter(term == c("induced_vertical_break_2021", "season2022:induced_vertical_break", "season2023:induced_vertical_break"))|> 
+    rename(season = term) |> 
+    mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Joins the slope and std_errors into one dataset
+  full_join(slope, std_error)
+}
+```
+
+```{r}
+# Linear model for induced_vertical break and stuff+
+induced_vertical_break_lm <- lm(stuff_plus ~ season * induced_vertical_break, 
+                data = fastball_data) 
+
+tidy_induced_vertical_break_lm <-tidy(induced_vertical_break_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+v_break_stuff_plus_slope <- induced_vertical_break_slope(tidy_induced_vertical_break_lm)
+
+
+# Linear model for Induced Vertical break predicting whiff percentage
+induced_vertical_break_whiff_lm <- lm(whiff_pct ~ season * induced_vertical_break, 
+                data = fastball_data) 
+
+tidy_induced_vertical_break_whiff_lm <-tidy(induced_vertical_break_whiff_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+v_break_whiff_slope <- induced_vertical_break_slope(tidy_induced_vertical_break_whiff_lm)
+
+# Linear Model For xwOBA and Induced Vertical Break
+induced_vertical_break_xwOBA <- lm(xwOBA ~ season * induced_vertical_break, 
+                data = fastball_data) 
+
+
+tidy_induced_vertical_break_xwOBA <- tidy(induced_vertical_break_xwOBA)
+
+# Calls the function above that calculates the slope of the linear model for each year
+v_break_xwOBA_slope <- induced_vertical_break_slope(tidy_induced_vertical_break_xwOBA)
+```
+
+::: {.panel-tabset}
+
+## Stuff+ And xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Induced Vertical Break and Stuff+ Linear Model
+stuff_plus_vertical <- v_break_stuff_plus_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Vertical Break's Impact on Stuff+",
+      x = "Year",
+      y = "Change in Stuff+ Per Inch of Induced Vertical Break") +
+  theme + 
+  theme(axis.title.y = element_text(size = 9.5),
+        axis.text.x = element_text(size = 10))
+ 
+xwOBA_vertical <- v_break_xwOBA_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |> 
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Vertical Break's Impact on xwOBA",
+       x = "Year",
+       y = "Change in xwOBA Per Inch of Induced Vertical Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 9.5),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_vertical, xwOBA_vertical, ncol=2)
+```
+
+**Coefficient Plot Key Takeaways:**
+
+The plots that provided us with the most valuable information were the vertical break plots. From them we learned that Stuff+ started valuing vertical break less in 2023. We also learned that in 2021 and 2022, as induced vertical break increased, expected wOBA increased. With this information and the knowledge that a lower expected weighted on-base average is better for pitchers, we were able to assume that having more induced vertical break is not necessarily good. This was only reiterated when observing that in all three years, the whiff percentage also went down as induced vertical break increased.
+
+## Stuff+ And Whiff Percentage
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Induced Vertical Break and Whiff Percentage Linear Model
+whiff_vertical <- v_break_whiff_slope |>
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Vertical Break's Impact on Whiff%",
+       x = "Year",
+       y = "Change in Whiff% Per Inch of Induced Vertical Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 9.5),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_vertical, whiff_vertical, ncol=2)
+```
+
+**Coefficient Plot Key Takeaways:**
+
+The plots that provided us with the most valuable information were the vertical break plots. From them we learned that Stuff+ started valuing vertical break less in 2023. We also learned that in 2021 and 2022, as induced vertical break increased, expected wOBA increased. With this information and the knowledge that a lower expected weighted on-base average is better for pitchers, we were able to assume that having more induced vertical break is not necessarily good. This was only reiterated when observing that in all three years, the whiff percentage also went down as induced vertical break increased.
+:::
+
+## Horizontal Movement
+
+::: {.panel-tabset}
+
+```{r}
+# Function That Calculates The Slope of The Linear Model For Each Year 
+horizontal_break_slope <- function(tidy_dataset){
+
+  # Calculates the slope of the line for each year
+  slope <- tidy_dataset |> 
+    select(term, estimate) |> 
+  mutate(term = recode(term, "horizontal_break" = "horizontal_break_2021")) |> 
+  pivot_wider(names_from = term, values_from = estimate) |> 
+  select(horizontal_break_2021:`season2023:horizontal_break`) |> 
+  mutate(slope2022 = horizontal_break_2021 + `season2022:horizontal_break`,
+         slope2023 = horizontal_break_2021 + `season2023:horizontal_break`) |> 
+  select(horizontal_break_2021, slope2022:slope2023) |> 
+  pivot_longer(cols = c(horizontal_break_2021, slope2022, slope2023), names_to = "season", values_to = "slope") |> 
+  mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Extracts the std_error for each year
+  std_error <- tidy_dataset |> 
+  mutate(term = recode(term, "horizontal_break" = "horizontal_break_2021")) |>
+  select(term, std.error) |> 
+  filter(term == c("horizontal_break_2021", "season2022:horizontal_break", "season2023:horizontal_break"))|> 
+    rename(season = term) |> 
+    mutate(season = str_extract(season, "\\d{4}"))
+  
+  # Joins the slope and std_erros into one dataset
+  full_join(slope, std_error)  
+}
+
+# Linear model for horizontal break and stuff+
+horizontal_break_lm <- lm(stuff_plus ~ season * horizontal_break, 
+                data = fastball_data) 
+
+tidy_horizontal_break_lm <-tidy(horizontal_break_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+h_break_stuff_plus_slope <- horizontal_break_slope(tidy_horizontal_break_lm)
+
+# Linear model for horizontal break predicting whiff percentage
+horizontal_break_whiff_lm <- lm(whiff_pct ~ season * horizontal_break, 
+                data = fastball_data) 
+
+tidy_horizontal_break_whiff_lm <-tidy(horizontal_break_whiff_lm)
+
+# Calls the function above that calculates the slope of the linear model for each year
+h_break_whiff_slope <- horizontal_break_slope(tidy_horizontal_break_whiff_lm)
+
+horizontal_break_xwOBA <- lm(xwOBA ~ season * horizontal_break, 
+                data = fastball_data) 
+
+
+tidy_horizontal_break_xwOBA <- tidy(horizontal_break_xwOBA)
+
+# Calls the function above that calculates the slope of the linear model for each year
+h_break_xwOBA_slope <- horizontal_break_slope(tidy_horizontal_break_xwOBA)
+```
+
+## Stuff+ And xwOBA
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Horizontal Break and Stuff+ Linear Model
+stuff_plus_horizontal <- h_break_stuff_plus_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Horizontal Break's Impact on Stuff+",
+       x = "Year",
+       y = "Change in Stuff+ Per Inch of Horizontal Break") +
+  theme + 
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+# Graph of Slope For Each Year's Horizontal Break and xwOBA Linear Model
+xwOBA_horizontal <- h_break_xwOBA_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Horizontal Break's Impact on xwOBA",
+       x = "Year",
+       y = "Change in xwOBA Per Inch of Horizontal Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_horizontal, xwOBA_horizontal, ncol=2)
+```
+
+**Coefficient Plot Key Takeaways:**
+
+The plots that provided us with the most valuable information were the vertical break plots. From them we learned that Stuff+ started valuing vertical break less in 2023. We also learned that in 2021 and 2022, as induced vertical break increased, expected wOBA increased. With this information and the knowledge that a lower expected weighted on-base average is better for pitchers, we were able to assume that having more induced vertical break is not necessarily good. This was only reiterated when observing that in all three years, the whiff percentage also went down as induced vertical break increased.
+
+## Stuff+ And Whiff Percentage 
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig.align: 'center'
+
+# Graph of Slope For Each Year's Horizontal Break and Whiff Percentage Linear Model
+whiff_horizontal <- h_break_whiff_slope |> 
+  mutate(ymin = slope - std.error, ymax = slope + std.error) |>
+  ggplot() +
+  geom_line(mapping = aes(x = season, y = slope), size = 1, group = 1, color = "red") +
+  geom_point(mapping = aes(x = season, y = slope), color = "black", size = 2) +
+  geom_errorbar(mapping = aes(x = season, ymin = ymin, ymax = ymax), width = 0.2, position = position_dodge(0.05)) +
+  labs(title = "Horizontal Break's Impact on Whiff%",
+       x = "Year",
+       y = "Change in Whiff% Per Inch of Horizontal Break") +
+  theme +
+  theme(axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10))
+
+grid.arrange(stuff_plus_horizontal, whiff_horizontal, ncol=2)
+```
+
+**Coefficient Plot Key Takeaways:**
+
+The plots that provided us with the most valuable information were the vertical break plots. From them we learned that Stuff+ started valuing vertical break less in 2023. We also learned that in 2021 and 2022, as induced vertical break increased, expected wOBA increased. With this information and the knowledge that a lower expected weighted on-base average is better for pitchers, we were able to assume that having more induced vertical break is not necessarily good. This was only reiterated when observing that in all three years, the whiff percentage also went down as induced vertical break increased.
+
+:::
+:::
+
+### Random Forest 
+
+To further evaluate the Stuff+ metric, which is created using a Random Forest model, we modeled Stuff+ by physical characteristics to determine the importance of each variable by year. The Random Forest model, which handles non-linear relationships well and does not need normally distributed variables, was chosen for this purpose. We trained the model with velocity, extension, induced vertical break, horizontal break, and spin rate as predictors for Stuff+. From the model, we extracted the variable importance of each variable to assess how much they influence Stuff+.
+
+In addition to the Random Forest model, we explored the use of Generalized Additive Models (GAM) to understand the relationships between physical characteristics and Stuff+. GAMs are flexible models that can capture non-linear relationships by allowing the data to determine the shape of the relationship between the predictors and the response variable. This flexibility makes GAMs particularly useful for identifying and modeling complex interactions between variables. We used GAM to model Stuff+ with velocity, extension, induced vertical break, horizontal break, and spin rate as predictors. By comparing the performance of GAM with the Random Forest model using k-fold cross-validation, we aimed to determine which modeling approach provides better and more predictive accuracy regarding the influence of physical characteristics on Stuff+. Our findings indicated that the Random Forest model outperformed GAM, as evidenced by its lower RMSE value.
+Based on these results, we decided to use the Random Forest model. We created three Random Forest models predicting Stuff+ for each season. Then, we modeled the xwOBA of each season using Random Forests to compare its performance with the Stuff+ model and assess how well Stuff+ predicts actual at-bat outcomes. Additionally, we examined the variable importance of each variable to understand their influence on the models. We also analyzed how the variable importance values changed each season, comparing their relative importance and interactions over time. This comprehensive approach allowed us to evaluate the robustness and effectiveness of the Random Forest model in capturing the key physical characteristics that influence pitch effectiveness for both xwOBA and Stuff+ models.
+
+
+## Results
+
+Variable importance is a measure used in Random Forest models to quantify the contribution of each predictor variable to the model's predictive power. It helps identify which features have the most significant impact on the model's predictions. Higher variable importance values indicate a greater influence on the outcome variable. The variable importance plots for Stuff+ and xwOBA across the 2021-2023 seasons are shown in the figure. These plots illustrate how the importance of different physical characteristics varied over time for each metric.
+
+```{r}
+
+## 2021 Random Forests Stuff+
+
+## filter
+ff_models_21 <- pitching_stats |> 
+  filter(
+    pitch_name == "4-Seam Fastball" &
+      !is.na(stuff_plus) & 
+      season == 2021
+  ) |> 
+  mutate(horizontal_break = -horizontal_break) |> 
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+sp_rf_final_21 <- ranger(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_21
+)
+
+## 2022 Random Forests Stuff+
+
+## filter
+ff_models_22 <- pitching_stats |> 
+  filter(
+    pitch_name == "4-Seam Fastball" &
+      !is.na(stuff_plus) & 
+      season == 2022
+  ) |> 
+  mutate(horizontal_break = -horizontal_break) |> 
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+sp_rf_final_22 <- ranger(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_22
+)
+
+## 2023 Random Forests Stuff+
+
+## filter
+ff_models_23 <- pitching_stats |> 
+  filter(
+    pitch_name == "4-Seam Fastball" &
+      !is.na(stuff_plus) & 
+      season == 2023
+  ) |> 
+  mutate(horizontal_break = -horizontal_break) |> 
+  select(spin, velocity, extension:horizontal_break, stuff_plus, xwOBA, whiff_pct)
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+sp_rf_final_23 <- ranger(
+  stuff_plus ~  . - xwOBA - whiff_pct,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_23
+)
+
+
+# xwOBA Random Forests
+## 2021 Random Forests xwOBA
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+xwOBA_rf_final_21 <- ranger(
+  xwOBA ~ . - stuff_plus - whiff_pct,,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_21
+)
+
+## 2022 Random Forests xwOBA
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+xwOBA_rf_final_22 <- ranger(
+  xwOBA ~ . - stuff_plus - whiff_pct,,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_22
+)
+
+## 2023 Random Forests xwOBA
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+xwOBA_rf_final_23 <- ranger(
+  xwOBA ~ . - stuff_plus - whiff_pct,,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_23
+)
+
+
+# whiff% Random Forests
+## 2021 Random Forests whiff%
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+whiff_pct_rf_final_21 <- ranger(
+  whiff_pct ~ . - stuff_plus - xwOBA,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_21
+)
+
+
+## 2022 Random Forests Whiff%
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+whiff_pct_rf_final_22 <- ranger(
+  whiff_pct ~ . - stuff_plus - xwOBA,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_22
+)
+
+
+## 2023 Random Forests Whiff%
+
+## final model
+### set seed
+set.seed(0829)
+
+### fit model
+whiff_pct_rf_final_23 <- ranger(
+  whiff_pct ~ . - stuff_plus - xwOBA,
+  num.trees = 1000,
+  importance = "impurity",
+  mtry = 2,
+  splitrule = "variance",
+  min.node.size = 5,
+  data = ff_models_23
+)
+
+
+## Importance plots
+### Combine into one dataset
+rf_importance <- tibble(
+  season = c(rep(2021, 5), rep(2022, 5), rep(2023, 5)),
+  variable = rep(names(sp_rf_final_21$variable.importance), 3),
+  sp_importance = c(
+    (
+      (as.vector(unlist(sp_rf_final_21$variable.importance)) - min(as.vector(unlist(sp_rf_final_21$variable.importance)))) /
+        (max(as.vector(unlist(sp_rf_final_21$variable.importance))) - min(as.vector(unlist(sp_rf_final_21$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(sp_rf_final_22$variable.importance)) - min(as.vector(unlist(sp_rf_final_22$variable.importance)))) /
+        (max(as.vector(unlist(sp_rf_final_22$variable.importance))) - min(as.vector(unlist(sp_rf_final_22$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(sp_rf_final_23$variable.importance)) - min(as.vector(unlist(sp_rf_final_23$variable.importance)))) /
+        (max(as.vector(unlist(sp_rf_final_23$variable.importance))) - min(as.vector(unlist(sp_rf_final_23$variable.importance))))
+    )
+  ),
+  xwOBA_importance = c(
+    (
+      (as.vector(unlist(xwOBA_rf_final_21$variable.importance)) - min(as.vector(unlist(xwOBA_rf_final_21$variable.importance)))) /
+        (max(as.vector(unlist(xwOBA_rf_final_21$variable.importance))) - min(as.vector(unlist(xwOBA_rf_final_21$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(xwOBA_rf_final_22$variable.importance)) - min(as.vector(unlist(xwOBA_rf_final_22$variable.importance)))) /
+        (max(as.vector(unlist(xwOBA_rf_final_22$variable.importance))) - min(as.vector(unlist(xwOBA_rf_final_22$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(xwOBA_rf_final_23$variable.importance)) - min(as.vector(unlist(xwOBA_rf_final_23$variable.importance)))) /
+        (max(as.vector(unlist(xwOBA_rf_final_23$variable.importance))) - min(as.vector(unlist(xwOBA_rf_final_23$variable.importance))))
+    )
+  ),
+  whiff_importance = c(
+    (
+      (as.vector(unlist(whiff_pct_rf_final_21$variable.importance)) - min(as.vector(unlist(whiff_pct_rf_final_21$variable.importance)))) /
+        (max(as.vector(unlist(whiff_pct_rf_final_21$variable.importance))) - min(as.vector(unlist(whiff_pct_rf_final_21$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(whiff_pct_rf_final_22$variable.importance)) - min(as.vector(unlist(whiff_pct_rf_final_22$variable.importance)))) /
+        (max(as.vector(unlist(whiff_pct_rf_final_22$variable.importance))) - min(as.vector(unlist(whiff_pct_rf_final_22$variable.importance))))
+    ),
+    (
+      (as.vector(unlist(whiff_pct_rf_final_23$variable.importance)) - min(as.vector(unlist(whiff_pct_rf_final_23$variable.importance)))) /
+        (max(as.vector(unlist(whiff_pct_rf_final_23$variable.importance))) - min(as.vector(unlist(whiff_pct_rf_final_23$variable.importance))))
+    )
+  )
+  ) |> 
+  mutate(
+    season = factor(season),
+    variable = recode(
+      variable,
+      "extension" = "Extension",
+      "horizontal_break" = "Horizontal Break",
+      "induced_vertical_break" = "Induced Vertical Break",
+      "spin" = "Spin",
+      "velocity" = "Velocity"
+    )
+  )
+```
+
+::: {.panel-tabset}
+
+## Stuff+ Variable Importance
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+#| fig.align: 'center'
+
+## Plots
+### Stuff+
+rf_importance |> 
+  ggplot(aes(season, sp_importance, group = variable, color = variable)) +
+  geom_point(alpha = 0.75) +
+  geom_line(
+    linewidth = 1.25
+  ) +
+  ggthemes::scale_color_pander() +
+  labs(
+    x = "Season",
+    y = "Importance",
+    color = "Characteristic",
+    title = "Stuff+ Variable Importance"
+  ) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12),
+  )
+```
+
+**Key Takeaways:**
+
+* Velocity consistently holds the highest importance across all three years, demonstrating that velocity is a critical factor in determining the Stuff+ value
+
+* Spin rate shows a significant level of importance, though it decreases slightly in 2022 before rising again in 2023. This suggests that while spin remains a vital factor, its relative importance can fluctuate
+
+* Induced vertical break maintains moderate and relatively stable importance throughout the years, indicating its consistent role in influencing Stuff+
+
+* Horizontal break and extension have the least importance, with minimal variation across the seasons, highlighting their lesser impact compared to other characteristics
+
+## xwOBA Variable Importance 
+
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+#| fig.align: 'center'
+
+### xwOBA
+rf_importance |> 
+  ggplot(aes(season, xwOBA_importance, group = variable, color = variable)) +
+  geom_point(alpha = 0.75) +
+  geom_line(
+    linewidth = 1.25
+  ) +
+  ggthemes::scale_color_pander() +
+  labs(
+    x = "Season",
+    y = "Importance",
+    color = "Characteristic",
+    title = "xwOBA Variable Importance"
+  ) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12)
+  )
+```
+
+**Key Takeaways:**
+
+The xwOBA Variable Importance plot reveals more dynamic changes:
+
+* Extension is the most important in 2021 and 2023, indicating its significant role in impacting at-bat outcomes; however, it becomes the least important in 2022
+
+* Spin rate increases significantly in importance in 2022, indicating a high impact during that year, but then decreases in 2023, though it remains an important factor
+
+* Velocity sharply decreases in importance by 2022 and remains low in 2023, suggesting its influence on batting outcomes becomes the least important
+
+* Horizontal break shows a decrease in importance in 2022, which then increases in 2023, highlighting the changing recognition of horizontal movement in affecting at-bat outcomes
+
+* Induced vertical break shows relatively low importance with minimal fluctuations across the years, indicating this characteristic is less influential on xwOBA compared to others
+
+## Whiff Percentage Importance
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+#| fig.align: 'center'
+
+### whiff%
+rf_importance |> 
+  ggplot(aes(season, whiff_importance, group = variable, color = variable)) +
+  geom_point(alpha = 0.75) +
+  geom_line(
+    linewidth = 1.25
+  ) +
+  ggthemes::scale_color_pander() +
+  labs(
+    x = "Season",
+    y = "Importance",
+    color = "Characteristic",
+    title = "Whiff% Variable Importance"
+  ) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.caption = element_text(size = 10),
+    axis.title.x = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.title.y = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12, hjust = 0.5),
+    axis.text.y = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    legend.title.position = "top",
+    legend.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    legend.key.size = unit(0.35, "inches"),
+    legend.text = element_text(size = 12)
+  )
+```
+
+::: 
+
+##### **Interpretation of Results**
+Our results highlight key differences in the importance of vertical break, horizontal break, and velocity between the Stuff+ and xwOBA models, which is critical for assessing if Stuff+ accurately reflects real pitch quality:
+
+* Velocity is consistently the most important characteristic across all years, underscoring its critical role in determining Stuff+. In contrast, for the xwOBA model, velocity's importance sharply decreases by 2022 and becomes the least important by 2023. This suggests that while velocity is heavily weighted in the Stuff+ metric, its actual impact on at-bat outcomes (xwOBA) diminishes over time. Therefore, the Stuff+ model's reliance on velocity may encapsulate the real pitch effectiveness
+
+* Horizontal break in the Stuff+ model is relatively unimportant but stable over the three seasons; however, in the xwOBA model, horizontal break decreases in importance in 2022 but increases again in 2023. This indicates that horizontal movement has a varying impact on at-bat outcomes, becoming more significant in the most recent full season. The Stuff+ model may underestimate the importance of horizontal break in predicting actual performance
+
+* Induced vertical break maintains a moderate and stable importance in the Stuff+ model, reflecting its consistent role in pitch evaluation. In the xwOBA model, vertical break shows relatively low importance with minimal fluctuations, indicating it is less influential on at-bat outcomes compared to other characteristics. This suggests that the Stuff+ model might overestimate how essential vertical break is in determining pitch effectiveness.
+
+
+## Discussion
+
+These insights suggest that the Stuff+ model is not modeling the outcomes well and appears biased. It does not account for the changing importance of certain physical characteristics for four-seam fastballs. Understanding these differences is essential for refining the Stuff+ metric to better align with practical performance indicators.
+
+### Limitations
+
+**Aggregated Data:** The primary limitation of our analysis is the absence of pitch-by-pitch Stuff+ data. Instead, we only have access to season-by-season aggregated data. This limitation hinders our ability to capture the nuances and variations occurring during individual games and events. Therefore, important short-term trends and deviations in pitch effectiveness may be smoothed too much by season averages
+
+**Limited Pitch Types:** The FanGraphs data we used has limited Stuff+ pitch types, such as not including sweeper as a separate pitch type. We may not be able to fully analyze certain pitch types, leading to important insights being left out
+
+**Temporal Scope:** Our dataset is restricted to a limited time frame, specifically from 2021 to 2023. The short period may not provide a sufficient historical context to understand long-term trends in pitch effectiveness
+
+## Future Work
+
+In future work, we aim to extend our analysis to include other pitch types beyond four-seam fastballs. By exploring a wider array of pitches, we can understand how different physical attributes influence pitching effectiveness across various pitches. Additionally, we can examine the differences between similar pitch types (e.g., sliders and sweepers). This will help refine the Stuff+ metric further and ensure it accurately reflects the performance of all pitches, providing a powerful tool for evaluating pitcher performance
+
+## Acknowledgments
+
+We appreciate Sean Ahmed from the Pittsburgh Pirates for being an exceptional mentor. Sean's extensive experience working in baseball and his creative thinking were instrumental in shaping the direction of this research. We are grateful to Dr. Ron Yurko and Quang Nguyen for their invaluable guidance and encouragement throughout this project.

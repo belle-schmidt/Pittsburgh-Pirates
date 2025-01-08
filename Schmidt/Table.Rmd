@@ -1,0 +1,40 @@
+---
+title: "Dataset"
+author: "Belle Schmidt"
+date: "2024-07-25"
+output: html_document
+---
+
+```{r}
+statcast <- read.csv("statcast.csv")
+
+fangraphs <- read.csv("Fangraphs_Pitching_Models_2020-24.csv")
+
+
+```
+
+```{r}
+library(tidyverse)
+library(gt)
+library(gtExtras)
+
+set.seed(1470)
+statcast_data <- statcast |> 
+  filter(pitch_name == "4-Seam Fastball", year %in% c(2021, 2022, 2023)) |> 
+  select(pitcher, pitch_name, year, release_speed, pfx_x, pfx_z, release_spin_rate, release_extension, description) |> 
+  sample_n(4)
+
+statcast_data
+
+write.csv(statcast_data, "statcast_condensed.csv")
+
+
+| > 
+  select(pitcher, pitch_name, year, release_speed, pfx_x, pfx_z, release_spin_rate, release_extension, description) |>
+  rename(velocity = release_speed, horizontal_break = pfx_x, vertical_break = pfx_z, spin = release_spin_rate, extension = release_extension) |> 
+  rename_with(~ gsub("_", " ", .)) 
+
+
+statcast_condensed
+```
+
